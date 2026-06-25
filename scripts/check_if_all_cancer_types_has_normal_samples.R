@@ -29,7 +29,9 @@ for (proj in tcga_projects) {
     meta_df <- getResults(query)
     
     # Check if any rows match our simplified groups
+    # below we might need to include other sample_type 
     contains_tumor  <- any(meta_df$sample_type %in% c("Primary Tumor", "Metastatic"))
+
     contains_normal <- any(meta_df$sample_type == "Solid Tissue Normal")
     
     project_status_df <- rbind(project_status_df, data.frame(
