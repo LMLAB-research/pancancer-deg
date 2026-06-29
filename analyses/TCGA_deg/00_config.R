@@ -94,6 +94,8 @@ min_count <- 10
 min_count_samples <- 3
 max_covariate_missing_fraction <- 0.25
 min_covariate_group_size <- 3
+deseq_alpha <- 0.05
+deseq_lfc_threshold <- log2(1.5)
 
 # Candidate covariates are tested per cancer type before entering the model.
 candidate_covariates <- c(
