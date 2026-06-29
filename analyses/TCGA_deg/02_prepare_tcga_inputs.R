@@ -48,26 +48,7 @@ coalesce_columns <- function(metadata, candidates) {
 normalise_missing_strings <- function(x) {
   x <- as.character(x)
   x <- trimws(x)
-  x[x %in% c(
-    "",
-    "NA",
-    "N/A",
-    "Unknown",
-    "unknown",
-    "Not Reported",
-    "not reported",
-    "Not Available",
-    "not available",
-    "Not Applicable",
-    "not applicable",
-    "Not Evaluated",
-    "not evaluated",
-    "[Unknown]",
-    "[Not Available]",
-    "[Not Applicable]",
-    "[Not Evaluated]",
-    "[Not Reported]"
-  )] <- NA_character_
+  x[x %in% metadata_missing_value_labels] <- NA_character_
   x
 }
 
@@ -310,6 +291,35 @@ merge_clinical_metadata <- function(metadata, project_id) {
   metadata
 }
 
+standardise_age_at_diagnosis_years <- function(metadata) {
+  indexed_age_days <- suppressWarnings(as.numeric(
+    coalesce_columns(metadata, c("indexed_age_at_diagnosis"))
+  ))
+  supplement_age_years <- suppressWarnings(as.numeric(
+    coalesce_columns(metadata, c("supplement_age_at_diagnosis"))
+  ))
+  fallback_age <- suppressWarnings(as.numeric(
+    coalesce_columns(metadata, c("age_at_diagnosis"))
+  ))
+
+  fallback_age_years <- if (
+    any(!is.na(fallback_age)) &&
+      stats::median(fallback_age, na.rm = TRUE) > 365
+  ) {
+    fallback_age / 365.25
+  } else {
+    fallback_age
+  }
+
+  age_years <- indexed_age_days / 365.25
+  missing <- is.na(age_years)
+  age_years[missing] <- supplement_age_years[missing]
+  missing <- is.na(age_years)
+  age_years[missing] <- fallback_age_years[missing]
+
+  age_years
+}
+
 # Add analysis-friendly metadata columns without deleting original metadata.
 standardise_tcga_metadata <- function(metadata) {
   metadata$condition <- classify_sample_type(metadata$sample_type)
@@ -339,14 +349,7 @@ standardise_tcga_metadata <- function(metadata) {
     "smoking_status",
     "cigarettes_per_day"
   ))
-
-  metadata$age_at_diagnosis_numeric <- suppressWarnings(as.numeric(
-    coalesce_columns(metadata, c(
-      "indexed_age_at_diagnosis",
-      "supplement_age_at_diagnosis",
-      "age_at_diagnosis"
-    ))
-  ))
+  metadata$age_at_diagnosis_numeric <- standardise_age_at_diagnosis_years(metadata)
 
   metadata
 }

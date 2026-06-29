@@ -94,6 +94,27 @@ metadata_column_patterns <- list(
   survival = "vital|death|survival|follow|recurrence|progression"
 )
 
+metadata_missing_value_labels <- c(
+  "",
+  "NA",
+  "N/A",
+  "Unknown",
+  "unknown",
+  "Not Reported",
+  "not reported",
+  "Not Available",
+  "not available",
+  "Not Applicable",
+  "not applicable",
+  "Not Evaluated",
+  "not evaluated",
+  "[Unknown]",
+  "[Not Available]",
+  "[Not Applicable]",
+  "[Not Evaluated]",
+  "[Not Reported]"
+)
+
 #### Paths ####
 
 analysis_dir <- file.path("analyses", analysis_name)
@@ -141,6 +162,11 @@ tcga_design_plan_file <- file.path(
 tcga_design_plan_rds <- file.path(
   data_processed_tcga_dir,
   "03_TCGA_deseq2_design_plan.rds"
+)
+
+tcga_covariate_report_file <- file.path(
+  results_table_dir,
+  "03_TCGA_covariate_report.csv"
 )
 
 #### Per-Project Output Helpers ####
