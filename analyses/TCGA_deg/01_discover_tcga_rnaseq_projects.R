@@ -19,14 +19,21 @@ metadata_column_patterns <- list(
 
 #### Helper Functions ####
 
-# Assign a provisional tumor/normal condition from the sample-type text.
+# Assign tumor/normal/uncharacterized labels from explicitly reviewed TCGA sample types.
 classify_sample_type <- function(sample_type) {
-  condition <- rep(NA_character_, length(sample_type))
+  unknown_sample_types <- setdiff(unique(as.character(sample_type)), known_sample_types)
+
+  if (length(unknown_sample_types) > 0) {
+    stop(
+      "Unknown TCGA sample_type value(s): ",
+      paste(sort(unknown_sample_types), collapse = "; "),
+      "\nReview GDC metadata and update known_sample_types in 00_config.R."
+    )
+  }
+
+  condition <- rep("uncharacterized", length(sample_type))
   condition[sample_type == normal_sample_type] <- "normal"
-  condition[
-    is.na(condition) &
-      grepl(tumor_sample_type_pattern, sample_type, ignore.case = TRUE)
-  ] <- "tumor"
+  condition[sample_type %in% tumor_sample_types] <- "tumor"
   condition
 }
 
@@ -129,6 +136,10 @@ summarise_project_metadata <- function(project_id, query_result) {
 
     n_normal <- sum(metadata$condition_candidate == "normal", na.rm = TRUE)
     n_tumor <- sum(metadata$condition_candidate == "tumor", na.rm = TRUE)
+    n_uncharacterized <- sum(
+      metadata$condition_candidate == "uncharacterized",
+      na.rm = TRUE
+    )
 
     # Eligibility here is only based on sample counts; design quality is checked later.
     project_status <- data.frame(
@@ -137,6 +148,7 @@ summarise_project_metadata <- function(project_id, query_result) {
       n_samples = nrow(metadata),
       n_normal = n_normal,
       n_tumor = n_tumor,
+      n_uncharacterized = n_uncharacterized,
       eligible_sample_counts =
         n_normal >= min_normal_samples && n_tumor >= min_tumor_samples,
       error = NA_character_,
@@ -155,6 +167,7 @@ summarise_project_metadata <- function(project_id, query_result) {
       n_samples = NA_integer_,
       n_normal = NA_integer_,
       n_tumor = NA_integer_,
+      n_uncharacterized = NA_integer_,
       eligible_sample_counts = FALSE,
       error = query_result$error,
       stringsAsFactors = FALSE

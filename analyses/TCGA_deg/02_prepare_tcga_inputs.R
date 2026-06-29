@@ -7,15 +7,22 @@ source(file.path("analyses", "TCGA_deg", "00_config.R"))
 
 #### Helper Functions ####
 
-# Reuse the same provisional condition classifier as in project discovery.
+# Reuse the same explicit sample-type classifier as in project discovery.
 classify_sample_type <- function(sample_type) {
-  condition <- rep(NA_character_, length(sample_type))
+  unknown_sample_types <- setdiff(unique(as.character(sample_type)), known_sample_types)
+
+  if (length(unknown_sample_types) > 0) {
+    stop(
+      "Unknown TCGA sample_type value(s): ",
+      paste(sort(unknown_sample_types), collapse = "; "),
+      "\nReview GDC metadata and update known_sample_types in 00_config.R."
+    )
+  }
+
+  condition <- rep("uncharacterized", length(sample_type))
   condition[sample_type == normal_sample_type] <- "normal"
-  condition[
-    is.na(condition) &
-      grepl(tumor_sample_type_pattern, sample_type, ignore.case = TRUE)
-  ] <- "tumor"
-  factor(condition, levels = c("normal", "tumor"))
+  condition[sample_type %in% tumor_sample_types] <- "tumor"
+  factor(condition, levels = c("normal", "tumor", "uncharacterized"))
 }
 
 # Merge possible aliases for the same biological/clinical covariate.

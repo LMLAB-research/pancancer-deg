@@ -95,7 +95,7 @@ for (project_id in eligible_projects) {
   rse <- readRDS(tcga_project_rse_file(project_id))
   metadata <- as.data.frame(colData(rse))
 
-  keep_samples <- !is.na(metadata$condition)
+  keep_samples <- metadata$condition %in% c("normal", "tumor")
   rse <- rse[, keep_samples]
   metadata <- as.data.frame(colData(rse))
 

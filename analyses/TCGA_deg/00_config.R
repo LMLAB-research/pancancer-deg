@@ -24,10 +24,27 @@ tcga_data_type <- "Gene Expression Quantification"
 tcga_workflow_type <- "STAR - Counts"
 tcga_experimental_strategy <- "RNA-Seq"
 
-# Sample labels vary by cancer type. We keep only a broad classifier here;
-# scripts downstream write sample-type summaries for manual review.
+# Known TCGA sample types observed in GDC RNA-seq metadata.
+# If GDC adds a new sample type, script 01 stops so this list can be reviewed.
 normal_sample_type <- "Solid Tissue Normal"
-tumor_sample_type_pattern <- "tumor|metastatic"
+
+tumor_sample_types <- c(
+  "Primary Tumor",
+  "Metastatic",
+  "Recurrent Tumor",
+  "Primary Blood Derived Cancer - Peripheral Blood",
+  "Additional Metastatic"
+)
+
+uncharacterized_sample_types <- c(
+  "Additional - New Primary"
+)
+
+known_sample_types <- c(
+  normal_sample_type,
+  tumor_sample_types,
+  uncharacterized_sample_types
+)
 
 # Conservative defaults for deciding whether a project/design is usable.
 min_normal_samples <- 5
