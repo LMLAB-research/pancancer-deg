@@ -84,6 +84,7 @@ project_status <- read.csv(tcga_project_status_file, stringsAsFactors = FALSE)
 eligible_projects <- project_status |>
   dplyr::filter(eligible_sample_counts) |>
   dplyr::pull(project_id)
+eligible_projects <- limit_projects(eligible_projects)
 
 design_plan <- list()
 

@@ -87,6 +87,7 @@ design_plan <- readRDS(tcga_design_plan_rds)
 eligible_projects <- design_plan |>
   dplyr::filter(eligible) |>
   dplyr::pull(project_id)
+eligible_projects <- limit_projects(eligible_projects)
 
 #### Run Each Eligible Project ####
 

@@ -189,6 +189,7 @@ tcga_projects <- sort(grep(
   TCGAbiolinks:::getGDCprojects()$project_id,
   value = TRUE
 ))
+tcga_projects <- limit_projects(tcga_projects)
 
 project_manifest <- setNames(
   lapply(tcga_projects, query_project_metadata),

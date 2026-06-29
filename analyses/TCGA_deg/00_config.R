@@ -18,6 +18,10 @@ library(TCGAbiolinks)
 
 analysis_name <- "TCGA_deg"
 
+# During development, limit scripts to the first N project IDs for faster runs.
+# Set to Inf when running the full analysis.
+debug_project_limit <- 2
+
 # GDC query settings shared by all TCGA-Biolinks downloads.
 tcga_data_category <- "Transcriptome Profiling"
 tcga_data_type <- "Gene Expression Quantification"
@@ -45,6 +49,14 @@ known_sample_types <- c(
   tumor_sample_types,
   uncharacterized_sample_types
 )
+
+limit_projects <- function(project_ids) {
+  if (is.null(debug_project_limit) || is.infinite(debug_project_limit)) {
+    return(project_ids)
+  }
+
+  head(project_ids, debug_project_limit)
+}
 
 # Conservative defaults for deciding whether a project/design is usable.
 min_normal_samples <- 5
