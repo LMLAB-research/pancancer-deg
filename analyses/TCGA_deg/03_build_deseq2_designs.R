@@ -191,7 +191,7 @@ make_design_formula <- function(covariates) {
 }
 
 format_design_formula <- function(design_formula) {
-  paste(deparse(design_formula), collapse = "")
+  gsub("\\s+", " ", paste(deparse(design_formula), collapse = ""))
 }
 
 filter_complete_design_samples <- function(rse, metadata, selected_covariates) {
