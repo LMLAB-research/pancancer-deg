@@ -6,18 +6,6 @@
 
 source(file.path("analyses", "TCGA_deg", "00_config.R"))
 
-#### Metadata Fields To Audit ####
-
-metadata_column_patterns <- list(
-  sex = "gender|sex",
-  race = "race",
-  ethnicity = "ethnic",
-  smoking_status = "smok|tobacco|cigarette|pack",
-  age = "age",
-  stage_grade = "stage|grade",
-  survival = "vital|death|survival|follow|recurrence|progression"
-)
-
 #### Helper Functions ####
 
 # Assign tumor/normal/uncharacterized labels from explicitly reviewed TCGA sample types.

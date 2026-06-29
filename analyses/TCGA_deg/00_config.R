@@ -82,6 +82,18 @@ candidate_covariates <- c(
   "smoking_status"
 )
 
+#### Metadata Audit Settings ####
+
+metadata_column_patterns <- list(
+  sex = "gender|sex",
+  race = "race",
+  ethnicity = "ethnic",
+  smoking_status = "smok|tobacco|cigarette|pack",
+  age = "age",
+  stage_grade = "stage|grade",
+  survival = "vital|death|survival|follow|recurrence|progression"
+)
+
 #### Paths ####
 
 analysis_dir <- file.path("analyses", analysis_name)
