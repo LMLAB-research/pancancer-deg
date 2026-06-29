@@ -67,12 +67,12 @@ normalise_missing_strings <- function(x) {
 }
 
 # TCGA patient barcodes are the first 12 characters of sample barcodes.
-patient_barcode_from_sample <- function(sample_barcode) {
-  sample_barcode <- normalise_missing_strings(sample_barcode)
+normalise_tcga_patient_barcode <- function(barcode) {
+  barcode <- normalise_missing_strings(barcode)
   ifelse(
-    !is.na(sample_barcode) & grepl("^TCGA-[A-Z0-9]{2}-[A-Z0-9]{4}", sample_barcode),
-    substr(sample_barcode, 1, 12),
-    NA_character_
+    !is.na(barcode) & grepl("^TCGA-[A-Z0-9]{2}-[A-Z0-9]{4}", barcode),
+    substr(barcode, 1, 12),
+    barcode
   )
 }
 
@@ -87,18 +87,20 @@ derive_sample_barcode <- function(metadata) {
 }
 
 derive_patient_barcode <- function(metadata) {
-  patient_barcode <- coalesce_columns(metadata, c(
-    "patient_barcode",
-    "cases.submitter_id",
-    "case_submitter_id",
-    "bcr_patient_barcode",
-    "patient",
-    "submitter_id"
-  ))
+  patient_barcode <- normalise_tcga_patient_barcode(
+    coalesce_columns(metadata, c(
+      "cases.submitter_id",
+      "case_submitter_id",
+      "bcr_patient_barcode",
+      "patient_barcode",
+      "patient",
+      "submitter_id"
+    ))
+  )
 
   missing <- is.na(patient_barcode)
   if (any(missing)) {
-    patient_barcode[missing] <- patient_barcode_from_sample(
+    patient_barcode[missing] <- normalise_tcga_patient_barcode(
       derive_sample_barcode(metadata)[missing]
     )
   }
