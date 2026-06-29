@@ -12,7 +12,9 @@ normalise_covariate <- function(x) {
   x <- as.character(x)
   x <- trimws(x)
   x[x %in% metadata_missing_value_labels] <- NA
-  factor(x)
+  x <- factor(x)
+  levels(x) <- make.names(levels(x), unique = TRUE)
+  x
 }
 
 # A categorical covariate must be present, sufficiently complete, and variable
@@ -116,33 +118,34 @@ formula_is_full_rank <- function(metadata, design_formula) {
   )
 }
 
-# Use centered age in years; convert defensively if older metadata is day-scale.
-add_centered_age_covariate <- function(metadata) {
+# Use scaled age in years; convert defensively if older metadata is day-scale.
+add_scaled_age_covariate <- function(metadata) {
   if (!"age_at_diagnosis_numeric" %in% colnames(metadata)) {
     return(metadata)
   }
 
   age <- suppressWarnings(as.numeric(metadata$age_at_diagnosis_numeric))
   if (all(is.na(age))) {
-    metadata$age_at_diagnosis_years_centered <- NA_real_
+    metadata$age_at_diagnosis_years_scaled <- NA_real_
     return(metadata)
   }
 
   age_years <- if (stats::median(age, na.rm = TRUE) > 365) age / 365.25 else age
-  metadata$age_at_diagnosis_years_centered <- as.numeric(scale(
+  metadata$age_at_diagnosis_years_scaled <- as.numeric(scale(
     age_years,
-    scale = FALSE
+    center = TRUE,
+    scale = TRUE
   ))
   metadata
 }
 
 # Select candidate covariates that pass basic availability checks.
 select_covariates <- function(metadata) {
-  metadata <- add_centered_age_covariate(metadata)
+  metadata <- add_scaled_age_covariate(metadata)
 
   age_report <- evaluate_numeric_covariate(
     metadata,
-    "age_at_diagnosis_years_centered"
+    "age_at_diagnosis_years_scaled"
   )
   covariate_report <- dplyr::bind_rows(
     age_report,
@@ -166,7 +169,7 @@ prepare_selected_covariates <- function(metadata, selected_covariates) {
   }
 
   prepared <- lapply(selected_covariates, function(covariate) {
-    if (covariate == "age_at_diagnosis_years_centered") {
+    if (covariate == "age_at_diagnosis_years_scaled") {
       metadata[[covariate]]
     } else {
       normalise_covariate(metadata[[covariate]])
@@ -185,6 +188,10 @@ make_design_formula <- function(covariates) {
   }
 
   as.formula(paste("~", paste(c(covariates, "condition"), collapse = " + ")))
+}
+
+format_design_formula <- function(design_formula) {
+  paste(deparse(design_formula), collapse = "")
 }
 
 filter_complete_design_samples <- function(rse, metadata, selected_covariates) {
@@ -330,7 +337,7 @@ build_project_design <- function(project_id) {
         n_tumor = sum(metadata$condition == "tumor"),
         n_genes = NA_integer_,
         covariates = paste(selected_covariates, collapse = ";"),
-        design_formula = deparse(design_formula),
+        design_formula = format_design_formula(design_formula),
         stringsAsFactors = FALSE
       ),
       covariate_report = covariate_report
@@ -366,7 +373,7 @@ build_project_design <- function(project_id) {
       n_tumor = sum(colData(dds)$condition == "tumor"),
       n_genes = nrow(dds),
       covariates = paste(selected_covariates, collapse = ";"),
-      design_formula = deparse(design_formula),
+      design_formula = format_design_formula(design_formula),
       stringsAsFactors = FALSE
     ),
     covariate_report = covariate_report
