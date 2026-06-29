@@ -68,27 +68,12 @@ flatten_metadata_for_export <- function(metadata) {
   as.data.frame(metadata)
 }
 
-#### Query Project-Level Metadata ####
-
-# Recover TCGA project IDs from GDC projects
-tcga_projects <- sort(grep(
-  "^TCGA",
-  TCGAbiolinks:::getGDCprojects()$project_id,
-  value = TRUE
-))
-
-project_manifest <- vector("list", length(tcga_projects))
-names(project_manifest) <- tcga_projects
-
-project_status <- list()
-sample_type_counts <- list()
-metadata_availability <- list()
-
-for (project_id in tcga_projects) {
+# Query one project and keep errors as data.
+query_project_metadata <- function(project_id) {
   message("Querying ", project_id)
 
   # Keep errors in the project status table instead of stopping the scan.
-  query_result <- tryCatch({
+  tryCatch({
     query <- GDCquery(
       project = project_id,
       data.category = tcga_data_category,
@@ -105,9 +90,10 @@ for (project_id in tcga_projects) {
   }, error = function(error) {
     list(query = NULL, metadata = NULL, error = conditionMessage(error))
   })
+}
 
-  project_manifest[[project_id]] <- query_result
-
+# Convert one query result into all outputs needed by this discovery step.
+summarise_project_metadata <- function(project_id, query_result) {
   if (!is.null(query_result$metadata)) {
     metadata <- query_result$metadata
 
@@ -121,7 +107,7 @@ for (project_id in tcga_projects) {
     )
 
     # Count all sample types before deciding what is tumor or normal.
-    sample_type_counts[[project_id]] <- as.data.frame(
+    sample_type_count <- as.data.frame(
       table(metadata$sample_type, useNA = "ifany"),
       stringsAsFactors = FALSE
     ) |>
@@ -134,7 +120,7 @@ for (project_id in tcga_projects) {
       function(pattern) find_matching_columns(metadata, pattern)
     )))
 
-    metadata_availability[[project_id]] <- dplyr::bind_rows(lapply(
+    metadata_availability <- dplyr::bind_rows(lapply(
       matching_metadata_columns,
       function(column_name) {
         summarise_column_availability(metadata, project_id, column_name)
@@ -145,7 +131,7 @@ for (project_id in tcga_projects) {
     n_tumor <- sum(metadata$condition_candidate == "tumor", na.rm = TRUE)
 
     # Eligibility here is only based on sample counts; design quality is checked later.
-    project_status[[project_id]] <- data.frame(
+    project_status <- data.frame(
       project_id = project_id,
       query_ok = TRUE,
       n_samples = nrow(metadata),
@@ -156,8 +142,14 @@ for (project_id in tcga_projects) {
       error = NA_character_,
       stringsAsFactors = FALSE
     )
+
+    return(list(
+      project_status = project_status,
+      sample_type_counts = sample_type_count,
+      metadata_availability = metadata_availability
+    ))
   } else {
-    project_status[[project_id]] <- data.frame(
+    project_status <- data.frame(
       project_id = project_id,
       query_ok = FALSE,
       n_samples = NA_integer_,
@@ -167,27 +159,53 @@ for (project_id in tcga_projects) {
       error = query_result$error,
       stringsAsFactors = FALSE
     )
+
+    return(list(
+      project_status = project_status,
+      sample_type_counts = NULL,
+      metadata_availability = NULL
+    ))
   }
 }
+
+#### Query Project-Level Metadata ####
+
+# Recover TCGA project IDs from GDC projects.
+tcga_projects <- sort(grep(
+  "^TCGA",
+  TCGAbiolinks:::getGDCprojects()$project_id,
+  value = TRUE
+))
+
+project_manifest <- setNames(
+  lapply(tcga_projects, query_project_metadata),
+  tcga_projects
+)
+
+project_summaries <- Map(
+  summarise_project_metadata,
+  names(project_manifest),
+  project_manifest
+)
 
 #### Save Discovery Outputs ####
 
 saveRDS(project_manifest, tcga_project_manifest_file)
 
 write.csv(
-  dplyr::bind_rows(project_status),
+  dplyr::bind_rows(lapply(project_summaries, `[[`, "project_status")),
   tcga_project_status_file,
   row.names = FALSE
 )
 
 write.csv(
-  dplyr::bind_rows(sample_type_counts),
+  dplyr::bind_rows(lapply(project_summaries, `[[`, "sample_type_counts")),
   tcga_sample_counts_file,
   row.names = FALSE
 )
 
 write.csv(
-  dplyr::bind_rows(metadata_availability),
+  dplyr::bind_rows(lapply(project_summaries, `[[`, "metadata_availability")),
   tcga_metadata_availability_file,
   row.names = FALSE
 )
