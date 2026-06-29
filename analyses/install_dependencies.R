@@ -1,38 +1,13 @@
-suppressPackageStartupMessages({
-  if (!requireNamespace("renv", quietly = TRUE)) {
-    install.packages("renv", repos = "https://cloud.r-project.org")
-  }
-})
-
-project <- normalizePath(".", winslash = "/", mustWork = TRUE)
-project_library <- renv::paths$library(project = project)
-
-cran_packages <- c(
-  "ggplot2"
-)
-
-bioc_packages <- c(
-  "AnnotationDbi",
-  "DESeq2",
-  "SummarizedExperiment",
-  "org.Hs.eg.db",
-  "recount3"
-)
-
-if (!dir.exists(file.path(project_library, "BiocManager"))) {
-  renv::install("BiocManager", prompt = FALSE, project = project)
+args <- commandArgs(trailingOnly = FALSE)
+file_arg <- grep("^--file=", args, value = TRUE)
+script_dir <- if (length(file_arg) > 0) {
+  dirname(normalizePath(sub("^--file=", "", file_arg[[1]]), winslash = "/", mustWork = TRUE))
+} else {
+  getwd()
 }
 
-if (dir.exists(project_library)) {
-  .libPaths(c(project_library, .libPaths()))
-}
+project <- normalizePath(file.path(script_dir, ".."), winslash = "/", mustWork = TRUE)
+old_wd <- setwd(project)
+on.exit(setwd(old_wd), add = TRUE)
 
-repos <- BiocManager::repositories()
-repos["CRAN"] <- "https://cloud.r-project.org"
-options(repos = repos)
-
-packages <- c(cran_packages, paste0("bioc::", bioc_packages))
-renv::install(packages, prompt = FALSE, project = project)
-renv::snapshot(prompt = FALSE, project = project)
-
-cat("Installed and snapshotted project R dependencies.\n")
+source(file.path(project, "setup", "install_dependencies.R"))

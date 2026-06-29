@@ -3,7 +3,7 @@ suppressPackageStartupMessages({
 })
 
 if (!ok_renv) {
-  stop("Package 'renv' is not available. Run: bash scripts/setup.sh")
+  stop("Package 'renv' is not available. Run: bash setup/setup.sh")
 }
 
 project <- normalizePath(".", winslash = "/", mustWork = TRUE)
@@ -15,9 +15,16 @@ if (dir.exists(project_library)) {
 required_packages <- c(
   "AnnotationDbi",
   "DESeq2",
+  "EnhancedVolcano",
   "SummarizedExperiment",
+  "TCGAbiolinks",
+  "ashr",
+  "dplyr",
   "ggplot2",
+  "openxlsx",
   "org.Hs.eg.db",
+  "pheatmap",
+  "readr",
   "recount3"
 )
 
@@ -35,7 +42,7 @@ if (length(missing) > 0) {
   stop(
     "Missing required package(s): ",
     paste(missing, collapse = ", "),
-    "\nRun: bash scripts/setup.sh"
+    "\nRun: bash setup/setup.sh"
   )
 }
 
