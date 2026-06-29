@@ -33,41 +33,343 @@ coalesce_columns <- function(metadata, candidates) {
     return(rep(NA_character_, nrow(metadata)))
   }
 
-  value <- as.character(metadata[[existing[[1]]]])
+  values <- lapply(existing, function(column_name) {
+    normalise_missing_strings(metadata[[column_name]])
+  })
 
-  if (length(existing) > 1) {
-    for (column_name in existing[-1]) {
-      missing <- is.na(value) | value == ""
-      value[missing] <- as.character(metadata[[column_name]])[missing]
-    }
+  Reduce(function(current, next_value) {
+    missing <- is.na(current)
+    current[missing] <- next_value[missing]
+    current
+  }, values)
+}
+
+# Harmonize common missing-value labels before merging or modelling.
+normalise_missing_strings <- function(x) {
+  x <- as.character(x)
+  x <- trimws(x)
+  x[x %in% c(
+    "",
+    "NA",
+    "N/A",
+    "Unknown",
+    "unknown",
+    "Not Reported",
+    "not reported",
+    "Not Available",
+    "not available",
+    "Not Applicable",
+    "not applicable",
+    "[Not Available]",
+    "[Not Applicable]"
+  )] <- NA_character_
+  x
+}
+
+# TCGA patient barcodes are the first 12 characters of sample barcodes.
+patient_barcode_from_sample <- function(sample_barcode) {
+  sample_barcode <- normalise_missing_strings(sample_barcode)
+  ifelse(
+    !is.na(sample_barcode) & grepl("^TCGA-[A-Z0-9]{2}-[A-Z0-9]{4}", sample_barcode),
+    substr(sample_barcode, 1, 12),
+    NA_character_
+  )
+}
+
+derive_sample_barcode <- function(metadata) {
+  coalesce_columns(metadata, c(
+    "sample.submitter_id",
+    "sample_submitter_id",
+    "barcode",
+    "sample",
+    "submitter_id"
+  ))
+}
+
+derive_patient_barcode <- function(metadata) {
+  patient_barcode <- coalesce_columns(metadata, c(
+    "patient_barcode",
+    "cases.submitter_id",
+    "case_submitter_id",
+    "bcr_patient_barcode",
+    "patient",
+    "submitter_id"
+  ))
+
+  missing <- is.na(patient_barcode)
+  if (any(missing)) {
+    patient_barcode[missing] <- patient_barcode_from_sample(
+      derive_sample_barcode(metadata)[missing]
+    )
   }
 
-  value[value == ""] <- NA_character_
-  value
+  patient_barcode
+}
+
+# Collapse repeated clinical rows so each patient joins at most once.
+collapse_duplicate_keys <- function(metadata, key_column) {
+  metadata <- metadata[!is.na(metadata[[key_column]]), , drop = FALSE]
+
+  if (nrow(metadata) == 0) {
+    return(metadata)
+  }
+
+  grouped <- split(metadata, metadata[[key_column]], drop = TRUE)
+  collapsed <- lapply(grouped, function(group) {
+    values <- lapply(group, function(column) {
+      column <- normalise_missing_strings(column)
+      available <- column[!is.na(column)]
+
+      if (length(available) == 0) {
+        return(NA_character_)
+      }
+
+      unique(available)[[1]]
+    })
+
+    as.data.frame(values, stringsAsFactors = FALSE, check.names = FALSE)
+  })
+
+  result <- do.call(rbind, collapsed)
+  rownames(result) <- NULL
+  result
+}
+
+prefix_non_key_columns <- function(metadata, prefix, key_column) {
+  columns_to_prefix <- setdiff(colnames(metadata), key_column)
+  colnames(metadata)[match(columns_to_prefix, colnames(metadata))] <-
+    paste0(prefix, "_", columns_to_prefix)
+  metadata
+}
+
+left_join_preserve_order <- function(metadata, lookup, by_x, by_y) {
+  metadata$.row_order <- seq_len(nrow(metadata))
+  merged <- merge(
+    metadata,
+    lookup,
+    by.x = by_x,
+    by.y = by_y,
+    all.x = TRUE,
+    sort = FALSE
+  )
+  merged <- merged[order(merged$.row_order), , drop = FALSE]
+  merged$.row_order <- NULL
+  rownames(merged) <- NULL
+  merged
+}
+
+# Add query metadata from script 01 when GDCprepare omits useful sample fields.
+merge_rnaseq_query_metadata <- function(metadata, project_id) {
+  query_file <- tcga_project_query_metadata_file(project_id)
+
+  if (!file.exists(query_file)) {
+    return(metadata)
+  }
+
+  query_metadata <- read.csv(
+    query_file,
+    stringsAsFactors = FALSE,
+    check.names = FALSE
+  )
+
+  query_metadata$query_sample_barcode <- derive_sample_barcode(query_metadata)
+  query_metadata$query_patient_barcode <- derive_patient_barcode(query_metadata)
+  query_metadata <- collapse_duplicate_keys(query_metadata, "query_sample_barcode")
+
+  if (nrow(query_metadata) == 0) {
+    return(metadata)
+  }
+
+  query_metadata <- prefix_non_key_columns(
+    query_metadata,
+    "query",
+    c("query_sample_barcode", "query_patient_barcode")
+  )
+
+  metadata$sample_barcode <- derive_sample_barcode(metadata)
+  metadata <- left_join_preserve_order(
+    metadata,
+    query_metadata,
+    by_x = "sample_barcode",
+    by_y = "query_sample_barcode"
+  )
+
+  if (!"sample_type" %in% colnames(metadata)) {
+    metadata$sample_type <- NA_character_
+  }
+
+  if ("query_sample_type" %in% colnames(metadata)) {
+    missing_sample_type <- is.na(normalise_missing_strings(metadata$sample_type))
+    metadata$sample_type[missing_sample_type] <-
+      metadata$query_sample_type[missing_sample_type]
+  }
+
+  metadata$patient_barcode <- derive_patient_barcode(metadata)
+
+  if ("query_patient_barcode" %in% colnames(metadata)) {
+    missing_patient <- is.na(metadata$patient_barcode)
+    metadata$patient_barcode[missing_patient] <-
+      metadata$query_patient_barcode[missing_patient]
+  }
+
+  metadata
+}
+
+load_indexed_clinical_metadata <- function(project_id) {
+  clinical_file <- tcga_project_clinical_indexed_file(project_id)
+
+  if (!file.exists(clinical_file)) {
+    return(NULL)
+  }
+
+  clinical <- read.csv(
+    clinical_file,
+    stringsAsFactors = FALSE,
+    check.names = FALSE
+  )
+
+  clinical$patient_barcode <- derive_patient_barcode(clinical)
+  clinical <- collapse_duplicate_keys(clinical, "patient_barcode")
+
+  if (nrow(clinical) == 0) {
+    return(NULL)
+  }
+
+  prefix_non_key_columns(clinical, "indexed", "patient_barcode")
+}
+
+load_patient_supplement_metadata <- function(project_id) {
+  supplement_file <- tcga_project_clinical_supplement_file(project_id)
+
+  if (!file.exists(supplement_file)) {
+    return(NULL)
+  }
+
+  supplement <- readRDS(supplement_file)
+  patient_table_names <- grep(
+    "^clinical_patient",
+    names(supplement),
+    ignore.case = TRUE,
+    value = TRUE
+  )
+
+  if (length(patient_table_names) == 0) {
+    return(NULL)
+  }
+
+  patient_table_name <- patient_table_names[[1]]
+
+  patient_metadata <- as.data.frame(
+    supplement[[patient_table_name]],
+    stringsAsFactors = FALSE,
+    check.names = FALSE
+  )
+  patient_metadata$patient_barcode <- derive_patient_barcode(patient_metadata)
+  patient_metadata <- collapse_duplicate_keys(patient_metadata, "patient_barcode")
+
+  if (nrow(patient_metadata) == 0) {
+    return(NULL)
+  }
+
+  prefix_non_key_columns(patient_metadata, "supplement", "patient_barcode")
+}
+
+merge_clinical_metadata <- function(metadata, project_id) {
+  metadata <- merge_rnaseq_query_metadata(metadata, project_id)
+  metadata$sample_barcode <- derive_sample_barcode(metadata)
+  metadata$patient_barcode <- derive_patient_barcode(metadata)
+
+  clinical_indexed <- load_indexed_clinical_metadata(project_id)
+  clinical_supplement <- load_patient_supplement_metadata(project_id)
+
+  if (!is.null(clinical_indexed)) {
+    metadata <- left_join_preserve_order(
+      metadata,
+      clinical_indexed,
+      by_x = "patient_barcode",
+      by_y = "patient_barcode"
+    )
+  }
+
+  if (!is.null(clinical_supplement)) {
+    metadata <- left_join_preserve_order(
+      metadata,
+      clinical_supplement,
+      by_x = "patient_barcode",
+      by_y = "patient_barcode"
+    )
+  }
+
+  metadata
 }
 
 # Add analysis-friendly metadata columns without deleting original metadata.
 standardise_tcga_metadata <- function(metadata) {
   metadata$condition <- classify_sample_type(metadata$sample_type)
-  metadata$sex <- coalesce_columns(metadata, c("gender", "sex", "sex_at_birth"))
-  metadata$race <- coalesce_columns(metadata, c("race"))
-  metadata$ethnicity <- coalesce_columns(metadata, c("ethnicity"))
+  metadata$sex <- coalesce_columns(metadata, c(
+    "indexed_sex_at_birth",
+    "indexed_gender",
+    "supplement_gender",
+    "gender",
+    "sex",
+    "sex_at_birth"
+  ))
+  metadata$race <- coalesce_columns(metadata, c(
+    "indexed_race",
+    "supplement_race",
+    "race"
+  ))
+  metadata$ethnicity <- coalesce_columns(metadata, c(
+    "indexed_ethnicity",
+    "supplement_ethnicity",
+    "ethnicity"
+  ))
   metadata$smoking_status <- coalesce_columns(metadata, c(
+    "indexed_tobacco_smoking_status",
+    "supplement_tobacco_smoking_history_indicator",
     "tobacco_smoking_history",
     "tobacco_smoking_status",
     "smoking_status",
     "cigarettes_per_day"
   ))
 
-  if ("age_at_diagnosis" %in% colnames(metadata)) {
-    metadata$age_at_diagnosis_numeric <- suppressWarnings(
-      as.numeric(metadata$age_at_diagnosis)
-    )
-  } else {
-    metadata$age_at_diagnosis_numeric <- NA_real_
-  }
+  metadata$age_at_diagnosis_numeric <- suppressWarnings(as.numeric(
+    coalesce_columns(metadata, c(
+      "indexed_age_at_diagnosis",
+      "supplement_age_at_diagnosis",
+      "age_at_diagnosis"
+    ))
+  ))
 
   metadata
+}
+
+summarise_clinical_merge <- function(metadata) {
+  data.frame(
+    metric = c(
+      "n_samples",
+      "n_samples_with_sample_barcode",
+      "n_samples_with_patient_barcode",
+      "n_samples_matched_indexed_clinical",
+      "n_samples_matched_patient_supplement"
+    ),
+    value = c(
+      nrow(metadata),
+      sum(!is.na(metadata$sample_barcode)),
+      sum(!is.na(metadata$patient_barcode)),
+      if ("indexed_submitter_id" %in% colnames(metadata)) {
+        sum(!is.na(metadata$indexed_submitter_id))
+      } else {
+        0
+      },
+      if ("supplement_bcr_patient_barcode" %in% colnames(metadata)) {
+        sum(!is.na(metadata$supplement_bcr_patient_barcode))
+      } else {
+        0
+      }
+    ),
+    stringsAsFactors = FALSE
+  )
 }
 
 # Flatten list columns before writing metadata to CSV/XLSX.
@@ -148,7 +450,9 @@ prepare_project_inputs <- function(project_id) {
   rse <- slim_row_data(rse)
 
   metadata <- as.data.frame(colData(rse))
+  metadata <- merge_clinical_metadata(metadata, project_id)
   metadata <- standardise_tcga_metadata(metadata)
+  clinical_merge_summary <- summarise_clinical_merge(metadata)
 
   colData(rse) <- S4Vectors::DataFrame(metadata)
 
@@ -194,6 +498,8 @@ prepare_project_inputs <- function(project_id) {
   writeData(wb, "sample_types", sample_type_summary)
   addWorksheet(wb, "metadata_availability")
   writeData(wb, "metadata_availability", metadata_availability)
+  addWorksheet(wb, "clinical_merge")
+  writeData(wb, "clinical_merge", clinical_merge_summary)
   addWorksheet(wb, "sample_metadata")
   writeData(wb, "sample_metadata", metadata_export, na.string = "NA")
   saveWorkbook(wb, tcga_project_metadata_report_file(project_id), overwrite = TRUE)
