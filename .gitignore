@@ -50,3 +50,7 @@ rsconnect/
 
 data/
 results/
+
+# TCGAbiolinks download artifacts if generated from the repository root
+GDCdata/
+MANIFEST.txt

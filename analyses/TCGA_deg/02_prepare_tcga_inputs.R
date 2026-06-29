@@ -100,6 +100,14 @@ slim_row_data <- function(rse) {
   rse
 }
 
+# Run GDC download/prepare calls from the raw data directory so TCGAbiolinks
+# writes GDCdata/ and MANIFEST.txt under data/TCGA_deg/raw.
+with_raw_data_dir <- function(expr) {
+  old_wd <- setwd(data_raw_tcga_dir)
+  on.exit(setwd(old_wd), add = TRUE)
+  force(expr)
+}
+
 #### Select Projects From Discovery Step ####
 
 project_status <- read.csv(tcga_project_status_file, stringsAsFactors = FALSE)
@@ -121,8 +129,19 @@ for (project_id in eligible_projects) {
     experimental.strategy = tcga_experimental_strategy
   )
 
-  GDCdownload(query, method = "api", files.per.chunk = 20)
-  rse <- GDCprepare(query, summarizedExperiment = TRUE)
+  rse <- with_raw_data_dir({
+    GDCdownload(
+      query,
+      method = "api",
+      directory = tcga_gdc_download_dir,
+      files.per.chunk = 20
+    )
+    GDCprepare(
+      query,
+      directory = tcga_gdc_download_dir,
+      summarizedExperiment = TRUE
+    )
+  })
 
   # Use raw unstranded counts as the DESeq2 assay.
   assays(rse) <- list(counts = assay(rse, "unstranded"))

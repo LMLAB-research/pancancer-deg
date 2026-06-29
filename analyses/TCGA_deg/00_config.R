@@ -28,6 +28,14 @@ tcga_data_type <- "Gene Expression Quantification"
 tcga_workflow_type <- "STAR - Counts"
 tcga_experimental_strategy <- "RNA-Seq"
 
+# Clinical metadata settings. Indexed clinical data is lightweight; BCR Biotab
+# supplements are richer and downloaded only when this flag is TRUE.
+tcga_clinical_indexed_type <- "clinical"
+download_clinical_supplement <- TRUE
+tcga_clinical_data_category <- "Clinical"
+tcga_clinical_data_type <- "Clinical Supplement"
+tcga_clinical_data_format <- "BCR Biotab"
+
 # Known TCGA sample types observed in GDC RNA-seq metadata.
 # If GDC adds a new sample type, script 01 stops so this list can be reviewed.
 normal_sample_type <- "Solid Tissue Normal"
@@ -81,6 +89,7 @@ analysis_dir <- file.path("analyses", analysis_name)
 data_tcga_dir <- file.path("data", analysis_name)
 data_raw_tcga_dir <- file.path(data_tcga_dir, "raw")
 data_processed_tcga_dir <- file.path(data_tcga_dir, "processed")
+tcga_gdc_download_dir <- "GDCdata"
 
 results_table_dir <- file.path("results", "tables", analysis_name)
 results_figure_dir <- file.path("results", "figures", analysis_name)
@@ -100,6 +109,11 @@ tcga_sample_counts_file <- file.path(
 tcga_metadata_availability_file <- file.path(
   results_table_dir,
   "01_TCGA_metadata_availability.csv"
+)
+
+tcga_clinical_supplement_table_dir <- file.path(
+  data_processed_tcga_dir,
+  "clinical_supplement_tables"
 )
 
 tcga_project_manifest_file <- file.path(
@@ -125,6 +139,14 @@ tcga_project_rse_file <- function(project_id) {
 
 tcga_project_query_metadata_file <- function(project_id) {
   file.path(data_processed_tcga_dir, paste0(project_id, "_query_metadata.csv"))
+}
+
+tcga_project_clinical_indexed_file <- function(project_id) {
+  file.path(data_processed_tcga_dir, paste0(project_id, "_clinical_indexed.csv"))
+}
+
+tcga_project_clinical_supplement_file <- function(project_id) {
+  file.path(data_processed_tcga_dir, paste0(project_id, "_clinical_supplement.rds"))
 }
 
 tcga_project_metadata_file <- function(project_id) {
@@ -163,5 +185,6 @@ tcga_volcano_figure_file <- function(project_id) {
 
 dir.create(data_raw_tcga_dir, recursive = TRUE, showWarnings = FALSE)
 dir.create(data_processed_tcga_dir, recursive = TRUE, showWarnings = FALSE)
+dir.create(tcga_clinical_supplement_table_dir, recursive = TRUE, showWarnings = FALSE)
 dir.create(results_table_dir, recursive = TRUE, showWarnings = FALSE)
 dir.create(results_figure_dir, recursive = TRUE, showWarnings = FALSE)
