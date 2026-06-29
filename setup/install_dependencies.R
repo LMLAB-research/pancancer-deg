@@ -8,18 +8,26 @@ project <- normalizePath(".", winslash = "/", mustWork = TRUE)
 project_library <- renv::paths$library(project = project)
 
 cran_packages <- c(
-  "ggplot2"
+  "ashr",
+  "dplyr",
+  "ggplot2",
+  "openxlsx",
+  "pheatmap",
+  "readr"
 )
 
 bioc_packages <- c(
   "AnnotationDbi",
+  "BiocParallel",
   "DESeq2",
-  "SummarizedExperiment",
+  "EnhancedVolcano",
   "org.Hs.eg.db",
-  "recount3"
+  "recount3",
+  "SummarizedExperiment",
+  "TCGAbiolinks"
 )
 
-if (!dir.exists(file.path(project_library, "BiocManager"))) {
+if (!requireNamespace("BiocManager", quietly = TRUE)) {
   renv::install("BiocManager", prompt = FALSE, project = project)
 }
 
