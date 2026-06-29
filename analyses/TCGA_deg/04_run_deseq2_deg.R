@@ -231,12 +231,14 @@ summarise_results <- function(project_id, design_info, results_df, raw_results_d
     reason = NA_character_,
     n_results = nrow(results_df),
     n_raw_results = nrow(raw_results_df),
-    n_padj_below_0_05 = sum(results_df$padj < deseq_alpha, na.rm = TRUE),
-    n_abs_lfc_above_1 = sum(
+    deseq_alpha = deseq_alpha,
+    deseq_lfc_threshold = deseq_lfc_threshold,
+    n_padj_below_alpha = sum(results_df$padj < deseq_alpha, na.rm = TRUE),
+    n_abs_lfc_above_threshold = sum(
       abs(results_df$log2FoldChange) > deseq_lfc_threshold,
       na.rm = TRUE
     ),
-    n_padj_below_0_05_and_abs_lfc_above_1 = sum(
+    n_padj_below_alpha_and_abs_lfc_above_threshold = sum(
       results_df$padj < deseq_alpha &
         abs(results_df$log2FoldChange) > deseq_lfc_threshold,
       na.rm = TRUE
@@ -256,9 +258,11 @@ skip_status <- function(project_id, reason) {
     reason = reason,
     n_results = NA_integer_,
     n_raw_results = NA_integer_,
-    n_padj_below_0_05 = NA_integer_,
-    n_abs_lfc_above_1 = NA_integer_,
-    n_padj_below_0_05_and_abs_lfc_above_1 = NA_integer_,
+    deseq_alpha = deseq_alpha,
+    deseq_lfc_threshold = deseq_lfc_threshold,
+    n_padj_below_alpha = NA_integer_,
+    n_abs_lfc_above_threshold = NA_integer_,
+    n_padj_below_alpha_and_abs_lfc_above_threshold = NA_integer_,
     biocparallel_backend = NA_character_,
     biocparallel_workers = NA_integer_,
     covariates = NA_character_,
@@ -274,9 +278,11 @@ failure_status <- function(project_id, error) {
     reason = conditionMessage(error),
     n_results = NA_integer_,
     n_raw_results = NA_integer_,
-    n_padj_below_0_05 = NA_integer_,
-    n_abs_lfc_above_1 = NA_integer_,
-    n_padj_below_0_05_and_abs_lfc_above_1 = NA_integer_,
+    deseq_alpha = deseq_alpha,
+    deseq_lfc_threshold = deseq_lfc_threshold,
+    n_padj_below_alpha = NA_integer_,
+    n_abs_lfc_above_threshold = NA_integer_,
+    n_padj_below_alpha_and_abs_lfc_above_threshold = NA_integer_,
     biocparallel_backend = NA_character_,
     biocparallel_workers = NA_integer_,
     covariates = NA_character_,
