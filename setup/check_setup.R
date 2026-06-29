@@ -14,6 +14,7 @@ if (dir.exists(project_library)) {
 
 required_packages <- c(
   "AnnotationDbi",
+  "BiocParallel",
   "DESeq2",
   "EnhancedVolcano",
   "SummarizedExperiment",

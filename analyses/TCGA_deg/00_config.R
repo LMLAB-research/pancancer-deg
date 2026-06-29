@@ -2,6 +2,7 @@
 
 library(AnnotationDbi)
 library(ashr)
+library(BiocParallel)
 library(DESeq2)
 library(dplyr)
 library(EnhancedVolcano)
@@ -21,6 +22,26 @@ analysis_name <- "TCGA_deg"
 # During development, limit scripts to the first N project IDs for faster runs.
 # Set to Inf when running the full analysis.
 debug_project_limit <- 2
+
+# Parallel execution for DESeq2 model fitting and log2FC shrinkage.
+use_biocparallel <- TRUE
+detected_cores <- parallel::detectCores(logical = FALSE)
+if (is.na(detected_cores)) {
+  detected_cores <- 1
+}
+biocparallel_workers <- max(1, min(12, detected_cores - 1))
+
+make_biocparallel_param <- function() {
+  if (!use_biocparallel || biocparallel_workers <= 1) {
+    return(BiocParallel::SerialParam())
+  }
+
+  if (.Platform$OS.type == "unix") {
+    return(BiocParallel::MulticoreParam(workers = biocparallel_workers))
+  }
+
+  BiocParallel::SnowParam(workers = biocparallel_workers, type = "SOCK")
+}
 
 # GDC query settings shared by all TCGA-Biolinks downloads.
 tcga_data_category <- "Transcriptome Profiling"

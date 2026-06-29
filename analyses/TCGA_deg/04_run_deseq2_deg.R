@@ -170,6 +170,8 @@ summarise_results <- function(project_id, design_info, results_df, raw_results_d
       results_df$padj < 0.05 & abs(results_df$log2FoldChange) > 1,
       na.rm = TRUE
     ),
+    biocparallel_backend = class(design_info$BPPARAM)[[1]],
+    biocparallel_workers = BiocParallel::bpnworkers(design_info$BPPARAM),
     covariates = paste(design_info$covariates, collapse = ";"),
     design_formula = format_design_formula(design_info$design_formula),
     stringsAsFactors = FALSE
@@ -186,6 +188,8 @@ skip_status <- function(project_id, reason) {
     n_padj_below_0_05 = NA_integer_,
     n_abs_lfc_above_1 = NA_integer_,
     n_padj_below_0_05_and_abs_lfc_above_1 = NA_integer_,
+    biocparallel_backend = NA_character_,
+    biocparallel_workers = NA_integer_,
     covariates = NA_character_,
     design_formula = NA_character_,
     stringsAsFactors = FALSE
@@ -202,6 +206,8 @@ failure_status <- function(project_id, error) {
     n_padj_below_0_05 = NA_integer_,
     n_abs_lfc_above_1 = NA_integer_,
     n_padj_below_0_05_and_abs_lfc_above_1 = NA_integer_,
+    biocparallel_backend = NA_character_,
+    biocparallel_workers = NA_integer_,
     covariates = NA_character_,
     design_formula = NA_character_,
     stringsAsFactors = FALSE
@@ -221,10 +227,17 @@ run_project_deseq2 <- function(project_id) {
 
   dds <- readRDS(tcga_project_dds_file(project_id))
   design_info <- readRDS(tcga_project_design_file(project_id))
+  design_info$BPPARAM <- make_biocparallel_param()
+  parallel_enabled <- use_biocparallel &&
+    BiocParallel::bpnworkers(design_info$BPPARAM) > 1
 
   pca_variables <- plot_project_pcas(dds, project_id, design_info)
 
-  dds <- DESeq(dds)
+  dds <- DESeq(
+    dds,
+    parallel = parallel_enabled,
+    BPPARAM = design_info$BPPARAM
+  )
 
   # Condition is always modeled with levels normal -> tumor.
   contrast <- c("condition", "tumor", "normal")
@@ -233,7 +246,9 @@ run_project_deseq2 <- function(project_id) {
     dds,
     contrast = contrast,
     res = raw_results,
-    type = "ashr"
+    type = "ashr",
+    parallel = parallel_enabled,
+    BPPARAM = design_info$BPPARAM
   )
 
   row_data <- as.data.frame(rowData(dds))
@@ -266,6 +281,8 @@ run_project_deseq2 <- function(project_id) {
   metadata(dds)$tcga_deg <- list(
     pca_variables = pca_variables,
     volcano_created = volcano_created,
+    biocparallel_backend = class(design_info$BPPARAM)[[1]],
+    biocparallel_workers = BiocParallel::bpnworkers(design_info$BPPARAM),
     raw_results_file = tcga_deseq_raw_results_file(project_id),
     shrunken_results_file = tcga_deseq_results_file(project_id)
   )
