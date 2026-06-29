@@ -1,0 +1,193 @@
+#### Discover TCGA RNA-Seq Projects ####
+#
+# This script queries GDC metadata only. It does not download count matrices.
+# Outputs are meant to be inspected before deciding which cohorts proceed.
+
+source(file.path("analyses", "TCGA_deg", "00_config.R"))
+
+#### Metadata Fields To Audit ####
+
+metadata_column_patterns <- list(
+  sex = "gender|sex",
+  race = "race",
+  ethnicity = "ethnic",
+  smoking_status = "smok|tobacco|cigarette|pack",
+  age = "age",
+  stage_grade = "stage|grade",
+  survival = "vital|death|survival|follow|recurrence|progression"
+)
+
+#### Helper Functions ####
+
+# Assign a provisional tumor/normal condition from the sample-type text.
+classify_sample_type <- function(sample_type) {
+  condition <- rep(NA_character_, length(sample_type))
+  condition[sample_type == normal_sample_type] <- "normal"
+  condition[
+    is.na(condition) &
+      grepl(tumor_sample_type_pattern, sample_type, ignore.case = TRUE)
+  ] <- "tumor"
+  condition
+}
+
+# Find columns whose names suggest a metadata category of interest.
+find_matching_columns <- function(metadata, pattern) {
+  grep(pattern, colnames(metadata), value = TRUE, ignore.case = TRUE)
+}
+
+# Summarize missingness and value diversity for one metadata column.
+summarise_column_availability <- function(metadata, project_id, column_name) {
+  x <- as.character(metadata[[column_name]])
+  n_total <- length(x)
+  n_missing <- sum(is.na(x) | x == "")
+  n_available <- n_total - n_missing
+  n_distinct <- length(unique(x[!(is.na(x) | x == "")]))
+
+  data.frame(
+    project_id = project_id,
+    column = column_name,
+    n_total = n_total,
+    n_available = n_available,
+    n_missing = n_missing,
+    missing_fraction = n_missing / n_total,
+    n_distinct = n_distinct,
+    stringsAsFactors = FALSE
+  )
+}
+
+# TCGAbiolinks metadata can contain list columns; CSV output needs flat values.
+flatten_metadata_for_export <- function(metadata) {
+  metadata[] <- lapply(metadata, function(x) {
+    if (is.list(x)) {
+      vapply(x, function(y) paste(y, collapse = "; "), character(1))
+    } else {
+      x
+    }
+  })
+
+  as.data.frame(metadata)
+}
+
+#### Query Project-Level Metadata ####
+
+# Recover TCGA project IDs from GDC projects
+tcga_projects <- sort(grep(
+  "^TCGA",
+  TCGAbiolinks:::getGDCprojects()$project_id,
+  value = TRUE
+))
+
+project_manifest <- vector("list", length(tcga_projects))
+names(project_manifest) <- tcga_projects
+
+project_status <- list()
+sample_type_counts <- list()
+metadata_availability <- list()
+
+for (project_id in tcga_projects) {
+  message("Querying ", project_id)
+
+  # Keep errors in the project status table instead of stopping the scan.
+  query_result <- tryCatch({
+    query <- GDCquery(
+      project = project_id,
+      data.category = tcga_data_category,
+      data.type = tcga_data_type,
+      workflow.type = tcga_workflow_type,
+      experimental.strategy = tcga_experimental_strategy
+    )
+
+    metadata <- getResults(query)
+    metadata$project_id <- project_id
+    metadata$condition_candidate <- classify_sample_type(metadata$sample_type)
+
+    list(query = query, metadata = metadata, error = NA_character_)
+  }, error = function(error) {
+    list(query = NULL, metadata = NULL, error = conditionMessage(error))
+  })
+
+  project_manifest[[project_id]] <- query_result
+
+  if (!is.null(query_result$metadata)) {
+    metadata <- query_result$metadata
+
+    # Save the raw query metadata so each cohort can be checked manually.
+    metadata_export <- flatten_metadata_for_export(metadata)
+
+    write.csv(
+      metadata_export,
+      tcga_project_query_metadata_file(project_id),
+      row.names = FALSE
+    )
+
+    # Count all sample types before deciding what is tumor or normal.
+    sample_type_counts[[project_id]] <- as.data.frame(
+      table(metadata$sample_type, useNA = "ifany"),
+      stringsAsFactors = FALSE
+    ) |>
+      dplyr::rename(sample_type = Var1, n = Freq) |>
+      dplyr::mutate(project_id = project_id, .before = 1)
+
+    # Audit metadata columns that may later become covariates.
+    matching_metadata_columns <- unique(unlist(lapply(
+      metadata_column_patterns,
+      function(pattern) find_matching_columns(metadata, pattern)
+    )))
+
+    metadata_availability[[project_id]] <- dplyr::bind_rows(lapply(
+      matching_metadata_columns,
+      function(column_name) {
+        summarise_column_availability(metadata, project_id, column_name)
+      }
+    ))
+
+    n_normal <- sum(metadata$condition_candidate == "normal", na.rm = TRUE)
+    n_tumor <- sum(metadata$condition_candidate == "tumor", na.rm = TRUE)
+
+    # Eligibility here is only based on sample counts; design quality is checked later.
+    project_status[[project_id]] <- data.frame(
+      project_id = project_id,
+      query_ok = TRUE,
+      n_samples = nrow(metadata),
+      n_normal = n_normal,
+      n_tumor = n_tumor,
+      eligible_sample_counts =
+        n_normal >= min_normal_samples && n_tumor >= min_tumor_samples,
+      error = NA_character_,
+      stringsAsFactors = FALSE
+    )
+  } else {
+    project_status[[project_id]] <- data.frame(
+      project_id = project_id,
+      query_ok = FALSE,
+      n_samples = NA_integer_,
+      n_normal = NA_integer_,
+      n_tumor = NA_integer_,
+      eligible_sample_counts = FALSE,
+      error = query_result$error,
+      stringsAsFactors = FALSE
+    )
+  }
+}
+
+#### Save Discovery Outputs ####
+
+saveRDS(project_manifest, tcga_project_manifest_file)
+
+write.csv(
+  dplyr::bind_rows(project_status),
+  tcga_project_status_file,
+  row.names = FALSE
+)
+
+write.csv(
+  dplyr::bind_rows(sample_type_counts),
+  tcga_sample_counts_file,
+  row.names = FALSE
+)
+
+write.csv(
+  dplyr::bind_rows(metadata_availability),
+  tcga_metadata_availability_file,
+  row.names = FALSE
+)
