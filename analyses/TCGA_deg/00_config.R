@@ -169,6 +169,11 @@ tcga_covariate_report_file <- file.path(
   "03_TCGA_covariate_report.csv"
 )
 
+tcga_deseq_run_status_file <- file.path(
+  results_table_dir,
+  "04_TCGA_deseq2_run_status.csv"
+)
+
 #### Per-Project Output Helpers ####
 
 tcga_project_rse_file <- function(project_id) {
@@ -207,8 +212,17 @@ tcga_deseq_results_file <- function(project_id) {
   file.path(results_table_dir, paste0(project_id, "_DGE_Results_Tumor_vs_Normal.csv"))
 }
 
+tcga_deseq_raw_results_file <- function(project_id) {
+  file.path(results_table_dir, paste0(project_id, "_DGE_Raw_Results_Tumor_vs_Normal.csv"))
+}
+
 tcga_pca_figure_file <- function(project_id) {
   file.path(results_figure_dir, paste0(project_id, "_PCA_plot.png"))
+}
+
+tcga_pca_covariate_figure_file <- function(project_id, covariate) {
+  safe_covariate <- gsub("[^A-Za-z0-9_.-]+", "_", covariate)
+  file.path(results_figure_dir, paste0(project_id, "_PCA_", safe_covariate, ".png"))
 }
 
 tcga_ma_figure_file <- function(project_id) {
