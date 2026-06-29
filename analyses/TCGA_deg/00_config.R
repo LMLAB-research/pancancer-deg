@@ -29,7 +29,7 @@ detected_cores <- parallel::detectCores(logical = FALSE)
 if (is.na(detected_cores)) {
   detected_cores <- 1
 }
-biocparallel_workers <- max(1, min(12, detected_cores - 1))
+biocparallel_workers <- max(1, min(6, detected_cores - 1))
 
 make_biocparallel_param <- function() {
   if (!use_biocparallel || biocparallel_workers <= 1) {
