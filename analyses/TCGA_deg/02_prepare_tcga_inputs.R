@@ -60,8 +60,13 @@ normalise_missing_strings <- function(x) {
     "not available",
     "Not Applicable",
     "not applicable",
+    "Not Evaluated",
+    "not evaluated",
+    "[Unknown]",
     "[Not Available]",
-    "[Not Applicable]"
+    "[Not Applicable]",
+    "[Not Evaluated]",
+    "[Not Reported]"
   )] <- NA_character_
   x
 }
