@@ -118,7 +118,7 @@ eligible_projects <- limit_projects(eligible_projects)
 
 #### Download And Prepare Each Cohort ####
 
-for (project_id in eligible_projects) {
+prepare_project_inputs <- function(project_id) {
   message("Preparing input object for ", project_id)
 
   query <- GDCquery(
@@ -197,4 +197,8 @@ for (project_id in eligible_projects) {
   addWorksheet(wb, "sample_metadata")
   writeData(wb, "sample_metadata", metadata_export, na.string = "NA")
   saveWorkbook(wb, tcga_project_metadata_report_file(project_id), overwrite = TRUE)
+
+  invisible(project_id)
 }
+
+prepared_projects <- lapply(eligible_projects, prepare_project_inputs)
