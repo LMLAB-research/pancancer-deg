@@ -22,7 +22,7 @@ is_plot_group_usable <- function(metadata, variable) {
   }
 
   n_groups <- length(unique(x[!is.na(x)]))
-  n_groups >= 2 && n_groups <= 12
+  n_groups >= 2 && n_groups <= pca_max_groups
 }
 
 classify_deg_direction <- function(results_df) {
@@ -39,9 +39,9 @@ classify_deg_direction <- function(results_df) {
 }
 
 deg_direction_colors <- c(
-  down = "blue",
-  not_significant = "grey70",
-  up = "red"
+  down = deg_down_color,
+  not_significant = deg_neutral_color,
+  up = deg_up_color
 )
 
 # Add gene annotation from rowData, filling missing symbols from org.Hs.eg.db.
@@ -99,9 +99,9 @@ plot_project_pca <- function(vst_data, project_id, variable, output_file) {
   ggsave(
     output_file,
     plot = pca_plot,
-    width = 7,
-    height = 5,
-    dpi = 300
+    width = pca_plot_width,
+    height = pca_plot_height,
+    dpi = plot_dpi
   )
 }
 
@@ -114,7 +114,7 @@ plot_project_pcas <- function(dds, project_id, design_info) {
     logical(1)
   )]
 
-  vst_data <- vst(dds, blind = FALSE)
+  vst_data <- vst(dds, blind = pca_blind)
 
   lapply(pca_variables, function(variable) {
     output_file <- if (variable == "condition") {
@@ -148,11 +148,11 @@ plot_project_ma <- function(results_df, project_id) {
     plot_df,
     aes(x = baseMean, y = log2FoldChange, color = direction)
   ) +
-    geom_point(alpha = 0.5, size = 0.8) +
+    geom_point(alpha = ma_point_alpha, size = ma_point_size) +
     geom_hline(yintercept = 0, linetype = "dashed", color = "grey40") +
     scale_x_log10() +
     scale_color_manual(values = deg_direction_colors, drop = FALSE) +
-    coord_cartesian(ylim = c(-5, 5)) +
+    coord_cartesian(ylim = ma_plot_ylim) +
     theme_minimal() +
     labs(
       title = paste(project_id, "MA plot"),
@@ -164,9 +164,9 @@ plot_project_ma <- function(results_df, project_id) {
   ggsave(
     tcga_ma_figure_file(project_id),
     plot = ma_plot,
-    width = 7,
-    height = 5,
-    dpi = 300
+    width = ma_plot_width,
+    height = ma_plot_height,
+    dpi = plot_dpi
   )
 
   TRUE
@@ -193,7 +193,7 @@ plot_project_volcano <- function(results_df, project_id) {
     plot_df,
     aes(x = log2FoldChange, y = neg_log10_padj, color = direction)
   ) +
-    geom_point(alpha = 0.55, size = 0.9) +
+    geom_point(alpha = volcano_point_alpha, size = volcano_point_size) +
     geom_vline(
       xintercept = c(-deseq_lfc_threshold, deseq_lfc_threshold),
       linetype = "dashed",
@@ -216,9 +216,9 @@ plot_project_volcano <- function(results_df, project_id) {
   ggsave(
     tcga_volcano_figure_file(project_id),
     plot = volcano_plot,
-    width = 8,
-    height = 8,
-    dpi = 300
+    width = volcano_plot_width,
+    height = volcano_plot_height,
+    dpi = plot_dpi
   )
 
   TRUE
@@ -233,6 +233,8 @@ summarise_results <- function(project_id, design_info, results_df, raw_results_d
     n_raw_results = nrow(raw_results_df),
     deseq_alpha = deseq_alpha,
     deseq_lfc_threshold = deseq_lfc_threshold,
+    use_lfc_shrinkage = use_lfc_shrinkage,
+    lfc_shrinkage_type = if (use_lfc_shrinkage) lfc_shrinkage_type else NA_character_,
     n_padj_below_alpha = sum(results_df$padj < deseq_alpha, na.rm = TRUE),
     n_abs_lfc_above_threshold = sum(
       abs(results_df$log2FoldChange) > deseq_lfc_threshold,
@@ -260,6 +262,8 @@ skip_status <- function(project_id, reason) {
     n_raw_results = NA_integer_,
     deseq_alpha = deseq_alpha,
     deseq_lfc_threshold = deseq_lfc_threshold,
+    use_lfc_shrinkage = use_lfc_shrinkage,
+    lfc_shrinkage_type = if (use_lfc_shrinkage) lfc_shrinkage_type else NA_character_,
     n_padj_below_alpha = NA_integer_,
     n_abs_lfc_above_threshold = NA_integer_,
     n_padj_below_alpha_and_abs_lfc_above_threshold = NA_integer_,
@@ -280,6 +284,8 @@ failure_status <- function(project_id, error) {
     n_raw_results = NA_integer_,
     deseq_alpha = deseq_alpha,
     deseq_lfc_threshold = deseq_lfc_threshold,
+    use_lfc_shrinkage = use_lfc_shrinkage,
+    lfc_shrinkage_type = if (use_lfc_shrinkage) lfc_shrinkage_type else NA_character_,
     n_padj_below_alpha = NA_integer_,
     n_abs_lfc_above_threshold = NA_integer_,
     n_padj_below_alpha_and_abs_lfc_above_threshold = NA_integer_,
@@ -319,14 +325,18 @@ run_project_deseq2 <- function(project_id) {
   # Condition is always modeled with levels normal -> tumor.
   contrast <- c("condition", "tumor", "normal")
   raw_results <- results(dds, contrast = contrast, alpha = deseq_alpha)
-  shrunken_results <- lfcShrink(
-    dds,
-    contrast = contrast,
-    res = raw_results,
-    type = "ashr",
-    parallel = parallel_enabled,
-    BPPARAM = design_info$BPPARAM
-  )
+  shrunken_results <- if (use_lfc_shrinkage) {
+    lfcShrink(
+      dds,
+      contrast = contrast,
+      res = raw_results,
+      type = lfc_shrinkage_type,
+      parallel = parallel_enabled,
+      BPPARAM = design_info$BPPARAM
+    )
+  } else {
+    raw_results
+  }
 
   row_data <- as.data.frame(rowData(dds))
   raw_results_df <- annotate_results(as.data.frame(raw_results), row_data)
@@ -359,6 +369,8 @@ run_project_deseq2 <- function(project_id) {
     pca_variables = pca_variables,
     ma_created = ma_created,
     volcano_created = volcano_created,
+    use_lfc_shrinkage = use_lfc_shrinkage,
+    lfc_shrinkage_type = if (use_lfc_shrinkage) lfc_shrinkage_type else NA_character_,
     biocparallel_backend = class(design_info$BPPARAM)[[1]],
     biocparallel_workers = BiocParallel::bpnworkers(design_info$BPPARAM),
     raw_results_file = tcga_deseq_raw_results_file(project_id),

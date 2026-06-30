@@ -29,7 +29,7 @@ detected_cores <- parallel::detectCores(logical = FALSE)
 if (is.na(detected_cores)) {
   detected_cores <- 1
 }
-biocparallel_workers <- max(1, min(6, detected_cores - 1))
+biocparallel_workers <- max(1, min(12, detected_cores - 1))
 
 make_biocparallel_param <- function() {
   if (!use_biocparallel || biocparallel_workers <= 1) {
@@ -48,6 +48,9 @@ tcga_data_category <- "Transcriptome Profiling"
 tcga_data_type <- "Gene Expression Quantification"
 tcga_workflow_type <- "STAR - Counts"
 tcga_experimental_strategy <- "RNA-Seq"
+tcga_count_assay <- "unstranded"
+gdc_download_method <- "api"
+gdc_files_per_chunk <- 20
 
 # Clinical metadata settings. Indexed clinical data is lightweight; BCR Biotab
 # supplements are richer and downloaded only when this flag is TRUE.
@@ -96,6 +99,8 @@ max_covariate_missing_fraction <- 0.25
 min_covariate_group_size <- 3
 deseq_alpha <- 0.05
 deseq_lfc_threshold <- log2(1.5)
+use_lfc_shrinkage <- TRUE
+lfc_shrinkage_type <- "ashr"
 
 # Candidate covariates are tested per cancer type before entering the model.
 candidate_covariates <- c(
@@ -104,6 +109,29 @@ candidate_covariates <- c(
   "ethnicity",
   "smoking_status"
 )
+
+#### Plot Settings ####
+
+pca_blind <- FALSE
+pca_max_groups <- 12
+
+plot_dpi <- 300
+pca_plot_width <- 7
+pca_plot_height <- 5
+ma_plot_width <- 7
+ma_plot_height <- 5
+volcano_plot_width <- 8
+volcano_plot_height <- 8
+
+ma_plot_ylim <- c(-5, 5)
+ma_point_alpha <- 0.5
+ma_point_size <- 0.8
+volcano_point_alpha <- 0.55
+volcano_point_size <- 0.9
+
+deg_up_color <- "red"
+deg_down_color <- "blue"
+deg_neutral_color <- "grey70"
 
 #### Metadata Audit Settings ####
 
