@@ -412,6 +412,23 @@ slim_row_data <- function(rse) {
   rse
 }
 
+set_deseq2_count_assay <- function(rse) {
+  available_assays <- assayNames(rse)
+
+  if (!tcga_count_assay %in% available_assays) {
+    stop(
+      "Configured TCGA count assay '",
+      tcga_count_assay,
+      "' was not found. Available assays: ",
+      paste(available_assays, collapse = ", "),
+      "\nReview tcga_count_assay in 00_config.R."
+    )
+  }
+
+  assays(rse) <- list(counts = assay(rse, tcga_count_assay))
+  rse
+}
+
 # Run GDC download/prepare calls from the raw data directory so TCGAbiolinks
 # writes GDCdata/ and MANIFEST.txt under data/TCGA_deg/raw.
 with_raw_data_dir <- function(expr) {
@@ -444,9 +461,9 @@ prepare_project_inputs <- function(project_id) {
   rse <- with_raw_data_dir({
     GDCdownload(
       query,
-      method = "api",
+      method = gdc_download_method,
       directory = tcga_gdc_download_dir,
-      files.per.chunk = 20
+      files.per.chunk = gdc_files_per_chunk
     )
     GDCprepare(
       query,
@@ -455,8 +472,8 @@ prepare_project_inputs <- function(project_id) {
     )
   })
 
-  # Use raw unstranded counts as the DESeq2 assay.
-  assays(rse) <- list(counts = assay(rse, "unstranded"))
+  # Keep only the configured raw count assay for DESeq2.
+  rse <- set_deseq2_count_assay(rse)
   rse <- slim_row_data(rse)
 
   metadata <- as.data.frame(colData(rse))
