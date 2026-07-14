@@ -220,21 +220,74 @@ eligible_projects <- limit_projects(eligible_projects)
 
 #### Build Designs And DESeq2 Objects ####
 
+make_design_plan_row <- function(
+  project_id,
+  design_type,
+  eligible,
+  reason,
+  n_normal = NA_integer_,
+  n_tumor = NA_integer_,
+  n_genes = NA_integer_,
+  covariates = character(),
+  design_formula = NULL
+) {
+  data.frame(
+    project_id = project_id,
+    design_type = design_type,
+    eligible = eligible,
+    reason = reason,
+    n_normal = n_normal,
+    n_tumor = n_tumor,
+    n_genes = n_genes,
+    covariates = paste(covariates, collapse = ";"),
+    design_formula = if (is.null(design_formula)) {
+      NA_character_
+    } else {
+      format_design_formula(design_formula)
+    },
+    stringsAsFactors = FALSE
+  )
+}
+
+build_and_save_dds <- function(
+  rse,
+  project_id,
+  design_type,
+  design_formula,
+  covariates
+) {
+  dds <- DESeqDataSet(rse, design = design_formula)
+  smallest_group_size <- min(table(colData(dds)$condition))
+  required_samples <- max(min_count_samples, smallest_group_size)
+  keep_genes <- rowSums(counts(dds) >= min_count) >= required_samples
+  dds <- dds[keep_genes, ]
+
+  dds_file <- tcga_project_dds_file(project_id, design_type)
+  design_file <- tcga_project_design_file(project_id, design_type)
+  saveRDS(dds, dds_file)
+  saveRDS(
+    list(
+      project_id = project_id,
+      design_type = design_type,
+      design_formula = design_formula,
+      covariates = covariates,
+      n_normal = sum(colData(dds)$condition == "normal"),
+      n_tumor = sum(colData(dds)$condition == "tumor"),
+      dds_file = dds_file
+    ),
+    design_file
+  )
+
+  dds
+}
+
 build_project_design <- function(project_id) {
   message("Building DESeq2 design for ", project_id)
 
   if (!file.exists(tcga_project_rse_file(project_id))) {
     return(list(
-      design_plan = data.frame(
-        project_id = project_id,
-        eligible = FALSE,
-        reason = "prepared RSE file not found",
-        n_normal = NA_integer_,
-        n_tumor = NA_integer_,
-        n_genes = NA_integer_,
-        covariates = NA_character_,
-        design_formula = NA_character_,
-        stringsAsFactors = FALSE
+      design_plan = make_design_plan_row(
+        project_id, "naive", FALSE, "prepared RSE file not found"
       ),
       covariate_report = data.frame()
     ))
@@ -254,20 +307,31 @@ build_project_design <- function(project_id) {
 
   if (n_normal < min_normal_samples || n_tumor < min_tumor_samples) {
     return(list(
-      design_plan = data.frame(
-        project_id = project_id,
-        eligible = FALSE,
-        reason = "insufficient tumor/normal samples after preparation",
-        n_normal = n_normal,
-        n_tumor = n_tumor,
-        n_genes = NA_integer_,
-        covariates = NA_character_,
-        design_formula = NA_character_,
-        stringsAsFactors = FALSE
+      design_plan = make_design_plan_row(
+        project_id, "naive", FALSE,
+        "insufficient tumor/normal samples after preparation",
+        n_normal, n_tumor
       ),
       covariate_report = data.frame()
     ))
   }
+
+  # The naive model uses every available tumor/normal sample and no covariates.
+  naive_formula <- make_design_formula(character())
+  naive_dds <- build_and_save_dds(
+    rse, project_id, "naive", naive_formula, character()
+  )
+  naive_plan <- make_design_plan_row(
+    project_id = project_id,
+    design_type = "naive",
+    eligible = TRUE,
+    reason = NA_character_,
+    n_normal = sum(colData(naive_dds)$condition == "normal"),
+    n_tumor = sum(colData(naive_dds)$condition == "tumor"),
+    n_genes = nrow(naive_dds),
+    covariates = character(),
+    design_formula = naive_formula
+  )
 
   selection <- select_covariates(metadata)
   metadata <- prepare_selected_covariates(
@@ -277,6 +341,24 @@ build_project_design <- function(project_id) {
   selected_covariates <- selection$selected_covariates
   covariate_report <- selection$covariate_report
   covariate_report$project_id <- project_id
+
+  # If no covariates are usable, the adjusted model would duplicate the naive
+  # model exactly, so only the canonical naive result is produced.
+  if (length(selected_covariates) == 0) {
+    return(list(
+      design_plan = dplyr::bind_rows(
+        naive_plan,
+        make_design_plan_row(
+          project_id, "adjusted", FALSE,
+          "no usable covariates; adjusted design equals naive design",
+          n_normal, n_tumor,
+          design_formula = naive_formula
+        )
+      ),
+      covariate_report = covariate_report
+    ))
+  }
+
   base_rse <- rse
   base_metadata <- metadata
 
@@ -293,16 +375,14 @@ build_project_design <- function(project_id) {
       n_tumor_complete < min_tumor_samples
   ) {
     return(list(
-      design_plan = data.frame(
-        project_id = project_id,
-        eligible = FALSE,
-        reason = "insufficient tumor/normal samples after covariate complete-case filtering",
-        n_normal = n_normal_complete,
-        n_tumor = n_tumor_complete,
-        n_genes = NA_integer_,
-        covariates = paste(selected_covariates, collapse = ";"),
-        design_formula = NA_character_,
-        stringsAsFactors = FALSE
+      design_plan = dplyr::bind_rows(
+        naive_plan,
+        make_design_plan_row(
+          project_id, "adjusted", FALSE,
+          "insufficient tumor/normal samples after covariate complete-case filtering",
+          n_normal_complete, n_tumor_complete,
+          covariates = selected_covariates
+        )
       ),
       covariate_report = covariate_report
     ))
@@ -329,52 +409,56 @@ build_project_design <- function(project_id) {
 
   if (!formula_is_full_rank(metadata, design_formula)) {
     return(list(
-      design_plan = data.frame(
-        project_id = project_id,
-        eligible = FALSE,
-        reason = "design matrix is not full rank",
-        n_normal = sum(metadata$condition == "normal"),
-        n_tumor = sum(metadata$condition == "tumor"),
-        n_genes = NA_integer_,
-        covariates = paste(selected_covariates, collapse = ";"),
-        design_formula = format_design_formula(design_formula),
-        stringsAsFactors = FALSE
+      design_plan = dplyr::bind_rows(
+        naive_plan,
+        make_design_plan_row(
+          project_id, "adjusted", FALSE, "design matrix is not full rank",
+          sum(metadata$condition == "normal"),
+          sum(metadata$condition == "tumor"),
+          covariates = selected_covariates,
+          design_formula = design_formula
+        )
+      ),
+      covariate_report = covariate_report
+    ))
+  }
+
+  # Full-rank restoration can remove every selected covariate. In that case,
+  # the adjusted model is again identical to the already-saved naive model.
+  if (length(selected_covariates) == 0) {
+    return(list(
+      design_plan = dplyr::bind_rows(
+        naive_plan,
+        make_design_plan_row(
+          project_id, "adjusted", FALSE,
+          "all covariates dropped; adjusted design equals naive design",
+          n_normal, n_tumor,
+          design_formula = naive_formula
+        )
       ),
       covariate_report = covariate_report
     ))
   }
 
   colData(rse) <- S4Vectors::DataFrame(metadata)
-
-  # Apply a simple low-count filter before saving the DESeq2 object.
-  dds <- DESeqDataSet(rse, design = design_formula)
-  smallest_group_size <- min(table(colData(dds)$condition))
-  required_samples <- max(min_count_samples, smallest_group_size)
-  keep_genes <- rowSums(counts(dds) >= min_count) >= required_samples
-  dds <- dds[keep_genes, ]
-
-  saveRDS(
-    list(
-      project_id = project_id,
-      design_formula = design_formula,
-      covariates = selected_covariates,
-      dds_file = tcga_project_dds_file(project_id)
-    ),
-    tcga_project_design_file(project_id)
+  dds <- build_and_save_dds(
+    rse, project_id, "adjusted", design_formula, selected_covariates
   )
-  saveRDS(dds, tcga_project_dds_file(project_id))
 
   list(
-    design_plan = data.frame(
-      project_id = project_id,
-      eligible = TRUE,
-      reason = NA_character_,
-      n_normal = sum(colData(dds)$condition == "normal"),
-      n_tumor = sum(colData(dds)$condition == "tumor"),
-      n_genes = nrow(dds),
-      covariates = paste(selected_covariates, collapse = ";"),
-      design_formula = format_design_formula(design_formula),
-      stringsAsFactors = FALSE
+    design_plan = dplyr::bind_rows(
+      naive_plan,
+      make_design_plan_row(
+        project_id = project_id,
+        design_type = "adjusted",
+        eligible = TRUE,
+        reason = NA_character_,
+        n_normal = sum(colData(dds)$condition == "normal"),
+        n_tumor = sum(colData(dds)$condition == "tumor"),
+        n_genes = nrow(dds),
+        covariates = selected_covariates,
+        design_formula = design_formula
+      )
     ),
     covariate_report = covariate_report
   )
