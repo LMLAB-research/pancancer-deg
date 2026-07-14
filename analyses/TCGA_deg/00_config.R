@@ -21,7 +21,7 @@ analysis_name <- "TCGA_deg"
 
 # During development, limit scripts to the first N project IDs for faster runs.
 # Set to Inf when running the full analysis.
-debug_project_limit <- 2
+debug_project_limit <- Inf
 
 # Parallel execution for DESeq2 model fitting and log2FC shrinkage.
 use_biocparallel <- TRUE
@@ -251,20 +251,42 @@ tcga_project_metadata_report_file <- function(project_id) {
   file.path(results_table_dir, paste0(project_id, "_metadata_report.xlsx"))
 }
 
-tcga_project_design_file <- function(project_id) {
-  file.path(data_processed_tcga_dir, paste0(project_id, "_design.rds"))
+tcga_project_design_file <- function(project_id, design_type) {
+  file.path(
+    data_processed_tcga_dir,
+    paste0(project_id, "_", design_type, "_design.rds")
+  )
 }
 
-tcga_project_dds_file <- function(project_id) {
-  file.path(data_processed_tcga_dir, paste0(project_id, "_dds.rds"))
+tcga_project_dds_file <- function(project_id, design_type) {
+  file.path(
+    data_processed_tcga_dir,
+    paste0(project_id, "_", design_type, "_dds.rds")
+  )
 }
 
-tcga_deseq_results_file <- function(project_id) {
-  file.path(results_table_dir, paste0(project_id, "_DGE_Results_Tumor_vs_Normal.csv"))
+tcga_deseq_results_file <- function(project_id, design_type) {
+  file.path(
+    results_table_dir,
+    paste0(
+      project_id,
+      "_DGE_Results_Tumor_vs_Normal_",
+      tools::toTitleCase(design_type),
+      ".csv"
+    )
+  )
 }
 
-tcga_deseq_raw_results_file <- function(project_id) {
-  file.path(results_table_dir, paste0(project_id, "_DGE_Raw_Results_Tumor_vs_Normal.csv"))
+tcga_deseq_raw_results_file <- function(project_id, design_type) {
+  file.path(
+    results_table_dir,
+    paste0(
+      project_id,
+      "_DGE_Raw_Results_Tumor_vs_Normal_",
+      tools::toTitleCase(design_type),
+      ".csv"
+    )
+  )
 }
 
 tcga_pca_figure_file <- function(project_id) {

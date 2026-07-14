@@ -227,8 +227,11 @@ plot_project_volcano <- function(results_df, project_id) {
 summarise_results <- function(project_id, design_info, results_df, raw_results_df) {
   data.frame(
     project_id = project_id,
+    design_type = design_info$design_type,
     status = "completed",
     reason = NA_character_,
+    n_normal = design_info$n_normal,
+    n_tumor = design_info$n_tumor,
     n_results = nrow(results_df),
     n_raw_results = nrow(raw_results_df),
     deseq_alpha = deseq_alpha,
@@ -253,11 +256,14 @@ summarise_results <- function(project_id, design_info, results_df, raw_results_d
   )
 }
 
-skip_status <- function(project_id, reason) {
+skip_status <- function(project_id, design_type, reason) {
   data.frame(
     project_id = project_id,
+    design_type = design_type,
     status = "skipped",
     reason = reason,
+    n_normal = NA_integer_,
+    n_tumor = NA_integer_,
     n_results = NA_integer_,
     n_raw_results = NA_integer_,
     deseq_alpha = deseq_alpha,
@@ -275,11 +281,14 @@ skip_status <- function(project_id, reason) {
   )
 }
 
-failure_status <- function(project_id, error) {
+failure_status <- function(project_id, design_type, error) {
   data.frame(
     project_id = project_id,
+    design_type = design_type,
     status = "failed",
     reason = conditionMessage(error),
+    n_normal = NA_integer_,
+    n_tumor = NA_integer_,
     n_results = NA_integer_,
     n_raw_results = NA_integer_,
     deseq_alpha = deseq_alpha,
@@ -297,24 +306,31 @@ failure_status <- function(project_id, error) {
   )
 }
 
-run_project_deseq2 <- function(project_id) {
-  message("Running DESeq2 for ", project_id)
+run_project_deseq2 <- function(project_id, design_type, create_plots) {
+  message("Running ", design_type, " DESeq2 for ", project_id)
 
-  if (!file.exists(tcga_project_dds_file(project_id))) {
-    return(skip_status(project_id, "DDS file not found"))
+  dds_file <- tcga_project_dds_file(project_id, design_type)
+  design_file <- tcga_project_design_file(project_id, design_type)
+
+  if (!file.exists(dds_file)) {
+    return(skip_status(project_id, design_type, "DDS file not found"))
   }
 
-  if (!file.exists(tcga_project_design_file(project_id))) {
-    return(skip_status(project_id, "design file not found"))
+  if (!file.exists(design_file)) {
+    return(skip_status(project_id, design_type, "design file not found"))
   }
 
-  dds <- readRDS(tcga_project_dds_file(project_id))
-  design_info <- readRDS(tcga_project_design_file(project_id))
+  dds <- readRDS(dds_file)
+  design_info <- readRDS(design_file)
   design_info$BPPARAM <- make_biocparallel_param()
   parallel_enabled <- use_biocparallel &&
     BiocParallel::bpnworkers(design_info$BPPARAM) > 1
 
-  pca_variables <- plot_project_pcas(dds, project_id, design_info)
+  pca_variables <- if (create_plots) {
+    plot_project_pcas(dds, project_id, design_info)
+  } else {
+    character()
+  }
 
   dds <- DESeq(
     dds,
@@ -353,17 +369,17 @@ run_project_deseq2 <- function(project_id) {
 
   write.csv(
     raw_results_df,
-    tcga_deseq_raw_results_file(project_id),
+    tcga_deseq_raw_results_file(project_id, design_type),
     row.names = FALSE
   )
   write.csv(
     shrunken_results_df,
-    tcga_deseq_results_file(project_id),
+    tcga_deseq_results_file(project_id, design_type),
     row.names = FALSE
   )
 
-  ma_created <- plot_project_ma(shrunken_results_df, project_id)
-  volcano_created <- plot_project_volcano(shrunken_results_df, project_id)
+  ma_created <- create_plots && plot_project_ma(shrunken_results_df, project_id)
+  volcano_created <- create_plots && plot_project_volcano(shrunken_results_df, project_id)
 
   metadata(dds)$tcga_deg <- list(
     pca_variables = pca_variables,
@@ -373,30 +389,41 @@ run_project_deseq2 <- function(project_id) {
     lfc_shrinkage_type = if (use_lfc_shrinkage) lfc_shrinkage_type else NA_character_,
     biocparallel_backend = class(design_info$BPPARAM)[[1]],
     biocparallel_workers = BiocParallel::bpnworkers(design_info$BPPARAM),
-    raw_results_file = tcga_deseq_raw_results_file(project_id),
-    shrunken_results_file = tcga_deseq_results_file(project_id)
+    design_type = design_type,
+    raw_results_file = tcga_deseq_raw_results_file(project_id, design_type),
+    shrunken_results_file = tcga_deseq_results_file(project_id, design_type)
   )
-  saveRDS(dds, tcga_project_dds_file(project_id))
+  saveRDS(dds, dds_file)
 
   summarise_results(project_id, design_info, shrunken_results_df, raw_results_df)
 }
 
-run_project_deseq2_safe <- function(project_id) {
+run_project_deseq2_safe <- function(project_id, design_type, create_plots) {
   tryCatch(
-    run_project_deseq2(project_id),
-    error = function(e) failure_status(project_id, e)
+    run_project_deseq2(project_id, design_type, create_plots),
+    error = function(e) failure_status(project_id, design_type, e)
   )
 }
 
 #### Select Projects From Design Plan ####
 
 design_plan <- readRDS(tcga_design_plan_rds)
-eligible_projects <- design_plan |>
-  dplyr::filter(eligible) |>
-  dplyr::pull(project_id)
-eligible_projects <- limit_projects(eligible_projects)
+eligible_designs <- design_plan |>
+  dplyr::filter(eligible)
+eligible_projects <- limit_projects(unique(eligible_designs$project_id))
+eligible_designs <- eligible_designs |>
+  dplyr::filter(project_id %in% eligible_projects) |>
+  dplyr::mutate(
+    create_plots = design_type == "adjusted" |
+      !project_id %in% project_id[design_type == "adjusted"]
+  )
 
 #### Run Each Eligible Project ####
 
-run_status <- dplyr::bind_rows(lapply(eligible_projects, run_project_deseq2_safe))
+run_status <- dplyr::bind_rows(Map(
+  run_project_deseq2_safe,
+  eligible_designs$project_id,
+  eligible_designs$design_type,
+  eligible_designs$create_plots
+))
 write.csv(run_status, tcga_deseq_run_status_file, row.names = FALSE)
