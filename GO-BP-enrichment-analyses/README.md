@@ -1,4 +1,4 @@
-# Independent GO BP reanalysis: how to run and audit it
+# GO BP analysis
 
 ## What this analysis asks
 
