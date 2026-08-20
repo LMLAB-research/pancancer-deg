@@ -1,6 +1,6 @@
-# TCGA–OIS Overlap Pipeline
+# TCGA-OIS overlap pipeline
 
-This pipeline compares cancer and OIS differentially expressed genes (DEGs) 
+This pipeline compares two datasets of differentially expressed genes (DEGs) 
 and creates a summary heatmap.
 
 ## Folder structure
@@ -38,7 +38,7 @@ Main functions:
 - `analyze_one_cancer()` prepares one TCGA dataset, runs all four directional
   overlap tests, and saves its result files.
 
-#### Duplicate gene-symbol rule
+#### Duplicate gene symbol rule
 
 For every gene symbol, `resolve_symbol_duplicates()`:
 
@@ -56,7 +56,7 @@ For every gene symbol, `resolve_symbol_duplicates()`:
    status of all duplicates in the audit output.
 
 Different gene IDs may represent different transcripts of the same gene, 
-and some transcripts may be better representatives than others. If all 
+and some transcripts may be better biological representatives than others. If all 
 duplicates show the same direction of change, we assume that this 
 uncertainty is unlikely to have a major effect on the overlap results. 
 However, this is still not an ideal solution, and duplicates should 
