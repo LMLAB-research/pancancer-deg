@@ -1,4 +1,4 @@
-# TCGA-OIS overlap pipeline
+# Overlap pipeline
 
 This pipeline compares two datasets of differentially expressed genes (DEGs) 
 and creates a summary heatmap.
