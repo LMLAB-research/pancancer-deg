@@ -1,167 +1,220 @@
-# GO BP analysis
+# GO enrichment of cancer–OIS overlaps
 
-## What this analysis asks
+This pipeline performs functional interpretation of genes shared between
+cancer and oncogene-induced senescence (OIS) differential-expression results.
+It tests GO Biological Process enrichment, groups redundant GO terms by
+semantic similarity, and summarizes recurrent biological themes across
+cancers.
 
-For each TCGA cancer and each directional overlap class, the analysis asks:
-
-> Are genes annotated to a GO Biological Process term represented more often
-> in the overlap list than expected from the genes that could have entered that
-> cancer-specific overlap?
-
-The four lists are analysed separately:
-
-- UP-UP
-- UP-DOWN
-- DOWN-UP
-- DOWN-DOWN
-
-This is over-representation analysis (ORA), not GSEA.
-
-## Inputs
-
-For every `TCGA-*` directory, the script reads:
-
-- `common_tested_genes.csv`: the cancer-specific statistical background;
-- `overlap_UP-UP.csv`;
-- `overlap_UP-DOWN.csv`;
-- `overlap_DOWN-UP.csv`;
-- `overlap_DOWN-DOWN.csv`.
-
-The foreground is forced to be a subset of the corresponding background.
-
-## Statistical test
-
-`clusterProfiler::enrichGO()` performs a GO over-representation test. For each
-GO term it compares:
-
-|                         | In GO term | Not in GO term |
-|-------------------------|-----------:|---------------:|
-| Overlap gene list       | a          | b              |
-| Remaining background    | c          | d              |
-
-The over-representation p-value is the upper tail of the hypergeometric
-distribution and is equivalent to a one-sided Fisher exact test with
-`alternative = "greater"` for this 2 × 2 table.
-
-Benjamini-Hochberg correction is applied within each cancer/class GO analysis.
-
-## Folder structure
-
-The script creates:
+## Workflow
 
 ```text
-GO_BP_independent_reanalysis/
-├── GO_BP_all_results.csv
-├── GO_BP_significant_results_BH_0.05.csv
-├── GO_BP_run_log.csv
-├── GO_BP_mapping_QC.csv
-├── GO_BP_analysis_settings.csv
-├── GO_BP_session_info.txt
-├── tables/
-│   ├── TCGA-BLCA/
-│   │   ├── UP-UP_GO_BP_all_results.csv
-│   │   ├── UP-UP_GO_BP_significant_BH_0.05.csv
-│   │   └── ...
-│   └── ...
-├── plots/
-│   ├── TCGA-BLCA/
-│   │   ├── UP-UP_GO_BP_dotplot.png
-│   │   ├── UP-UP_GO_BP_dotplot.pdf
-│   │   └── ...
-│   └── ...
-└── audit/
-    ├── TCGA-BLCA/
-    │   ├── UP-UP_input_gene_audit.csv
-    │   ├── UP-UP_background_audit.csv
-    │   ├── UP-UP_GO_BP_annotations.csv
-    │   └── ...
+directional cancer–OIS overlap gene lists
+    ↓
+GO Biological Process enrichment
+    ↓
+global semantic clustering of significant GO terms
+    ↓
+cross-cancer theme ranking
+    ↓
+TOP5 and TOP10 review tables and figures
+```
+
+## Input
+
+The input is the `results/` folder created by the previous overlap pipeline:
+
+```text
+TCGA_OIS_overlapping_pipeline/results/
+├── TCGA-BLCA/
+│   ├── common_tested_genes.csv
+│   ├── overlap_UP-UP.csv
+│   ├── overlap_UP-DOWN.csv
+│   ├── overlap_DOWN-UP.csv
+│   └── overlap_DOWN-DOWN.csv
+└── TCGA-*/
     └── ...
 ```
 
-## How to run it in RStudio
+Every input CSV must contain a `gene_symbol` column.
+
+- `common_tested_genes.csv` contains genes tested in both DEG datasets and is
+  used as the cancer-specific enrichment background.
+- The four `overlap_*.csv` files contain the directional cancer–OIS overlaps.
+
+The upstream overlap pipeline uses adjusted `p < 0.05` and
+`|log2FoldChange| > log2(1.5)` for DEG filtering. Overlap enrichment is tested
+with `GeneOverlap::testGeneOverlap()`, which uses a one-sided Fisher exact test
+from `stats::fisher.test(..., alternative = "greater")`. P-values are corrected
+with the Benjamini–Hochberg method.
+
+## Running in RStudio
+
+### 1. Load the launcher
+
+Open `run_pipeline.R` in RStudio and click **Source**.
+
+### 2. Install packages once
+
+Run in the RStudio Console:
 
 ```r
-source(
-  "/Users/danabiruk/Documents/Codex/2026-08-12/referenced-chatgpt-conversation-this-is-an/outputs/run_GO_BP_independent_reanalysis.R"
+run_go_pipeline("install")
+```
+
+Packages are installed into the local `.Rlib/` folder.
+
+### 3. Run the complete analysis
+
+If the overlap and GO pipeline folders are next to each other, run:
+
+```r
+run_go_pipeline("full")
+```
+
+Otherwise, provide the upstream `results/` folder:
+
+```r
+run_go_pipeline(
+  "full",
+  input = "/path/to/TCGA_OIS_overlapping_pipeline/results"
 )
 ```
 
-## What each main output means
+This creates both TOP5 and TOP10 results.
 
-### `GO_BP_run_log.csv`
+### 4. Review theme names
 
-One row per cancer/class. Check first that no row has `status = FAILED`.
+Open:
 
-### `GO_BP_mapping_QC.csv`
-
-Reports:
-
-- input symbols before GO mapping;
-- genes inside the cancer-specific background;
-- genes with at least one GO BP annotation;
-- corresponding mapping rates;
-- background size before and after GO annotation filtering.
-
-### `GO_BP_all_results.csv`
-
-Combined table of all returned GO tests across cancers/classes. Important
-columns include:
-
-- `ID`, `Description`;
-- `GeneRatio`, `BgRatio`;
-- numeric versions of both ratios;
-- `Count`;
-- `expected_gene_count`;
-- `FoldEnrichment` and `log2_FoldEnrichment`;
-- `pvalue`, `p.adjust`, `qvalue`;
-- cancer/class and input/background sizes.
-
-### `GO_BP_significant_results_BH_0.05.csv`
-
-Only rows with BH-adjusted p-value below 0.05. No additional correction across
-all cancers is imposed by this file.
-
-## First audit after running
-
-```r
-root <- paste0(
-  "/Users/danabiruk/Documents/all_TCGA_OIS_overlaps/",
-  "GO_BP_independent_reanalysis"
-)
-
-run_log <- read.csv(file.path(root, "GO_BP_run_log.csv"))
-mapping_qc <- read.csv(file.path(root, "GO_BP_mapping_QC.csv"))
-all_go <- read.csv(file.path(root, "GO_BP_all_results.csv"))
-
-table(run_log$status)
-summary(mapping_qc$input_GO_BP_mapping_rate)
-summary(mapping_qc$background_GO_BP_mapping_rate)
-table(all_go$cancer_project, all_go$overlap_class)
+```text
+results/TOP5_theme_review.csv
+results/TOP10_theme_review.csv
 ```
 
-## Manual check of one GO result
+Each row contains the automatic representative GO term, all GO terms assigned
+to its semantic cluster, enrichment summaries, and two empty columns:
 
-For one row:
+- `manual_theme_name` — reviewed name for the figure;
+- `manual_note` — optional explanation.
+
+If `manual_theme_name` is empty, the automatic GO description is used. Manual
+names replace only the displayed label; statistics, clustering, and ranking are
+preserved.
+
+### 5. Rebuild the figures
+
+After saving the review CSV files, run in the RStudio Console:
 
 ```r
-x <- all_go[1, ]
-
-# Should reproduce the saved fold enrichment.
-x$GeneRatio_numeric / x$BgRatio_numeric
-
-# Expected number of overlap genes under the background model.
-x$expected_gene_count
-
-# Observed number.
-x$Count
+run_go_pipeline("plot")
 ```
 
-If `Count` is much larger than `expected_gene_count`, fold enrichment will be
-greater than one. Statistical significance is still determined by the test and
-BH correction, not by fold enrichment alone.
+## Analysis method
 
-## Interpretation boundary
+### GO enrichment
 
-GO ORA demonstrates over-representation of annotations in a selected gene
-list. It does not directly measure pathway activity, prove causal mechanism, or
-show that every cell in a bulk tumour expresses the program.
+`01_GO_enrichment.R` runs `clusterProfiler::enrichGO()` separately for every
+cancer and overlap direction.
+
+- Ontology: GO Biological Process.
+- Identifier type: gene symbol checked against `org.Hs.eg.db`.
+- Background: the corresponding `common_tested_genes.csv`.
+- Multiple-testing correction: Benjamini–Hochberg.
+- Significance threshold: BH-adjusted `p < 0.05`.
+- GO gene-set size: 10–500 genes.
+
+### Global semantic clustering
+
+`02_global_semantic_themes.R` combines the union of significant GO terms from
+all enrichment analyses. Pairwise semantic similarity is calculated with
+`GOSemSim::mgoSim()` using the Wang method. Redundant terms are grouped with
+`rrvgo::reduceSimMatrix()`.
+
+Primary settings:
+
+```text
+ontology: GO Biological Process
+semantic similarity: Wang
+similarity threshold: 0.70
+```
+
+Sensitivity outputs are also calculated for Wang thresholds 0.60 and 0.80 and
+for the Rel similarity method at 0.70. Cluster agreement is summarized with
+the adjusted Rand index.
+
+### Automatic cluster representative
+
+One automatic GO representative is selected for every semantic cluster by:
+
+1. largest number of significant cancer/direction lists;
+2. lowest median BH-adjusted p-value;
+3. highest median log2 fold enrichment;
+4. GO ID as the final tie-break.
+
+The automatic representative provides a reproducible label. Manual review of
+all member GO terms is used to assign the final biological name.
+
+### Cross-cancer ranking
+
+Themes are ranked independently within each overlap direction by:
+
+1. number of cancers, decreasing;
+2. median log2 fold enrichment, decreasing;
+3. median GeneRatio, decreasing;
+4. GO ID as the final tie-break.
+
+TOP5 and TOP10 are generated automatically from the same ranking. TOP5 is the
+compact main summary. TOP10 provides a broader review but produces a denser
+figure.
+
+## Main outputs
+
+```text
+results/
+├── 00_GO_enrichment_run_log.csv
+├── 01_GO_enrichment_all_results.csv
+├── 02_GO_significant_terms.csv
+├── 03_global_semantic_cluster_mapping.csv
+├── 04_theme_per_cancer_class.csv
+├── 05_cross_cancer_theme_summary.csv
+├── 06_TOP5_cross_cancer_themes_per_class.csv
+├── 06_TOP10_cross_cancer_themes_per_class.csv
+├── 07_TOP5_cross_cancer_themes_with_manual_names.csv
+├── 07_TOP10_cross_cancer_themes_with_manual_names.csv
+├── 08_semantic_sensitivity_summary.csv
+├── 09_semantic_sensitivity_assignments.csv
+├── 10_validation_report.txt
+├── TOP5_theme_review.csv
+├── TOP10_theme_review.csv
+├── per_cancer_GO/
+├── per_cancer_plots/
+└── figures/
+    ├── GO_TOP5_theme_map.png
+    ├── GO_TOP5_theme_map_data.csv
+    ├── GO_TOP10_theme_map.png
+    └── GO_TOP10_theme_map_data.csv
+```
+
+Identical final display names are shown once on the y-axis with one point for
+each relevant overlap direction.
+
+## Files
+
+- `run_pipeline.R` runs the complete workflow from RStudio.
+- `install_packages.R` installs the required packages.
+- `config.R` contains analysis parameters and portable paths.
+- `pipeline_utils.R` contains shared helper functions.
+- `01_GO_enrichment.R` performs GO enrichment.
+- `02_global_semantic_themes.R` performs semantic clustering, ranking, and
+  sensitivity analysis.
+- `03_GO_enrichment_map.R` applies reviewed names and creates both figures.
+- `04_validate_results.R` validates the analysis and output tables.
+
+## References
+
+- [GeneOverlap](https://bioconductor.org/packages/GeneOverlap/)
+- [clusterProfiler](https://bioconductor.org/packages/clusterProfiler/)
+- [Wang et al. (2007)](https://doi.org/10.1093/bioinformatics/btm087)
+- [GOSemSim](https://bioconductor.org/packages/GOSemSim/)
+- [rrvgo](https://bioconductor.org/packages/rrvgo/)
