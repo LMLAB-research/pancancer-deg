@@ -19,6 +19,7 @@ cran_packages <- c(
 bioc_packages <- c(
   "AnnotationDbi",
   "BiocParallel",
+  "clusterProfiler",
   "DESeq2",
   "EnhancedVolcano",
   "org.Hs.eg.db",
