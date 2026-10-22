@@ -106,7 +106,6 @@ lfc_shrinkage_type <- "ashr"
 candidate_covariates <- c(
   "sex",
   "race",
-  "ethnicity",
   "smoking_status"
 )
 
@@ -138,7 +137,6 @@ deg_neutral_color <- "grey70"
 metadata_column_patterns <- list(
   sex = "gender|sex",
   race = "race",
-  ethnicity = "ethnic",
   smoking_status = "smok|tobacco|cigarette|pack",
   age = "age",
   stage_grade = "stage|grade",
