@@ -5,10 +5,11 @@ The pipeline saves shared gene lists and one enrichment heatmap per signature.
 
 ## Input files
 
-Set paths and signatures in `config.R`. Default folders:
+Set paths and signatures in `config.R`. By default, inputs come from these
+repository folders:
 
-- `data/meta_analysis/`: signature tables and their matching background files.
-- `data/TCGA_deg/`: full TCGA differential-expression tables, including non-DEGs.
+- `data/senescence_meta_analysis_deg/`: signature tables and their matching background files.
+- `results/tables/TCGA_deg/`: full TCGA differential-expression tables, including non-DEGs.
 
 | File example | Required columns |
 | --- | --- |
@@ -38,7 +39,7 @@ Rscript heatmap_final.R
 ```
 
 For files in `Downloads/meta_analysis/` and `Downloads/TCGA_deg/`, set these
-before running:
+before running to use the original two-folder input layout:
 
 ```bash
 export TCGA_SENESCENCE_BASE_DIR="$HOME/Downloads"
@@ -53,7 +54,8 @@ Genes are classified using `padj < 0.05` and `abs(log2FoldChange) > log2(1.5)`.
 Four overlaps are tested: `UP-UP`, `UP-DOWN`, `DOWN-UP`, `DOWN-DOWN`
 (cancer first, signature second).
 
-Each one-sided Fisher test uses **TCGA protein-coding genes ∩ signature
+Each one-sided Fisher test uses **TCGA protein-coding genes with non-missing
+adjusted p-values and fold changes ∩ signature
 background** as its universe. Both DEG sets are restricted to this universe.
 Duplicate symbols with opposing significant directions are excluded;
 other duplicates use one representative and are exported for review.

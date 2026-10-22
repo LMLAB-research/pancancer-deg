@@ -1,7 +1,16 @@
-# Input paths. Override these environment variables when using other folders.
-base_dir <- Sys.getenv("TCGA_SENESCENCE_BASE_DIR", unset = file.path(project_dir, "data"))
-senescence_input_dir <- file.path(base_dir, "meta_analysis")
-cancer_input_dir <- file.path(base_dir, "TCGA_deg")
+# Input paths. An optional base directory supports the original two-folder layout.
+repo_dir <- dirname(project_dir)
+base_dir <- Sys.getenv("TCGA_SENESCENCE_BASE_DIR", unset = "")
+senescence_input_dir <- if (nzchar(base_dir)) {
+  file.path(base_dir, "meta_analysis")
+} else {
+  file.path(repo_dir, "data", "senescence_meta_analysis_deg")
+}
+cancer_input_dir <- if (nzchar(base_dir)) {
+  file.path(base_dir, "TCGA_deg")
+} else {
+  file.path(repo_dir, "results", "tables", "TCGA_deg")
+}
 results_dir <- Sys.getenv("TCGA_SENESCENCE_RESULTS_DIR", unset = file.path(project_dir, "results"))
 
 expected_signatures <- c("OIS", "RS", "SIPS", "CICQ", "SSCQ")

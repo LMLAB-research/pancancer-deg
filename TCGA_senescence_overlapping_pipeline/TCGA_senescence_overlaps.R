@@ -176,6 +176,10 @@ prepare_genes <- function(file, cancer = FALSE) {
   x$gene_symbol[x$gene_symbol == ""] <- NA_character_
   x$padj <- validate_numeric(x$padj, "padj", file)
   x$log2FoldChange <- validate_numeric(x$log2FoldChange, "log2FoldChange", file)
+  if (cancer) {
+    # Only genes with usable DEG statistics could enter a directional set.
+    x <- x[!is.na(x$padj) & !is.na(x$log2FoldChange), , drop = FALSE]
+  }
   x$regulation <- classify_regulation(x$padj, x$log2FoldChange)
   resolved <- resolve_symbol_duplicates(x, if (cancer) "ensembl_id" else "source_row")
   list(
