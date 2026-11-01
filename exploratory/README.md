@@ -37,6 +37,22 @@ regardless of arrest, and which of these tumours share.
    GSE245807 RAS-senescent single-cell states (house QC kept); state 3 has MAPK output
    at growing level.
 
+## RAS vs MYC (and other oncogenes) (`ras_vs_myc/`)
+
+Asks whether RAS-induced senescence (RIS) features differ by oncogene, and whether RAS-
+vs MYC-driven tumours carry different parts of the RIS programme.
+
+1. `01_driver_status.py`: per-sample KRAS/NRAS/HRAS codon 12/13/61 and BRAF V600 hotspots,
+   and MYC high-level amplification (GISTIC = 2), from cBioPortal TCGA PanCancer Atlas.
+2. `02_tumour_scores.R`: per-tumour scores (mean within-cohort z of VST expression) for the
+   RIS gene classes, ERK output, Hallmark MYC targets, proliferation and a stromal proxy.
+3. `03_driver_models.py`: within-cohort score ~ RAS-mutant or MYC-amplified (vs neither) + stroma.
+4. `04_activity_models.py`: within-cohort score ~ ERK + MYC targets + proliferation + stroma.
+5. `05_nis_vs_ris.R`, `06_nis_class_sharing.py`: NOTCH1-ICD- vs RAS-induced senescence in the
+   same IMR90 cells (Hoare 2016, SRP062871; runs summed per biological replicate), and which
+   RIS gene classes a non-RAS oncogene's senescence shares. No public MYC-induced senescence
+   transcriptome with proliferating controls was found (human or mouse).
+
 Inputs outside this repository (read-only): the published senescence meta-analysis DEG
 table and house functions from the senescence_stress project, and the GSE245807 house
 objects. Paths are absolute to the author's machine.
