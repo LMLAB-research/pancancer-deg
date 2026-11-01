@@ -72,7 +72,8 @@ for (signature in expected_signatures) {
 
   d$significant <- !is.na(d$BH) & d$BH < 0.05
 
-  d$log2_OR <- ifelse( d$odds_ratio > 0, log2(d$odds_ratio), NA_real_ )
+  # OR = 0 (no shared genes) gives -Inf; it is drawn at the lower end of the scale.
+  d$log2_OR <- log2(d$odds_ratio)
 
   d$label <- cut(
     d$BH,
@@ -81,29 +82,25 @@ for (signature in expected_signatures) {
     right = FALSE
   )
 
+  # Symmetric diverging scale: blue = enrichment (log2 OR > 0), red = depletion.
   finite_OR <- d$log2_OR[
     d$significant &
-      is.finite(d$log2_OR) &
-      d$log2_OR > 0
+      is.finite(d$log2_OR)
   ]
 
   fill_limit <- if (length(finite_OR)) {
-    max(finite_OR)
+    max(abs(finite_OR))
   } else {
     1
   }
 
   legend_max <- ceiling(fill_limit * 2) / 2
 
-  legend_breaks <- seq( 0, legend_max, by = 0.5 )
+  legend_breaks <- seq( -legend_max, legend_max, by = if (legend_max > 2) 1 else 0.5 )
 
-  d$plot_log2_OR <- pmax( d$log2_OR, 0 )
+  d$plot_log2_OR <- pmin( pmax( d$log2_OR, -legend_max ), legend_max )
 
-  d$plot_log2_OR[
-    is.infinite(d$log2_OR)
-  ] <- legend_max
-
-  d$text_color <- ifelse( d$significant & d$plot_log2_OR >= 0.55 * legend_max, "white", "black" )
+  d$text_color <- ifelse( d$significant & abs(d$plot_log2_OR) >= 0.55 * legend_max, "white", "black" )
 
   plot_cancers <- cancer_order[cancer_order %in% d$cancer_type]
   d$cancer_type <- factor(d$cancer_type, levels = rev(plot_cancers))
@@ -137,18 +134,20 @@ for (signature in expected_signatures) {
 
     scale_fill_gradientn(
       colors = c(
+        "#7D1B1B",
+        "#A73232",
+        "#C98D8D",
         "white",
-        "#B4C2DE",
         "#8DA2C9",
         "#3266A7",
-        "#275392",
         "#1B427D"
       ),
-      limits = c( 0, legend_max ),
+      values = c( 0, 1/6, 2/6, 0.5, 4/6, 5/6, 1 ),
+      limits = c( -legend_max, legend_max ),
       breaks = legend_breaks,
       name = "log2 odds\nratio",
       guide = guide_colorbar(
-        barheight = grid::unit(3.5, "cm"),
+        barheight = grid::unit(5, "cm"),
         barwidth = grid::unit(0.65, "cm"),
         ticks = TRUE,
         draw.llim = FALSE,

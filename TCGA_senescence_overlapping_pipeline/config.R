@@ -20,6 +20,10 @@ cancer_file_pattern <- "^TCGA-[A-Za-z0-9-]+_DGE_Raw_Results_Tumor_vs_Normal_Adju
 padj_threshold <- 0.05
 lfc_threshold <- log2(1.5)
 
+# Fisher test sidedness: "two.sided" tests for enrichment and depletion;
+# "greater" tests enrichment only (the original GeneOverlap behaviour).
+fisher_alternative <- "two.sided"
+
 # Heatmap settings
 
 cancer_order <- c(
