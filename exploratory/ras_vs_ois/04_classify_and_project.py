@@ -7,7 +7,9 @@ from scipy.stats import fisher_exact
 
 C = "results/exploratory/ras_vs_ois/contrast_degs"
 STRICT = os.environ.get("STRICT", "0") == "1"
-OUT = "results/exploratory/ras_vs_ois" + ("/strict" if STRICT else "/lenient")
+# NO_BRAF=1 drops the TIG3 BRAF "bypass" arm (hTERT + SV40 small T + BRAF vs cycling cells without small T)
+NO_BRAF = os.environ.get("NO_BRAF", "0") == "1"
+OUT = "results/exploratory/ras_vs_ois" + ("/strict" if STRICT else "/lenient") + ("_noBRAF" if NO_BRAF else "")
 META = "/Users/ro/Academic/10_Research/senescence_stress/work/published_reference/arrest_degs_final.csv"
 TCGA = "results/tables/TCGA_deg"
 LFC_T = math.log2(1.5)
@@ -43,7 +45,7 @@ for g, d in meta["OIS"].items():
     if d == "NS": continue
     sign = 1 if d == "UP" else -1
     r = [ratio(g, "IMR90_RAS_shp53Rb", "IMR90_RAS_shRen"),
-         ratio(g, "TIG3_BRAF_bypass_d10", "TIG3_BRAF_OIS_d10"),
+         None if NO_BRAF else ratio(g, "TIG3_BRAF_bypass_d10", "TIG3_BRAF_OIS_d10"),
          retained_escape(g, sign)]
     ev = [x for x in r if x is not None]
     keep = sum(x >= 0.5 for x in ev); lost = sum(x <= 0.25 for x in ev)

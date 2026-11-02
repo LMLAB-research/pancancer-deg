@@ -5,6 +5,16 @@ import pandas as pd, numpy as np, statsmodels.formula.api as smf
 
 OUT = "results/exploratory/ras_vs_myc"
 d = pd.read_csv(f"{OUT}/tumour_scores.csv")
+
+import os
+PURITY = os.environ.get("PURITY", "0") == "1"
+if PURITY:
+    # ABSOLUTE purity (TCGA PanCanAtlas mastercalls, GDC file 4f277128-...), called samples only
+    pur = pd.read_csv("data/exploratory/tcga_extra/TCGA_mastercalls.abs_tables_JSedit.fixed.txt", sep="\t")
+    pur = pur[pur["call status"] == "called"][["array", "purity"]].drop_duplicates("array")
+    d = d.merge(pur.rename(columns={"array": "sample15"}), on="sample15", how="inner")
+    OUT = OUT + "/purity_adjusted"; os.makedirs(OUT, exist_ok=True)
+COV = " + Stroma" + (" + purity" if PURITY else "")
 targets = ["RIS_RASauto_UP", "RIS_intermediate_UP", "RIS_arrest_UP", "RIS_NFKB_BRD4_UP", "RIS_RASauto_DOWN"]
 preds = ["ERK_output", "MYC_targets", "Proliferation", "Stroma"]
 res = []
@@ -13,7 +23,7 @@ for coh, g in d.groupby("cohort"):
     for c in targets + preds:
         g[c] = (g[c] - g[c].mean()) / g[c].std()
     for t in targets:
-        m = smf.ols(f"{t} ~ ERK_output + MYC_targets + Proliferation + Stroma" + (" + C(stype)" if g.stype.nunique() > 1 else ""), data=g).fit()
+        m = smf.ols(f"{t} ~ ERK_output + MYC_targets + Proliferation" + COV + (" + C(stype)" if g.stype.nunique() > 1 else ""), data=g).fit()
         res.append(dict(cohort=coh, n=len(g), target=t, **{f"b_{p}": m.params[p] for p in preds},
                         **{f"p_{p}": m.pvalues[p] for p in preds}))
 r = pd.DataFrame(res)

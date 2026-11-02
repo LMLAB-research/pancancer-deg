@@ -7,6 +7,7 @@ C = "results/exploratory/ras_vs_ois/contrast_degs"
 def load(n):
     return {r["gene"].upper(): (float(r["log2FoldChange"]), r["sig"] == "y") for r in csv.DictReader(open(f"{C}/{n}.csv"))}
 arms = [("IMR90 RAS (Hoare)", "IMR90_N1ICD_RIS"), ("IMR90 NOTCH1-ICD", "IMR90_N1ICD_NIS"),
+        ("IMR90 RAS (array)", "IMR90_array_RAS"), ("IMR90 AKT (array)", "IMR90_array_AKT"),
         ("BJ-hTERT HRAS d14", "BJhT_HRAS_d14"), ("BJ-hTERT myrAKT1 d6", "BJhT_AKT_d6"),
         ("RPE-1 p53wt MYC 120h", "RPE1_p53wt_Myc_dox120h"), ("RPE-1 p53-/- MYC 120h", "RPE1_p53ko_Myc_dox120h")]
 D = {a: load(n) for a, n in arms}

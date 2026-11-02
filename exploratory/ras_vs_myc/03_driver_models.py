@@ -5,6 +5,16 @@ from statsmodels.stats.multitest import multipletests
 
 OUT = "results/exploratory/ras_vs_myc"
 d = pd.read_csv(f"{OUT}/tumour_scores.csv")
+
+import os
+PURITY = os.environ.get("PURITY", "0") == "1"
+if PURITY:
+    # ABSOLUTE purity (TCGA PanCanAtlas mastercalls, GDC file 4f277128-...), called samples only
+    pur = pd.read_csv("data/exploratory/tcga_extra/TCGA_mastercalls.abs_tables_JSedit.fixed.txt", sep="\t")
+    pur = pur[pur["call status"] == "called"][["array", "purity"]].drop_duplicates("array")
+    d = d.merge(pur.rename(columns={"array": "sample15"}), on="sample15", how="inner")
+    OUT = OUT + "/purity_adjusted"; os.makedirs(OUT, exist_ok=True)
+COV = " + Stroma" + (" + purity" if PURITY else "")
 d = d[d["ras_mut"].notna() & d["myc_amp"].notna()].copy()
 d["ras_mut"] = d["ras_mut"].astype(str) == "True"; d["myc_amp"] = d["myc_amp"].astype(str) == "True"
 d["group"] = np.select([d.ras_mut & ~d.myc_amp, d.myc_amp & ~d.ras_mut, ~d.ras_mut & ~d.myc_amp],
@@ -20,7 +30,7 @@ for coh, g in d.groupby("cohort"):
         s["is_drv"] = (s.group == drv).astype(int)
         for sc in scores:
             s["y"] = (s[sc] - s[sc].mean()) / s[sc].std()  # standardise within cohort
-            m = smf.ols("y ~ is_drv + Stroma" + (" + C(stype)" if s.stype.nunique() > 1 else ""), data=s).fit()
+            m = smf.ols("y ~ is_drv" + COV + (" + C(stype)" if s.stype.nunique() > 1 else ""), data=s).fit()
             res.append(dict(cohort=coh, driver=drv, n_driver=int(n[drv]), n_neither=int(n["neither"]),
                             score=sc, effect_sd=m.params["is_drv"], p=m.pvalues["is_drv"]))
 r = pd.DataFrame(res)
