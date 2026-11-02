@@ -1,6 +1,7 @@
 # Per-tumour scores for the RAS-induced-senescence (RIS) gene classes, ERK output, MYC
 # targets, proliferation and a stromal proxy, in every local TCGA cohort; joined to
 # RAS-hotspot / MYC-amplification calls. Exploratory; run from the pancancer-deg root.
+eval(parse(".claude/worktrees/two-sided-fisher/.Rprofile")[[2]])  # sandbox proxy fix (msigdbr download)
 suppressMessages({ library(SummarizedExperiment); library(DESeq2) })
 OUT <- "results/exploratory/ras_vs_myc"
 cls <- read.csv("results/exploratory/ras_vs_ois/strict/ois_gene_classes.csv")

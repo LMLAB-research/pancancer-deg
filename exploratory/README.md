@@ -36,6 +36,10 @@ regardless of arrest, and which of these tumours share.
 6. `06_inspect_ris_object.R`, `07_score_ris_states.R`: UCell scores of the classes in the
    GSE245807 RAS-senescent single-cell states (house QC kept); state 3 has MAPK output
    at growing level.
+7. `08_inspect_prefilter.R`, `09_cycling_vs_arrested_ras.R`, `10_cycling_dose_model.py`:
+   GSE245807 RAS cells still cycling vs in G1, each against phase-matched growing cells. House
+   QC, integrity and control-like filters kept; the house LMNB1/G1 subset is reproduced
+   (773/652 cells) but not applied for this comparison (agreed 2026-11-02).
 
 ## RAS vs MYC (and other oncogenes) (`ras_vs_myc/`)
 
@@ -52,6 +56,12 @@ vs MYC-driven tumours carry different parts of the RIS programme.
    same IMR90 cells (Hoare 2016, SRP062871; runs summed per biological replicate), and which
    RIS gene classes a non-RAS oncogene's senescence shares. No public MYC-induced senescence
    transcriptome with proliferating controls was found (human or mouse).
+6. `07_download_paad_skcm.R`: TCGA-PAAD and TCGA-SKCM counts (tumour-only cohorts; SKCM keeps
+   metastases, with sample type as a covariate in 03/04).
+7. `08_akt_myc_degs.R`, `09_oncogene_class_sharing.py`: GEO raw counts through the house
+   `find_degs_new()`: BJ-hTERT myrAKT1 (GSE130099) and HRAS (GSE130100); RPE-1 dox-MYC,
+   cyclin E and empty vector, p53 wt and -/- (GSE185512, 120 h); and RIS-class sharing across
+   RAS, NOTCH1, AKT and MYC arms with arrest/ERK/MYC read-outs.
 
 Inputs outside this repository (read-only): the published senescence meta-analysis DEG
 table and house functions from the senescence_stress project, and the GSE245807 house
