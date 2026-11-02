@@ -20,7 +20,7 @@ for coh, g in d.groupby("cohort"):
         s["is_drv"] = (s.group == drv).astype(int)
         for sc in scores:
             s["y"] = (s[sc] - s[sc].mean()) / s[sc].std()  # standardise within cohort
-            m = smf.ols("y ~ is_drv + Stroma", data=s).fit()
+            m = smf.ols("y ~ is_drv + Stroma" + (" + C(stype)" if s.stype.nunique() > 1 else ""), data=s).fit()
             res.append(dict(cohort=coh, driver=drv, n_driver=int(n[drv]), n_neither=int(n["neither"]),
                             score=sc, effect_sd=m.params["is_drv"], p=m.pvalues["is_drv"]))
 r = pd.DataFrame(res)

@@ -13,12 +13,12 @@ for coh, g in d.groupby("cohort"):
     for c in targets + preds:
         g[c] = (g[c] - g[c].mean()) / g[c].std()
     for t in targets:
-        m = smf.ols(f"{t} ~ ERK_output + MYC_targets + Proliferation + Stroma", data=g).fit()
+        m = smf.ols(f"{t} ~ ERK_output + MYC_targets + Proliferation + Stroma" + (" + C(stype)" if g.stype.nunique() > 1 else ""), data=g).fit()
         res.append(dict(cohort=coh, n=len(g), target=t, **{f"b_{p}": m.params[p] for p in preds},
                         **{f"p_{p}": m.pvalues[p] for p in preds}))
 r = pd.DataFrame(res)
 r.to_csv(f"{OUT}/activity_models.csv", index=False)
-print("Standardised coefficients (median across 18 cohorts; n cohorts with p<0.05 positive/negative)")
+print(f"Standardised coefficients (median across {r.cohort.nunique()} cohorts; n cohorts with p<0.05 positive/negative)")
 for t in targets:
     s = r[r.target == t]
     line = f"  {t:22}"
