@@ -40,6 +40,10 @@ regardless of arrest, and which of these tumours share.
    GSE245807 RAS cells still cycling vs in G1, each against phase-matched growing cells. House
    QC, integrity and control-like filters kept; the house LMNB1/G1 subset is reproduced
    (773/652 cells) but not applied for this comparison (agreed 2026-11-02).
+8. `14_dose_and_kras.R`: class UCell scores against RAS dose (GSE222951, RPE1-hTERT ER:HRAS-G12V
+   sorted S/M/L/XL, HTODemux singlets) and an early KRAS time course (GSE202126, HPNE parental vs
+   KRAS days 1-5, VASA-seq; plus a run without the 120k UMI cap). House default QC only; no
+   senescent-state filters (dose/time course, not a state definition).
 
 ## RAS vs MYC (and other oncogenes) (`ras_vs_myc/`)
 
