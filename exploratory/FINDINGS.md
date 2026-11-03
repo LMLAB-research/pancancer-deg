@@ -3,7 +3,8 @@
 Roberto Avelar, 2026-10-31 to 2026-11-03. Exploratory; not part of the main pipeline. Script
 index: `README.md`. Summary tables behind the numbers below are in `summary_tables/`
 (regenerate with `export_summaries.py`); full results and downloaded data are local only
-(`results/exploratory/`, `data/exploratory/`; both gitignored).
+(`results/exploratory/`, `data/exploratory/`; both gitignored). Each choice behind these
+results, who made it and any sensitivity check: `DECISIONS.md`. Figures: `figures/` (list below).
 
 ## 1. Two-sided overlap tests
 
@@ -111,6 +112,24 @@ mouse; search 2026-11-01).
 | NF-κB/BRD4-dependent up | +0.28 (20/20) | | |
 | RAS-autonomous down | | −0.45 (20/20) | |
 | Arrest-coupled up | | | −0.52 (18/20) |
+
+## Figures (`figures/`)
+
+| File | Shows | Script |
+|---|---|---|
+| `fig1_tcga_overlap_by_class.png` | log2 OR per cancer for each OIS gene class vs tumour DEGs (section 2) | `figures_summary.R` |
+| `fig2_oncogene_arms.png` | fraction of each class reproduced by each oncogene arm, with MKI67 log2FC (section 3) | `figures_summary.R` |
+| `fig3_single_cell_time_dose_tests.png` | GSE115301 time course, GSE222951 dose, GSE202126 KRAS days (scaled medians); GSE173879 RAS withdrawal and GSE245807 cycling-cell retention (section 2) | `figures_summary.R` |
+| `fig4_tcga_activity_models.png` | per-cohort coefficients of ERK, MYC targets and proliferation for each class (section 3) | `figures_summary.R` |
+| `fig5_tcga_driver_models.png` | RAS-hotspot and MYC-amplified vs neither, per cohort (section 3) | `figures_summary.R` |
+| `umap_GSE245807_RAS_final_states.png` | house final RAS states (clusters, plate) and class scores | `figures_sc_umaps.R` |
+| `umap_GSE245807_RAS_cycling_vs_G1.png` | RAS cells before the LMNB1/G1 subset: group (cycling / G1) and class scores | `figures_sc_umaps.R` |
+| `umap_GSE173879_OISON.png`, `umap_GSE173879_OISOFF.png` | house final OIS cells with 4-OHT kept / withdrawn: clusters and class scores | `figures_sc_umaps.R` |
+
+UMAPs use the house calls (`DimPlot` clusters first, no cluster labels; `customSignaturePlot` for
+scores, scaled 0–10 within each plot). In `umap_GSE245807_RAS_cycling_vs_G1.png`, most cycling RAS
+cells form a separate cluster with low MAPK output, low RAS-autonomous UP and high RAS-autonomous
+DOWN scores; some house-final G1 cells fall in the same cluster.
 
 ## Departures from house practice
 
