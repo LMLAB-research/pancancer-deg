@@ -67,6 +67,15 @@ vs MYC-driven tumours carry different parts of the RIS programme.
    cyclin E and empty vector, p53 wt and -/- (GSE185512, 120 h); and RIS-class sharing across
    RAS, NOTCH1, AKT and MYC arms with arrest/ERK/MYC read-outs.
 
+8. `10_akt_ras_array.R`: GSE45276 IMR90 AKT vs RAS vs control (Affymetrix; limma, house thresholds).
+
+Later `ras_vs_ois/` scripts: `11_teo_time_course.R` (GSE115301 ER:RAS time course),
+`13_ras_withdrawal_GSE173879.R` with `house_copy/` (house pipeline on GSE173879 OIS arms, 4-OHT
+kept vs withdrawn), `14_dose_and_kras.R` (GSE222951 RAS dose, GSE202126 KRAS time course;
+brief in `BRIEF_dose_and_kras.md`).
+
+What was done, why, and the results: `FINDINGS.md`.
+
 Inputs outside this repository (read-only): the published senescence meta-analysis DEG
 table and house functions from the senescence_stress project, and the GSE245807 house
 objects. Paths are absolute to the author's machine.
