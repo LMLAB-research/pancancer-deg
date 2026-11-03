@@ -74,7 +74,8 @@ Later `ras_vs_ois/` scripts: `11_teo_time_course.R` (GSE115301 ER:RAS time cours
 kept vs withdrawn), `14_dose_and_kras.R` (GSE222951 RAS dose, GSE202126 KRAS time course;
 brief in `BRIEF_dose_and_kras.md`).
 
-What was done, why, and the results: `FINDINGS.md`.
+What was done, why, and the results: `FINDINGS.md`. Summary-level CSVs: `summary_tables/`,
+written by `export_summaries.py` (run from the repo root) from the local results.
 
 Inputs outside this repository (read-only): the published senescence meta-analysis DEG
 table and house functions from the senescence_stress project, and the GSE245807 house

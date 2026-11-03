@@ -1,0 +1,4 @@
+group,n_cells,MAPK_output,RASauto_UP,intermediate_UP,arrest_UP,NFKB_BRD4_dep_UP,RASauto_DOWN,arrest_DOWN
+Proliferating (CTRL),2173,0.00143,0.03327,0.05387,0.02577,0.03841,0.08537,0.01697
+"OIS, 4-OHT kept (house final)",260,0.05665,0.07954,0.09634,0.0813,0.07514,0.04242,0.00483
+"OIS, 4-OHT withdrawn (house final)",241,0.0,0.04725,0.08222,0.05864,0.04905,0.07115,0.00322

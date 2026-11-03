@@ -1,0 +1,15 @@
+"dataset","group","before_qc","after_qc"
+"GSE222951","L",1710,1655
+"GSE222951","M",1580,1532
+"GSE222951","S",1913,1838
+"GSE222951","XL",1243,1148
+"GSE202126","day1",171,12
+"GSE202126","day2",170,157
+"GSE202126","day3",171,15
+"GSE202126","day5",130,8
+"GSE202126","parental",150,40
+"GSE202126_no_UMI_cap","day1",171,171
+"GSE202126_no_UMI_cap","day2",170,170
+"GSE202126_no_UMI_cap","day3",171,171
+"GSE202126_no_UMI_cap","day5",130,130
+"GSE202126_no_UMI_cap","parental",150,150

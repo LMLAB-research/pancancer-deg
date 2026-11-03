@@ -1,0 +1,28 @@
+sig   class      | full: enr/dep/ns med log2OR | no-prolif: enr/dep/ns med log2OR
+OIS   UP-UP      |           17/0/0       0.67 |                17/0/0       0.73
+OIS   UP-DOWN    |           15/0/2       0.66 |                14/1/2       0.45
+OIS   DOWN-UP    |           14/0/3       0.66 |                14/0/3       0.62
+OIS   DOWN-DOWN  |           16/0/1       1.30 |                16/0/1       1.40
+RS    UP-UP      |            5/4/8       0.10 |                 7/2/8       0.12
+RS    UP-DOWN    |           17/0/0       1.08 |                16/0/1       0.95
+RS    DOWN-UP    |           17/0/0       0.97 |                17/0/0       0.91
+RS    DOWN-DOWN  |           10/1/6       0.22 |                14/1/2       0.42
+SIPS  UP-UP      |           12/0/5       0.45 |                14/0/3       0.53
+SIPS  UP-DOWN    |           17/0/0       1.83 |                17/0/0       1.50
+SIPS  DOWN-UP    |           17/0/0       1.25 |                17/0/0       1.20
+SIPS  DOWN-DOWN  |            2/6/9      -0.26 |                4/2/11       0.08
+CICQ  UP-UP      |           2/14/1      -0.45 |                2/11/4      -0.41
+CICQ  UP-DOWN    |           17/0/0       1.74 |                17/0/0       1.48
+CICQ  DOWN-UP    |           17/0/0       1.28 |                17/0/0       1.22
+CICQ  DOWN-DOWN  |           0/15/2      -0.70 |                0/10/7      -0.49
+SSCQ  UP-UP      |           2/10/5      -0.31 |                 2/9/6      -0.23
+SSCQ  UP-DOWN    |           17/0/0       1.83 |                17/0/0       1.53
+SSCQ  DOWN-UP    |           17/0/0       1.50 |                17/0/0       1.44
+SSCQ  DOWN-DOWN  |           0/11/6      -0.32 |                 1/8/8      -0.13
+
+Depleted cells (full, two-sided):
+  OIS: 0 -> 
+  RS: 5 -> CHOL:DOWN-DOWN(-0.50), COAD:UP-UP(-0.25), ESCA:UP-UP(-0.35), LUSC:UP-UP(-0.51), READ:UP-UP(-0.36)
+  SIPS: 6 -> CHOL:DOWN-DOWN(-1.03), ESCA:DOWN-DOWN(-0.37), HNSC:DOWN-DOWN(-0.73), LUSC:DOWN-DOWN(-0.37), STAD:DOWN-DOWN(-0.34), UCEC:DOWN-DOWN(-0.34)
+  CICQ: 29 -> BLCA:DOWN-DOWN(-1.12), BLCA:UP-UP(-1.26), BRCA:DOWN-DOWN(-1.01), BRCA:UP-UP(-1.01), CHOL:DOWN-DOWN(-0.73), CHOL:UP-UP(-0.13), COAD:DOWN-DOWN(-0.70), COAD:UP-UP(-0.77), ESCA:DOWN-DOWN(-1.09), ESCA:UP-UP(-1.07), HNSC:DOWN-DOWN(-1.04), HNSC:UP-UP(-0.22), KICH:DOWN-DOWN(-0.22), KICH:UP-UP(-0.44), KIRC:DOWN-DOWN(-0.25), KIRP:DOWN-DOWN(-0.38), LIHC:DOWN-DOWN(-0.31), LIHC:UP-UP(-0.22), LUAD:DOWN-DOWN(-0.42), LUAD:UP-UP(-0.48), LUSC:DOWN-DOWN(-0.88), LUSC:UP-UP(-1.16), PRAD:UP-UP(-0.22), READ:DOWN-DOWN(-0.95), READ:UP-UP(-0.99), STAD:DOWN-DOWN(-0.66), STAD:UP-UP(-0.45), UCEC:DOWN-DOWN(-1.36), UCEC:UP-UP(-1.26)
+  SSCQ: 21 -> BLCA:DOWN-DOWN(-0.91), BLCA:UP-UP(-1.18), BRCA:DOWN-DOWN(-0.66), BRCA:UP-UP(-0.92), CHOL:DOWN-DOWN(-0.66), COAD:DOWN-DOWN(-0.23), COAD:UP-UP(-0.61), ESCA:DOWN-DOWN(-0.89), ESCA:UP-UP(-1.01), HNSC:DOWN-DOWN(-0.60), KICH:UP-UP(-0.30), LUAD:UP-UP(-0.31), LUSC:DOWN-DOWN(-0.55), LUSC:UP-UP(-0.98), READ:DOWN-DOWN(-0.61), READ:UP-UP(-0.96), STAD:DOWN-DOWN(-0.29), STAD:UP-UP(-0.32), THCA:DOWN-DOWN(-0.32), UCEC:DOWN-DOWN(-1.10), UCEC:UP-UP(-1.22)

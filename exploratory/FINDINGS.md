@@ -1,8 +1,9 @@
 # Exploratory findings: two-sided overlaps, RAS vs OIS, RAS vs MYC
 
 Roberto Avelar, 2026-10-31 to 2026-11-03. Exploratory; not part of the main pipeline. Script
-index: `README.md`. Results and downloaded data are local only (`results/exploratory/`,
-`data/exploratory/`; both gitignored).
+index: `README.md`. Summary tables behind the numbers below are in `summary_tables/`
+(regenerate with `export_summaries.py`); full results and downloaded data are local only
+(`results/exploratory/`, `data/exploratory/`; both gitignored).
 
 ## 1. Two-sided overlap tests
 
