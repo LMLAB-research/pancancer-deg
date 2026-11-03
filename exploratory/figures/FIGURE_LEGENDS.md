@@ -24,7 +24,8 @@ DUSP6, SPRY2, SPRY4, ETV4, ETV5, FOSL1, EGR1. Choices behind each figure: `../DE
   tested in the OIS meta-analysis.
 - **Markers:** filled = p < 0.05 (not corrected); bar = median across cancers.
 - **Brackets:** paired Wilcoxon signed-rank tests between classes across the 17 cancers (paired by cancer), BH over
-  the 6 tests (`summary_tables/07_fig1_paired_class_tests.csv`).
+  the 6 tests, shown as stars: * < 0.05, ** < 0.01, *** < 0.001, **** < 0.0001
+  (`summary_tables/07_fig1_paired_class_tests.csv`).
 - **Source:** `summary_tables/02_tcga_overlap_by_class_strict.csv`. Script: `figures_summary.R`.
 
 ---
@@ -92,28 +93,30 @@ is the arrest-coupled DOWN set; "RAS-autonomous" and "NF-κB/BRD4-dependent" are
 - **Scores:** mean within-cohort z of VST expression of the set's genes.
 - **Points:** one per cohort and predictor (standardised coefficient). Filled = p < 0.05 (not
   corrected); bar = median.
-- **Stars:** Wilcoxon signed-rank test across the 20 cohorts that the coefficient differs from 0, BH over 12 tests.
-  **Bracket:** paired Wilcoxon across cohorts, ERK vs MYC coefficient, BH over 4 tests
-  (`summary_tables/07_fig4_*.csv`). Stars: * < 0.05, ** < 0.01, *** < 0.001, **** < 0.0001.
+- **Stars under each column:** is that coefficient different from 0 across the 20 cohorts (Wilcoxon signed-rank,
+  BH over the 12 class × predictor tests)?
+- **Stars on the bracket at the top:** is the ERK coefficient different from the MYC coefficient across the 20
+  cohorts (paired Wilcoxon, BH over the 4 classes)?
+- Stars: * < 0.05, ** < 0.01, *** < 0.001, **** < 0.0001; n.s. ≥ 0.05. Tables: `summary_tables/07_fig4_*.csv`.
 - **Caveat:** predictors are correlated, so each coefficient is conditional on the others.
 - **Source:** `summary_tables/05_tcga_activity_models_stroma_purity.csv`. Script: `figures_summary.R`.
 
 ---
 
-**Fig. 5 | TCGA tumours grouped by driver.**
+**Fig. 5 | TCGA tumours with a RAS hotspot or MYC amplification, each compared with tumours that have neither.**
 `fig5_tcga_driver_models.png`
 
+- **Layout:** one row per cohort; under each score, two columns: RAS-hotspot vs neither and MYC-amplified vs
+  neither.
 - **Groups** (cBioPortal TCGA PanCanAtlas):
   - RAS-hotspot = KRAS/NRAS/HRAS missense at codons 12/13/61, or BRAF V600.
   - MYC-amplified = GISTIC = 2.
-  - Each group is compared with tumours carrying neither; tumours with both are excluded.
-  - Cohorts with ≥ 10 tumours in both groups.
-- **Effect:** coefficient of the group indicator for a score standardised within cohort, adjusted
-  for the stromal proxy and ABSOLUTE purity (+ sample type for SKCM).
-- **Colour:** blue = RAS-hotspot vs neither; orange = MYC-amplified vs neither (each cohort row has one point per
-  driver that met the group-size rule).
-- **Marker:** filled = BH < 0.05 (correction across all cohort × score × driver tests); open = p < 0.05 before
-  correction only; cross = p ≥ 0.05.
+  - Tumours with both are excluded. A cell is tested only when both groups have ≥ 10 tumours in that cohort;
+    blank cells were not tested.
+- **Colour:** difference in the score between the driver group and "neither", in within-cohort SD, adjusted for
+  the stromal proxy and ABSOLUTE purity (+ sample type for SKCM). Red = higher in the driver group, blue = lower.
+- **Stars:** BH-corrected significance over all cohort × score × driver tests: * < 0.05, ** < 0.01,
+  *** < 0.001, **** < 0.0001; no star = BH ≥ 0.05.
 - **Source:** `summary_tables/05_tcga_driver_models_stroma_purity.csv`. Script: `figures_summary.R`.
 
 ---

@@ -17,6 +17,7 @@ th <- theme_minimal(base_size = 13) +
         legend.position = "none", plot.title.position = "plot")
 save <- function(p, f, w, h) ggsave(file.path(FIG, f), p, width = w, height = h, dpi = 200, bg = "#fcfcfb")
 rd <- function(f) read.csv(file.path(T, f), check.names = FALSE)
+stars <- function(p) ifelse(p < 1e-4, "****", ifelse(p < 1e-3, "***", ifelse(p < 0.01, "**", ifelse(p < 0.05, "*", "n.s."))))
 
 # Fig 1: overlap of each OIS gene class with TCGA tumour DEGs (same direction), per cancer
 o <- rd("02_tcga_overlap_by_class_strict.csv")
@@ -43,19 +44,19 @@ ytop <- tapply(o$lor, o$dir, max)
 pt$x1 <- match(pt$group1, lv); pt$x2 <- match(pt$group2, lv)
 pt$y <- ytop[as.character(pt$dir)] + 0.35 * pt$i
 pt$dir <- factor(pt$dir, levels = levels(o$dir))
-pt$label <- ifelse(pt$padj < 0.001, sprintf("BH p = %.1e", pt$padj), sprintf("BH p = %.3f", pt$padj))
+pt$label <- stars(pt$padj)
 p1 <- ggplot(o, aes(class, lor, colour = class)) +
   geom_hline(yintercept = 0, colour = "#c3c2b7") +
   geom_jitter(aes(shape = sig), width = 0.15, size = 2.6, stroke = 0.8) +
   scale_shape_manual(values = c(`TRUE` = 16, `FALSE` = 1)) +
   geom_crossbar(data = med, aes(ymin = lor, ymax = lor), width = 0.5, colour = ink, linewidth = 0.4) +
   geom_segment(data = pt, aes(x = x1, xend = x2, y = y, yend = y), inherit.aes = FALSE, colour = ink2, linewidth = 0.4) +
-  geom_text(data = pt, aes(x = (x1 + x2) / 2, y = y + 0.12, label = label), inherit.aes = FALSE, size = 3.3, colour = ink2) +
+  geom_text(data = pt, aes(x = (x1 + x2) / 2, y = y + 0.08, label = label), inherit.aes = FALSE, size = 4.2, colour = ink2) +
   scale_colour_manual(values = col) + facet_wrap(~dir) +
   labs(x = NULL, y = "log2 odds ratio (17 TCGA cancers)",
        title = "Overlap of OIS gene classes with TCGA tumour-vs-normal DEGs (same direction)",
        subtitle = paste0("Each point is one cancer; filled = p < 0.05 (two-sided Fisher, uncorrected); bar = median.\n",
-                         "Brackets: paired Wilcoxon signed-rank across the 17 cancers, BH over 6 tests.")) + th
+                         "Brackets: paired Wilcoxon signed-rank across the 17 cancers (BH over 6 tests): * < 0.05, ** < 0.01, *** < 0.001, **** < 0.0001.")) + th
 save(p1, "fig1_tcga_overlap_by_class.png", 11, 6)
 
 # Fig 2: fraction of each class changed in the same direction, per oncogene arm
@@ -174,22 +175,22 @@ pr <- do.call(rbind, lapply(split(lg, lg$target), function(x) { e <- x[x$predict
 pr$padj <- p.adjust(pr$p, "BH")
 write.csv(one, file.path(T, "07_fig4_coefficient_vs_zero_tests.csv"), row.names = FALSE)
 write.csv(pr, file.path(T, "07_fig4_ERK_vs_MYC_paired_tests.csv"), row.names = FALSE)
-stars <- function(p) ifelse(p < 1e-4, "****", ifelse(p < 1e-3, "***", ifelse(p < 0.01, "**", ifelse(p < 0.05, "*", "n.s."))))
-ymax <- max(lg$b)
-one$y <- ymax + 0.08; one$lab <- stars(one$padj)
-pr$y <- ymax + 0.22; pr$lab <- paste("ERK vs MYC:", stars(pr$padj))
+ymax <- max(lg$b); ymin <- min(lg$b)
+one$y <- ymin - 0.1; one$lab <- stars(one$padj)
+pr$y <- ymax + 0.12; pr$lab <- stars(pr$padj)
 p4 <- ggplot(lg, aes(predictor, b)) + geom_hline(yintercept = 0, colour = "#c3c2b7") +
   geom_jitter(aes(shape = sig), width = 0.15, size = 2.2, colour = "#2a78d6") +
   scale_shape_manual(values = c(`TRUE` = 16, `FALSE` = 1)) +
   geom_crossbar(data = mm, aes(ymin = b, ymax = b), width = 0.5, colour = ink, linewidth = 0.4) +
-  geom_text(data = one, aes(predictor, y, label = lab), size = 3.4, colour = ink2) +
+  geom_text(data = one, aes(predictor, y, label = lab), size = 4.2, colour = ink2) +
   geom_segment(data = pr, aes(x = 1, xend = 2, y = y - 0.04, yend = y - 0.04), colour = ink2, linewidth = 0.4) +
-  geom_text(data = pr, aes(x = 1.5, y = y, label = lab), size = 3.4, colour = ink2) +
+  geom_text(data = pr, aes(x = 1.5, y = y, label = lab), size = 4.2, colour = ink2) +
   facet_wrap(~target, nrow = 1) +
   labs(x = NULL, y = "standardised coefficient", title = "TCGA: what each OIS gene class tracks across tumours (20 cohorts)",
-       subtitle = paste("score ~ ERK output + MYC targets + proliferation + stroma + ABSOLUTE purity, within cohort; filled = p < 0.05 within cohort; bar = median.",
-                         "Stars: Wilcoxon across cohorts vs 0 (BH); bracket: paired Wilcoxon ERK vs MYC (BH).")) + th
-save(p4, "fig4_tcga_activity_models.png", 15, 5)
+       subtitle = paste0("score ~ ERK output + MYC targets + proliferation + stroma + ABSOLUTE purity, fitted within each cohort. Point = one cohort (filled: p < 0.05 in that cohort); bar = median.\n",
+                          "Stars under a column: is that coefficient different from 0 across the 20 cohorts? Bracket on top: is the ERK coefficient different from the MYC coefficient?\n",
+                          "Wilcoxon signed-rank across cohorts, BH; * < 0.05, ** < 0.01, *** < 0.001, **** < 0.0001")) + th
+save(p4, "fig4_tcga_activity_models.png", 15, 6)
 
 # Fig 5: TCGA driver groups (stroma + purity): RAS-mutant or MYC-amplified vs neither
 dm <- rd("05_tcga_driver_models_stroma_purity.csv")
@@ -197,20 +198,20 @@ dm <- dm[dm$score %in% c("ERK_output", "MYC_targets", "RIS_RASauto_UP", "RIS_NFK
 dm$score <- factor(c(ERK_output = "ERK output", MYC_targets = "MYC targets", RIS_RASauto_UP = "RAS-autonomous UP",
                      RIS_NFKB_BRD4_UP = "NF-kB/BRD4 UP", RIS_arrest_UP = "Arrest-coupled UP", RIS_RASauto_DOWN = "RAS-autonomous DOWN")[dm$score],
                    levels = c("ERK output", "MYC targets", "RAS-autonomous UP", "NF-kB/BRD4 UP", "Arrest-coupled UP", "RAS-autonomous DOWN"))
-dm$driver <- factor(ifelse(dm$driver == "RAS", "RAS-hotspot vs neither", "MYC-amplified vs neither"),
-                    levels = c("RAS-hotspot vs neither", "MYC-amplified vs neither"))
-dm$sig <- factor(ifelse(dm$padj < 0.05, "BH < 0.05", ifelse(dm$p < 0.05, "p < 0.05, not after BH", "n.s.")),
-                 levels = c("BH < 0.05", "p < 0.05, not after BH", "n.s."))
-coh <- sort(unique(dm$cohort), decreasing = TRUE)
-dm$y <- match(dm$cohort, coh) + ifelse(dm$driver == "RAS-hotspot vs neither", 0.18, -0.18)
-p5 <- ggplot(dm, aes(effect_sd, y, colour = driver, shape = sig)) + geom_vline(xintercept = 0, colour = "#c3c2b7") +
-  geom_point(size = 2.8, stroke = 1) +
-  scale_colour_manual(values = c("RAS-hotspot vs neither" = "#2a78d6", "MYC-amplified vs neither" = "#eb6834"), name = NULL) +
-  scale_shape_manual(values = c("BH < 0.05" = 16, "p < 0.05, not after BH" = 1, "n.s." = 4), name = NULL, drop = FALSE) +
-  scale_y_continuous(breaks = seq_along(coh), labels = coh) +
+dm$driver <- factor(ifelse(dm$driver == "RAS", "RAS-hotspot", "MYC-amplified"), levels = c("RAS-hotspot", "MYC-amplified"))
+dm$lab <- ifelse(dm$padj < 0.05, stars(dm$padj), "")
+lim <- max(abs(dm$effect_sd))
+p5 <- ggplot(dm, aes(driver, cohort, fill = effect_sd)) +
+  geom_tile(colour = "#fcfcfb", linewidth = 0.8) +
+  geom_text(aes(label = lab, colour = abs(effect_sd) > 0.6 * lim), size = 4) +
+  scale_colour_manual(values = c(`TRUE` = "#ffffff", `FALSE` = ink), guide = "none") +
+  scale_fill_gradient2(low = "#184f95", mid = "#f0efec", high = "#e34948", midpoint = 0, limits = c(-lim, lim),
+                       name = "effect\n(within-cohort SD)") +
+  scale_y_discrete(limits = rev) +
   facet_wrap(~score, nrow = 1) +
-  labs(x = "effect (within-cohort SD)", y = NULL, title = "TCGA driver groups vs tumours with neither (stroma + ABSOLUTE purity adjusted)",
-       subtitle = "Each cohort with >= 10 tumours per group; BH over all cohort x score x driver tests") +
-  th + theme(legend.position = "bottom", panel.grid.minor = element_blank())
-save(p5, "fig5_tcga_driver_models.png", 17, 7.5)
+  labs(x = NULL, y = NULL, title = "TCGA tumours with a RAS hotspot or MYC amplification, each compared with tumours that have neither",
+       subtitle = paste0("Colour = difference in score (within-cohort SD), adjusted for stroma and ABSOLUTE purity; white/blank cell = not tested (< 10 tumours in a group).\n",
+                         "Stars = BH-corrected significance over all cohort x score x driver tests: * < 0.05, ** < 0.01, *** < 0.001, **** < 0.0001")) +
+  th + theme(legend.position = "right", panel.grid = element_blank(), axis.text.x = element_text(angle = 30, hjust = 1))
+save(p5, "fig5_tcga_driver_models.png", 15, 7.5)
 cat("figures written to", FIG, "\n")
