@@ -115,6 +115,8 @@ mouse; search 2026-11-01).
 
 ## Figures (`figures/`)
 
+Full legends (data, n, statistics, scaling): `figures/FIGURE_LEGENDS.md`.
+
 | File | Shows | Script |
 |---|---|---|
 | `fig1_tcga_overlap_by_class.png` | log2 OR per cancer for each OIS gene class vs tumour DEGs (section 2) | `figures_summary.R` |
