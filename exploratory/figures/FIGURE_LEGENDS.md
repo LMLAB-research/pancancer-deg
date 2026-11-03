@@ -23,6 +23,8 @@ DUSP6, SPRY2, SPRY4, ETV4, ETV5, FOSL1, EGR1. Choices behind each figure: `../DE
 - **y axis:** log2 odds ratio of a two-sided Fisher test. The universe is tumour genes ∩ genes
   tested in the OIS meta-analysis.
 - **Markers:** filled = p < 0.05 (not corrected); bar = median across cancers.
+- **Brackets:** paired Wilcoxon signed-rank tests between classes across the 17 cancers (paired by cancer), BH over
+  the 6 tests (`summary_tables/07_fig1_paired_class_tests.csv`).
 - **Source:** `summary_tables/02_tcga_overlap_by_class_strict.csv`. Script: `figures_summary.R`.
 
 ---
@@ -71,7 +73,12 @@ is the arrest-coupled DOWN set; "RAS-autonomous" and "NF-κB/BRD4-dependent" are
   - Bar = (median RAS-cycling − median growing-cycling) / (median RAS-G1 house-final − median
     growing-G1).
   - Cells: RAS cycling 621, RAS G1 house-final 1,425, growing cycling 3,052, growing G1 2,677.
-- **Sources:** `summary_tables/03_*`. Script: `figures_summary.R`.
+- **Markers in a–c:** square = reference group; filled = BH < 0.05 vs the reference; open = not significant. Tests:
+  house pairwise Wilcoxon on per-cell scores (`stats_sc_tests.R`; full results in the `stats_*` figures below and
+  `summary_tables/06_stats_*_wilcox.csv`).
+- **Error bars in d–e:** 95% bootstrap CI, 2,000 resamples of cells within each group, seeded per score
+  (`summary_tables/06_bootstrap_ratios.csv`).
+- **Sources:** `summary_tables/03_*`, `06_*`. Script: `figures_summary.R`.
 
 ---
 
@@ -85,6 +92,9 @@ is the arrest-coupled DOWN set; "RAS-autonomous" and "NF-κB/BRD4-dependent" are
 - **Scores:** mean within-cohort z of VST expression of the set's genes.
 - **Points:** one per cohort and predictor (standardised coefficient). Filled = p < 0.05 (not
   corrected); bar = median.
+- **Stars:** Wilcoxon signed-rank test across the 20 cohorts that the coefficient differs from 0, BH over 12 tests.
+  **Bracket:** paired Wilcoxon across cohorts, ERK vs MYC coefficient, BH over 4 tests
+  (`summary_tables/07_fig4_*.csv`). Stars: * < 0.05, ** < 0.01, *** < 0.001, **** < 0.0001.
 - **Caveat:** predictors are correlated, so each coefficient is conditional on the others.
 - **Source:** `summary_tables/05_tcga_activity_models_stroma_purity.csv`. Script: `figures_summary.R`.
 
@@ -100,12 +110,15 @@ is the arrest-coupled DOWN set; "RAS-autonomous" and "NF-κB/BRD4-dependent" are
   - Cohorts with ≥ 10 tumours in both groups.
 - **Effect:** coefficient of the group indicator for a score standardised within cohort, adjusted
   for the stromal proxy and ABSOLUTE purity (+ sample type for SKCM).
-- **Colour:** blue = BH < 0.05, correction across all cohort × score × driver tests.
+- **Colour:** blue = RAS-hotspot vs neither; orange = MYC-amplified vs neither (each cohort row has one point per
+  driver that met the group-size rule).
+- **Marker:** filled = BH < 0.05 (correction across all cohort × score × driver tests); open = p < 0.05 before
+  correction only; cross = p ≥ 0.05.
 - **Source:** `summary_tables/05_tcga_driver_models_stroma_purity.csv`. Script: `figures_summary.R`.
 
 ---
 
-**UMAP figures** (`figures_sc_umaps.R`; house plotting calls: `DimPlot` clusters first, no cluster
+**UMAP figures.** Point size 3 for < 1,000 cells, 1.6 for 1,000–3,000, 1 above. (`figures_sc_umaps.R`; house plotting calls: `DimPlot` clusters first, no cluster
 labels; `customSignaturePlot` for scores, each rescaled 0–10 within the plot, so colours are not
 comparable across panels or files).
 
@@ -123,3 +136,27 @@ comparable across panels or files).
   ER:HRAS clone 1, house-final OIS cells, 4-OHT kept (260) / withdrawn (241).
   - One plate per arm, so no integration and every cluster kept (house one-plate rule).
   - Scores: script 13.
+
+---
+
+**Statistics figures `stats_*.png`** (`stats_sc_tests.R`). House `wilcox_dotplot_wrapper()` from
+`senescence_stress/.../lib/scRNA_seq.R`:
+
+- **Plot:** one panel per score; violin + jittered cells.
+- **Panel title:** Kruskal–Wallis significance, BH over the 6 scores.
+- **Brackets:** all pairwise Wilcoxon rank-sum tests, BH over all pairs × scores in the figure; only significant
+  brackets drawn.
+- **Tables:** `summary_tables/06_stats_<tag>_{kw,wilcox}.csv`.
+- **Unit:** cells are the test unit. Most datasets have 1–2 biological replicates per group, so the p-values
+  describe cell-to-cell differences within these cultures, not replicate experiments.
+
+| File | Groups |
+|---|---|
+| `stats_GSE115301_time_course.png` | Growing, day 2, day 4, senescent |
+| `stats_GSE222951_RAS_dose.png` | S, M, L, XL |
+| `stats_GSE202126_KRAS_days.png` | parental, days 1, 2, 3, 5 (no UMI cap) |
+| `stats_GSE173879_withdrawal.png` | proliferating, OIS 4-OHT kept, OIS 4-OHT withdrawn |
+| `stats_GSE245807_cycling.png` | growing G1, growing cycling, RAS cycling, RAS G1 house-final |
+| `stats_clusters_GSE245807_final_states.png` | house final states 1–3 |
+| `stats_clusters_GSE245807_prefilter.png` | clusters 0, 1 of the recomputed pre-filter embedding |
+| `stats_clusters_GSE173879_OISON.png`, `..._OISOFF.png` | house clusters 1, 2 of each arm |

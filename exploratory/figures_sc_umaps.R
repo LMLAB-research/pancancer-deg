@@ -17,8 +17,13 @@ R <- "results/exploratory/ras_vs_ois"
 score_cols <- c(MAPK_output = "MAPK output", RASauto_UP = "RAS-autonomous UP", arrest_UP = "Arrest-coupled UP",
                 NFKB_BRD4_dep_UP = "NF-kB/BRD4-dependent UP", RASauto_DOWN = "RAS-autonomous DOWN",
                 arrest_DOWN = "Arrest-coupled DOWN")
+FD <- "results/exploratory/figure_data"; dir.create(FD, recursive = TRUE, showWarnings = FALSE)
+save_meta <- function(o, tag, extra = NULL) {   # per-cell cluster, group and scores for the cluster tests
+  m <- o[[]][, intersect(c("seurat_clusters", extra, names(score_cols)), colnames(o[[]])), drop = FALSE]
+  write.csv(data.frame(cell = colnames(o), m), file.path(FD, paste0(tag, "_cells.csv")), row.names = FALSE)
+}
 umap_panel <- function(o, title, extra_group = NULL) {
-  pt <- if (ncol(o) > 3000) 1 else 1.6
+  pt <- if (ncol(o) > 3000) 1 else if (ncol(o) > 1000) 1.6 else 3
   o$seurat_clusters <- factor(as.character(o$seurat_clusters),
                               levels = sort(unique(as.integer(as.character(o$seurat_clusters)))))
   p <- list(DimPlot(o, reduction = "umap", group.by = "seurat_clusters", pt.size = pt, label = FALSE) +
@@ -40,6 +45,7 @@ for (k in names(score_cols)) if (paste0(k, "_UCell") %in% colnames(sc) || k %in%
   o[[k]] <- v[match(key_o, paste(sc$plate, sc$cell))]
 }
 cat("GSE245807 final: scores matched for", sum(!is.na(o$RASauto_UP)), "of", ncol(o), "cells\n")
+save_meta(o, "GSE245807_final_states", "accession")
 save_p(umap_panel(o, "GSE245807 RAS (house final states)", extra_group = "accession"),
        file_name = "umap_GSE245807_RAS_final_states", save_dir = paste0(FIG, "/"), p_width = 20, p_height = 10)
 
@@ -53,6 +59,7 @@ for (cond in c("OISON", "OISOFF")) {
   rn <- sub("\\.[0-9]+$", "", rownames(w))   # rbind made row names unique with .1 suffixes
   for (k in names(score_cols)) o[[k]] <- w[[k]][match(colnames(o), rn)]
   cat(cond, ": scores matched for", sum(!is.na(o$RASauto_UP)), "of", ncol(o), "cells\n")
+  save_meta(o, paste0("GSE173879_", cond))
   save_p(umap_panel(o, paste("GSE173879", lab)), file_name = paste0("umap_GSE173879_", cond),
          save_dir = paste0(FIG, "/"), p_width = 20, p_height = 10)
 }
@@ -70,5 +77,6 @@ key <- paste(o$plate, colnames(o)); keyc <- paste(cs$plate, cs$cell)
 o$group <- cs$group[match(key, keyc)]
 for (k in names(score_cols)) o[[k]] <- cs[[k]][match(key, keyc)]
 cat("GSE245807 pre-filter RAS cells: groups matched for", sum(!is.na(o$group)), "of", ncol(o), "\n")
+save_meta(o, "GSE245807_prefilter", "group")
 save_p(umap_panel(o, "GSE245807 RAS cells before LMNB1/G1 subset", extra_group = "group"),
        file_name = "umap_GSE245807_RAS_cycling_vs_G1", save_dir = paste0(FIG, "/"), p_width = 20, p_height = 10)

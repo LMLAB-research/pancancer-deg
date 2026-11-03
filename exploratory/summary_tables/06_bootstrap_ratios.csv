@@ -1,0 +1,13 @@
+"readout","score","estimate","lo","hi"
+"GSE173879 fraction of OIS change remaining after withdrawal","MAPK output",-0.0259403372243848,-0.171965517241379,0
+"GSE245807 RAS effect in cycling / G1 cells","MAPK output",0.339684625492772,0.204448155216284,0.459329419730363
+"GSE173879 fraction of OIS change remaining after withdrawal","RAS-autonomous UP",0.302278822795116,0.247893320401766,0.36143952768439
+"GSE245807 RAS effect in cycling / G1 cells","RAS-autonomous UP",0.372093324021621,0.311622078935182,0.436698250063019
+"GSE173879 fraction of OIS change remaining after withdrawal","Arrest-coupled UP",0.591911126540532,0.535561516432466,0.677651543545269
+"GSE245807 RAS effect in cycling / G1 cells","Arrest-coupled UP",0.864471669218995,0.734515797488393,0.979657134799843
+"GSE173879 fraction of OIS change remaining after withdrawal","NF-kB/BRD4-dependent UP",0.289527146895426,0.245415192095008,0.338005368274602
+"GSE245807 RAS effect in cycling / G1 cells","NF-kB/BRD4-dependent UP",0.565307993665085,0.488059285169779,0.635257219046921
+"GSE173879 fraction of OIS change remaining after withdrawal","RAS-autonomous DOWN",0.331236849606386,0.27064458259567,0.389608944137394
+"GSE245807 RAS effect in cycling / G1 cells","RAS-autonomous DOWN",0.249158165174228,0.155320455010641,0.316217685555987
+"GSE173879 fraction of OIS change remaining after withdrawal","Arrest-coupled DOWN",1.13217527198413,0.92167219650554,1.40571850066756
+"GSE245807 RAS effect in cycling / G1 cells","Arrest-coupled DOWN",1.51216670981103,1.19900270435494,1.91116975782434

@@ -1,0 +1,7 @@
+"dir","group1","group2","n_cancers","median_diff","p","padj"
+"OIS-up genes vs tumour-up genes","RAS-autonomous","Arrest-coupled",17,0.261242449430847,0.0055694580078125,0.006683349609375
+"OIS-up genes vs tumour-up genes","RAS-autonomous","Intermediate",17,0.427898674053086,0.0001068115234375,0.00016021728515625
+"OIS-up genes vs tumour-up genes","Intermediate","Arrest-coupled",17,-0.13405811040636,0.044769287109375,0.044769287109375
+"OIS-down genes vs tumour-down genes","RAS-autonomous","Arrest-coupled",17,3.04983503983681,1.52587890625e-05,3.0517578125e-05
+"OIS-down genes vs tumour-down genes","RAS-autonomous","Intermediate",17,1.4108442319189,1.52587890625e-05,3.0517578125e-05
+"OIS-down genes vs tumour-down genes","Intermediate","Arrest-coupled",17,1.61681410357495,1.52587890625e-05,3.0517578125e-05

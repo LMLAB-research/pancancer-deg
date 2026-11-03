@@ -77,6 +77,33 @@ ERK targets stay up in every bypass arm.
 | Early KRAS | GSE202126 HPNE, days 1–5 | Day 1: RAS-autonomous up at 35% of the day-5 change, arrest-coupled down at 5%; cells slow from day 2 |
 | Without the BRAF bypass arm | script 04, `NO_BRAF=1` | 91% of genes keep their class; tumour overlaps unchanged; arrest-coupled up shrinks from 37 to 15 genes |
 
+**Statistics on the single-cell tests** (house pairwise Wilcoxon on cells, BH; `stats_sc_tests.R`; cells are the
+test unit):
+
+- **GSE115301:** Growing vs day 2 is significant for MAPK output, RAS-autonomous UP and RAS-autonomous DOWN
+  (BH ≤ 10⁻³). It is not significant for arrest-coupled UP, arrest-coupled DOWN or NF-κB/BRD4-dependent UP; those
+  first differ at day 4.
+- **GSE222951:** 33/36 pairwise tests BH < 0.05. Not significant: arrest-coupled DOWN and UP for S vs M, and
+  arrest-coupled UP for L vs XL.
+- **Bootstrap 95% CIs:**
+  - GSE173879 withdrawal (fraction remaining): RAS-autonomous UP 0.30 (0.25–0.36), NF-κB/BRD4 0.29 (0.25–0.34),
+    arrest-coupled DOWN 1.13 (0.92–1.41).
+  - GSE245807 cycling/G1: RAS-autonomous UP 0.37 (0.31–0.44), arrest-coupled DOWN 1.51 (1.20–1.91).
+- **Clusters:** low-MAPK clusters, each with lower RAS-autonomous UP and NF-κB/BRD4 scores (BH ≤ 3×10⁻⁵ vs the
+  other clusters):
+
+  | Cluster | MAPK output (median) |
+  |---|---|
+  | GSE245807 house final state 3 | 0.019 (others about 0.10) |
+  | GSE245807 pre-filter cluster 1 | 0.015 (other 0.095) |
+  | GSE173879 4-OHT-kept cluster 2 | 0.004 (other 0.078) |
+
+  After 4-OHT withdrawal, both GSE173879 clusters have median MAPK output 0.
+- **Tumour-level paired tests:**
+  - Fig. 1: RAS-autonomous vs arrest-coupled overlap, BH p = 0.007 (UP) and 3×10⁻⁵ (DOWN).
+  - Fig. 4: ERK minus MYC coefficient, paired across 20 cohorts, BH ≤ 8×10⁻⁶ for RAS-autonomous UP,
+    NF-κB/BRD4 UP and RAS-autonomous DOWN; reversed (MYC > ERK) for arrest-coupled UP (BH p = 0.001).
+
 ## 3. RAS vs other oncogenes (`ras_vs_myc/`)
 
 **Question.** Is "OIS" specific to RAS?
@@ -115,7 +142,8 @@ mouse; search 2026-11-01).
 
 ## Figures (`figures/`)
 
-Full legends (data, n, statistics, scaling): `figures/FIGURE_LEGENDS.md`.
+Full legends (data, n, statistics, scaling): `figures/FIGURE_LEGENDS.md`, which also lists the
+`stats_*.png` test figures.
 
 | File | Shows | Script |
 |---|---|---|

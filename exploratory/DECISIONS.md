@@ -79,6 +79,16 @@ Every choice that shaped the results in `FINDINGS.md`, in the order the analyses
 | F6 | SKCM includes metastases (sample type as covariate); PAAD/SKCM added as tumour-only cohorts | Primary tumours only | Most SKCM samples are metastases | Claude | none |
 | F7 | Continuous models: class score ~ ERK output + MYC targets + proliferation + stroma (+ purity); MYC targets = Hallmark MYC v1 + v2; proliferation = E2F + G2M | — | — | Claude | predictors are correlated; coefficients are conditional on each other |
 
+## G. Statistics and figures (2026-11-03)
+
+| # | Decision | Alternatives | Reason | Decided by | Check |
+|---|---|---|---|---|---|
+| G1 | Single-cell group and cluster comparisons with the house `wilcox_dotplot_wrapper()` (Kruskal–Wallis + all pairwise Wilcoxon, BH) | Pseudobulk by replicate | House function; most datasets have 1–2 replicates, too few for pseudobulk | Roberto asked for statistics; tool by Claude | cells are pseudo-replicates; stated in legends |
+| G2 | Ratio read-outs (withdrawal, cycling) get 95% bootstrap CIs: 2,000 resamples of cells within each group, seed 1000 + i / 2000 + i | Delta method | Ratio of medians | Claude | none |
+| G3 | Fig. 1: paired Wilcoxon signed-rank between classes across cancers; Fig. 4: one-sample Wilcoxon vs 0 and paired ERK vs MYC across cohorts | Mixed models | Cancer or cohort as the unit | Claude | none |
+| G4 | Fig. 5: RAS and MYC in one panel, marker = BH < 0.05 / nominal only / n.s. | Separate rows | Roberto asked | Roberto | none |
+| G5 | Pre-filter GSE245807 UMAP recomputed (SCTransform, PCA 50, UMAP dims 1:30, res 0.12, seed 1), not a house-run embedding | House embedding (none exists for these cells) | The house run stores no embedding before the LMNB1/G1 subset | Claude | stated in legend |
+
 ## Not decided yet
 
 - Accept the GSE202126 uncapped run as primary (D9).
