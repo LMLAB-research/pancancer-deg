@@ -1,4 +1,4 @@
-#### Libraries ####
+ #### Libraries ####
 
 library(AnnotationDbi)
 library(ashr)
@@ -15,16 +15,16 @@ library(recount3)
 library(SummarizedExperiment)
 library(TCGAbiolinks)
 
-#### Analysis Parameters ####
+#### Analysis parameters ####
 
 analysis_name <- "TCGA_deg"
 
 # During development, limit scripts to the first N project IDs for faster runs.
 # Set to Inf when running the full analysis.
-debug_project_limit <- Inf
+debug_project_limit <- 2
 
 # Parallel execution for DESeq2 model fitting and log2FC shrinkage.
-use_biocparallel <- TRUE
+use_biocparallel <- FALSE
 detected_cores <- parallel::detectCores(logical = FALSE)
 if (is.na(detected_cores)) {
   detected_cores <- 1
@@ -64,13 +64,7 @@ tcga_clinical_data_format <- "BCR Biotab"
 # If GDC adds a new sample type, script 01 stops so this list can be reviewed.
 normal_sample_type <- "Solid Tissue Normal"
 
-tumor_sample_types <- c(
-  "Primary Tumor",
-  "Metastatic",
-  "Recurrent Tumor",
-  "Primary Blood Derived Cancer - Peripheral Blood",
-  "Additional Metastatic"
-)
+tumor_sample_types <- "Primary Tumor"
 
 uncharacterized_sample_types <- c(
   "Additional - New Primary"
@@ -106,11 +100,10 @@ lfc_shrinkage_type <- "ashr"
 candidate_covariates <- c(
   "sex",
   "race",
-  "ethnicity",
   "smoking_status"
 )
 
-#### Plot Settings ####
+#### Plot settings ####
 
 pca_blind <- FALSE
 pca_max_groups <- 12
@@ -138,7 +131,6 @@ deg_neutral_color <- "grey70"
 metadata_column_patterns <- list(
   sex = "gender|sex",
   race = "race",
-  ethnicity = "ethnic",
   smoking_status = "smok|tobacco|cigarette|pack",
   age = "age",
   stage_grade = "stage|grade",
@@ -306,7 +298,7 @@ tcga_volcano_figure_file <- function(project_id) {
   file.path(results_figure_dir, paste0(project_id, "_Volcano_plot.png"))
 }
 
-#### Create Expected Directories ####
+#### Create expected directories ####
 
 dir.create(data_raw_tcga_dir, recursive = TRUE, showWarnings = FALSE)
 dir.create(data_processed_tcga_dir, recursive = TRUE, showWarnings = FALSE)
