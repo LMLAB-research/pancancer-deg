@@ -101,6 +101,8 @@ brief in `BRIEF_dose_and_kras.md`).
 - `stressors/01_inducer_tcga_overlap.R` now includes the house acute and chronic stress modules (antimycin A, 2-DG,
   glucocorticoid, 21% O2, IL-1β, heat shock, UPR, NF-κB, ...).
 
+Input files (80, about 91 MB, gzipped; originals and checksums in `inputs/MANIFEST.tsv`) and what is not included: `inputs/DATA.md`.
+
 What was done, why, and the results: `FINDINGS.md`. Every choice and who made it: `DECISIONS.md`.
 Figures: `figures/`, from `figures_summary.R` (summary tables) and `figures_sc_umaps.R` (house UMAP calls). Summary-level CSVs: `summary_tables/`,
 written by `export_summaries.py` (run from the repo root) from the local results.
