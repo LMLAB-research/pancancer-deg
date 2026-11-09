@@ -4,7 +4,7 @@
 #  - GSE185512 (Zimmerli 2022): dox-inducible MYC / cyclin E / empty vector in RPE-1 (p53 wt and
 #    p53-/-), dox vs no dox at 120 h (n = 2). QuantSeq 3' counts. Senescence not demonstrated.
 # Raw counts from GEO supplementary files. Run from the pancancer-deg repo root.
-source(".claude/worktrees/two-sided-fisher/exploratory/ras_vs_ois/house_env.R")
+source("exploratory/ras_vs_ois/house_env.R")
 G <- "data/exploratory/geo_oncogenes"
 out_dir <- "results/exploratory/ras_vs_ois/contrast_degs"
 

@@ -2,28 +2,28 @@
 on but the arrest is reduced or lost, then test which classes TCGA tumour DEGs overlap.
 Exploratory; run from the pancancer-deg repo root."""
 import csv, glob, math, os, statistics
+import sys; sys.path.insert(0, "exploratory"); from paths import *  # repo-relative inputs (paths.py)
 from collections import Counter, defaultdict
 from scipy.stats import fisher_exact
 
-C = "results/exploratory/ras_vs_ois/contrast_degs"
+CF = contrast_deg_files()
 STRICT = os.environ.get("STRICT", "0") == "1"
 # NO_BRAF=1 drops the TIG3 BRAF "bypass" arm (hTERT + SV40 small T + BRAF vs cycling cells without small T)
 NO_BRAF = os.environ.get("NO_BRAF", "0") == "1"
 OUT = "results/exploratory/ras_vs_ois" + ("/strict" if STRICT else "/lenient") + ("_noBRAF" if NO_BRAF else "")
-META = "/Users/ro/Academic/10_Research/senescence_stress/work/published_reference/arrest_degs_final.csv"
-TCGA = "results/tables/TCGA_deg"
+META = ARREST_PUBLISHED
 LFC_T = math.log2(1.5)
 
 def load(name):
     return {r["gene"].upper(): (float(r["log2FoldChange"]), r["sig"] == "y")
-            for r in csv.DictReader(open(f"{C}/{name}.csv"))}
-c = {os.path.basename(f)[:-4]: load(os.path.basename(f)[:-4]) for f in glob.glob(C + "/*.csv")}
+            for r in csv.DictReader(opent(CF[name]))}
+c = {n: load(n) for n in CF}
 
 # Meta-analysis OIS DEGs (published reference) and other arrest types
 meta = defaultdict(dict)
 lab = {"Oncogene_induced_CS": "OIS", "Replicative_CS": "RS", "Stress_induced_CS": "SIPS",
        "Contact_inhibited_CQ": "CICQ", "Serum_starved_CQ": "SSCQ"}
-for r in csv.DictReader(open(META)):
+for r in csv.DictReader(opent(META)):
     p, l = float(r["padj"]), float(r["log2FoldChange"])
     meta[lab[r["group_1"]]][r["gene"].upper()] = "UP" if p < .05 and l > LFC_T else "DOWN" if p < .05 and l < -LFC_T else "NS"
 
@@ -90,7 +90,7 @@ for d in ("UP", "DOWN"):
         print(f"      {cls}: shared RS/SIPS {sum(r['shared_RS_SIPS'] for r in ss)}, shared quiescence {sum(r['shared_quiescence'] for r in ss)}")
 
 # Hallmark proliferation genes should be arrest-coupled (sanity)
-prolif = set(open("results/exploratory/two_sided_2026-11-01/prolif_genes.txt").read().split())
+prolif = set(open(PROLIF).read().split())
 pc = Counter(r["arrest_class"] for r in rows if r["gene"] in prolif and r["OIS_direction"] == "DOWN")
 print("\nSanity: OIS-DOWN proliferation genes by class:", dict(pc))
 
@@ -102,10 +102,10 @@ for r in rows:
         groups[("UP", "nfkb_brd4-" + r["nfkb_brd4"])].add(r["gene"])
         groups[("UP", r["ris_vs_ddis"])].add(r["gene"])
 res = []
-for f in sorted(glob.glob(TCGA + "/TCGA-*_DGE_Raw_Results_Tumor_vs_Normal_Adjusted.csv")):
+for f in tcga_deg_files():
     ca = os.path.basename(f).split("_")[0][5:]
     tum = {"UP": set(), "DOWN": set()}; univ = set()
-    for r in csv.DictReader(open(f)):
+    for r in csv.DictReader(opent(f)):
         if r.get("gene_type") != "protein_coding": continue
         try: p, l = float(r["padj"]), float(r["log2FoldChange"])
         except ValueError: continue

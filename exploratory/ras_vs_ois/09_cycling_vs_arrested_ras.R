@@ -3,10 +3,11 @@
 # integrity, control-like kNN removal); the house LMNB1/G1 subset is NOT applied for this
 # comparison (approved by Roberto 2026-11-02), but reproduced to check the rebuild.
 # Reads senescence_stress objects and scutils READ-ONLY; writes only to pancancer-deg.
-.libPaths(c("/Users/ro/Academic/10_Research/senescence_stress/modules/scrna_seq/GSE226225/final_analysis/.Rlib/main", .libPaths()))
+source("exploratory/paths.R")   # repo-relative inputs; run from the pancancer-deg repo root
+add_lib(SC_LIB)
 suppressMessages({ library(Seurat); library(UCell) })
-source("/Users/ro/code/academic/scutils/R/ucell_parallel.R")
-H <- "/Users/ro/Academic/10_Research/senescence_stress/modules/scrna_seq/cs_dataset_survey/house_rerun/GSE245807"
+source_ucell()
+H <- file.path(SS_DIR, "modules/scrna_seq/cs_dataset_survey/house_rerun/GSE245807")
 out <- "results/exploratory/ras_vs_ois/scrna_GSE245807"
 dir.create(out, recursive = TRUE, showWarnings = FALSE)
 set.seed(1)
@@ -51,7 +52,7 @@ sets <- list(
   arrest_DOWN = cls$gene[cls$OIS_direction == "DOWN" & cls$arrest_class == "arrest-coupled"],
   NFKB_BRD4_dep_UP = cls$gene[cls$OIS_direction == "UP" & cls$nfkb_brd4 == "dependent"]
 )
-source(".claude/worktrees/two-sided-fisher/exploratory/ras_vs_ois/pathway_sets.R"); sets <- c(sets, pathway_sets())  # added 2026-11-07: pathway scores (TGF-beta, cGAS-STING, IFN, ...)
+source("exploratory/ras_vs_ois/pathway_sets.R"); sets <- c(sets, pathway_sets())  # added 2026-11-07: pathway scores (TGF-beta, cGAS-STING, IFN, ...)
 sc <- do.call(rbind, lapply(names(cells), function(b) {
   o <- cells[[b]]; DefaultAssay(o) <- "RNA"
   s <- lapply(sets, function(g) intersect(g, rownames(o)))

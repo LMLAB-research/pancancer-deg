@@ -2,10 +2,10 @@
 Fraction of each class changed in the same direction (house sig), plus arrest and pathway
 read-outs per contrast. Run from the pancancer-deg repo root."""
 import csv, statistics
+import sys; sys.path.insert(0, "exploratory"); from paths import *  # repo-relative inputs (paths.py)
 from collections import defaultdict
-C = "results/exploratory/ras_vs_ois/contrast_degs"
 def load(n):
-    return {r["gene"].upper(): (float(r["log2FoldChange"]), r["sig"] == "y") for r in csv.DictReader(open(f"{C}/{n}.csv"))}
+    return {r["gene"].upper(): (float(r["log2FoldChange"]), r["sig"] == "y") for r in csv.DictReader(opent(contrast_deg(n)))}
 arms = [("IMR90 RAS (Hoare)", "IMR90_N1ICD_RIS"), ("IMR90 NOTCH1-ICD", "IMR90_N1ICD_NIS"),
         ("IMR90 RAS (array)", "IMR90_array_RAS"), ("IMR90 AKT (array)", "IMR90_array_AKT"),
         ("BJ-hTERT HRAS d14", "BJhT_HRAS_d14"), ("BJ-hTERT myrAKT1 d6", "BJhT_AKT_d6"),

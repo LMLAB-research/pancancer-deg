@@ -1,0 +1,7 @@
+Built 2026-10-31 by Claude Code from:
+  /Users/ro/Academic/10_Research/senescence_stress/work/published_reference/arrest_degs_final.csv
+  (published bulk meta-analysis; each arrest subtype vs pooled Proliferating, DESeq2 ~cell_substate + study)
+Split by group_1: Oncogene_induced_CS->OIS, Replicative_CS->RS, Stress_induced_CS->SIPS,
+  Contact_inhibited_CQ->CICQ, Serum_starved_CQ->SSCQ.
+*_genes.csv = all tested genes (gene, log2FoldChange, padj); pipeline applies padj<0.05 & |LFC|>log2(1.5).
+*_background.csv = all genes tested for that subtype.

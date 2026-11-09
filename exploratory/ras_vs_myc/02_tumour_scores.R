@@ -1,7 +1,8 @@
 # Per-tumour scores for the RAS-induced-senescence (RIS) gene classes, ERK output, MYC
 # targets, proliferation and a stromal proxy, in every local TCGA cohort; joined to
 # RAS-hotspot / MYC-amplification calls. Exploratory; run from the pancancer-deg root.
-eval(parse(".claude/worktrees/two-sided-fisher/.Rprofile")[[2]])  # sandbox proxy fix (msigdbr download)
+source("exploratory/paths.R")   # repo-relative inputs; run from the pancancer-deg repo root
+if (file.exists(".Rprofile")) eval(parse(".Rprofile")[[2]])  # sandbox proxy fix (msigdbr download)
 suppressMessages({ library(SummarizedExperiment); library(DESeq2) })
 OUT <- "results/exploratory/ras_vs_myc"
 cls <- read.csv("results/exploratory/ras_vs_ois/strict/ois_gene_classes.csv")
@@ -10,7 +11,7 @@ drv$sample15 <- substr(drv$sample, 1, 15)
 
 # Hallmark sets via msigdbr from the senescence_stress bulk library (read-only)
 local({
-  .libPaths(c("/Users/ro/Academic/10_Research/senescence_stress/modules/systems_analysis_arrest/bulk_RNA_seq/.Rlib", .libPaths()))
+  add_lib(BULK_LIB)
   h <- msigdbr::msigdbr(species = "Homo sapiens", collection = "H")
   assign("hs", split(h$gene_symbol, h$gs_name), envir = globalenv())
 })
@@ -30,7 +31,7 @@ sets <- list(
 for (k in grep("^RIS_", names(sets), value = TRUE)) sets[[k]] <- setdiff(sets[[k]], stroma)
 # added 2026-11-07: pathway scores (TGF-beta, cGAS-STING, IFN, NF-kB, ...; pathway_sets.R). Stromal-proxy genes and
 # every gene in a RIS class set are removed, so a pathway score shares no genes with the class scores or the stroma covariate.
-source(".claude/worktrees/two-sided-fisher/exploratory/ras_vs_ois/pathway_sets.R")
+source("exploratory/ras_vs_ois/pathway_sets.R")
 ris_genes <- unique(unlist(sets[grep("^RIS_", names(sets))]))
 ps <- pathway_sets()
 # metabolic score sets keep RIS class genes (glycolysis is scored as a whole, HK2 included; not used as covariates)

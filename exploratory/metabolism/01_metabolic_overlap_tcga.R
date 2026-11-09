@@ -19,39 +19,31 @@
 #       (grouped by group x direction), df_2 = tumour DEGs (cancer x direction), background = SI37 genes tested in both.
 #       BH within family = all senescence-group x cancer x direction pairs.
 # USAGE (from the pancancer-deg repo root):
-#   Rscript --vanilla .claude/worktrees/two-sided-fisher/exploratory/metabolism/01_metabolic_overlap_tcga.R
+#   Rscript --vanilla exploratory/metabolism/01_metabolic_overlap_tcga.R
 # OUT: results/exploratory/metabolism/
-SA <- "/Users/ro/Academic/10_Research/senescence_stress/modules/systems_analysis_arrest"
-BULK <- file.path(SA, "bulk_RNA_seq")
-PD <- getwd()
+source("exploratory/paths.R"); PD <- getwd()
 NOPROLIF <- Sys.getenv("NOPROLIF") == "1"   # 2026-11-07: Hallmark proliferation genes removed from pathways and backgrounds
 OUT <- file.path(PD, "results/exploratory/metabolism", if (NOPROLIF) "noprolif" else ""); dir.create(OUT, recursive = TRUE, showWarnings = FALSE)
-.libPaths(c(file.path(BULK, ".Rlib"), .libPaths()))
-Sys.setenv(BULK_RNASEQ_DIR = SA)
-source(file.path(BULK, "R/config.R")); source(file.path(BULK, "R/functions.R"))
+source_house_bulk()   # house R/functions.R (copy in exploratory/inputs/house_code)
 suppressPackageStartupMessages({ library(dplyr); library(ggplot2); library(patchwork); library(readxl) })
-ex <- parse(file.path(BULK, "meta_analysis/17_stress_module_overlap_v3.R"))
-fn <- sapply(ex, function(e) is.call(e) && identical(e[[1]], as.name("<-")) && is.name(e[[2]]) && as.character(e[[2]]) %in% c("add_corr", "ARR"))
-for (e in ex[fn]) eval(e)
+house_add_corr()   # add_corr() and ARR from the house 17_stress_module_overlap_v3.R (copy in inputs/house_code)
 
 # ---- house inputs (as 19_v3) ----
-SI_XLSX <- file.path(DATA_DIR, "final", "si_tables.xlsx")
-rd_si <- function(sheet) as.data.frame(read_excel(SI_XLSX, sheet = sheet, skip = 1, na = c("", "NA")))
-met_bg_tab <- rd_si("SI Table 18"); pathways_genes <- rd_si("SI Table 37")
+met_bg_tab <- read_si("si18"); pathways_genes <- read_si("si37")   # SI Tables 18 / 37 (extracted from si_tables.xlsx; inputs/senescence_stress)
 metabolism_background <- unique(met_bg_tab$gene)
 metabolism_genes <- pathways_genes[pathways_genes$keep %in% TRUE, ]
 stopifnot(length(metabolism_background) == 2894, nrow(metabolism_genes) == 346)
 if (NOPROLIF) {   # same 671-gene list as the main-pipeline proliferation sensitivity (DECISIONS B5)
-  prolif <- readLines(file.path(PD, "results/exploratory/two_sided_2026-11-01/prolif_genes.txt"))
+  prolif <- readLines(PROLIF)
   cat("NOPROLIF: removing", sum(unique(metabolism_genes$gene) %in% prolif), "pathway genes and",
       sum(metabolism_background %in% prolif), "background genes\n")
   metabolism_genes <- metabolism_genes[!metabolism_genes$gene %in% prolif, ]; metabolism_background <- setdiff(metabolism_background, prolif)
 }
 BGS <- function(tested) list(SI37_pathway_genes = intersect(unique(metabolism_genes$gene), tested),
                              SI18_enzymes_sensitivity = intersect(metabolism_background, tested))
-ad <- read.csv(file.path(RERUN_DIR, "arrest_degs_final_RERUN.csv"))
+ad <- read.csv(SEN$arrest_rerun)
 if (!NOPROLIF) {
-  A <- read.csv(file.path(RERUN_DIR, "stress_modules_v3", "metabolic_SI37", "metabolic_overlap_arrest.csv"))
+  A <- read.csv(SEN$metabolic_arrest)
 } else {   # recomputed with the house call of 19_v3 metabolic_arrest(), on the reduced pathways / backgrounds
   sig_ad <- ad[ad$sig == "y", ]
   A <- do.call(rbind, lapply(names(BGS(ad$gene)), function(bt) { bg <- BGS(ad$gene)[[bt]]
@@ -65,7 +57,7 @@ if (!NOPROLIF) {
 
 # ---- (1) TCGA tumour DEGs ----
 LFC_T <- log2(1.5)
-tf <- list.files(file.path(PD, "results/tables/TCGA_deg"), pattern = "_DGE_Raw_Results_Tumor_vs_Normal_Adjusted.csv$", full.names = TRUE)
+tf <- tcga_deg_files()
 tum <- do.call(rbind, lapply(tf, function(f) {
   d <- read.csv(f); d <- d[d$gene_type == "protein_coding" & !is.na(d$gene_name) & d$gene_name != "", ]
   d <- d[!duplicated(d$gene_name), ]
@@ -88,7 +80,7 @@ TC <- per_source(tum, "cancer", "tcga"); TC <- add_corr(TC, TC$bg_type)
 save_csv(TC, file_name = "metabolic_overlap_tcga", path = OUT)
 
 # ---- (2) per-inducer senescence arms ----
-ng <- read.csv(file.path(RERUN_DIR, "nongenotoxic", "degs_nongenotoxic.csv"))
+ng <- read.csv(SEN$nongenotoxic)
 ng$dir_accession <- paste(ng$arm, ng$direction_1, sep = "_")
 NG <- per_source(ng, "arm", "inducer_arm"); NG <- add_corr(NG, NG$bg_type)
 NG$class_arm <- ng$class[match(NG$group, ng$arm)]

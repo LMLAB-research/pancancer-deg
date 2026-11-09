@@ -3,15 +3,15 @@
 #   scores) plus all pairwise Wilcoxon tests (rstatix, BH across all tests in the call), violin + jitter,
 #   significant brackets only. Also bootstrap 95% CIs for the two ratio read-outs in Fig. 3d/e.
 # USAGE: from the pancancer-deg repo root:
-#   Rscript --vanilla .claude/worktrees/two-sided-fisher/exploratory/stats_sc_tests.R
+#   Rscript --vanilla exploratory/stats_sc_tests.R
 # OUT: exploratory/figures/stats_*.png; exploratory/summary_tables/06_stats_*_{kw,wilcox}.csv,
 #   06_bootstrap_ratios.csv. Reads local per-cell score files (results/exploratory/...).
+source("exploratory/paths.R")   # repo-relative inputs; run from the pancancer-deg repo root
 Sys.setenv(KMP_WARNINGS = "0")
-SC <- "/Users/ro/Academic/10_Research/senescence_stress/modules/scrna_seq/GSE226225/final_analysis"
-.libPaths(c(file.path(SC, ".Rlib/main"), .libPaths()))
+add_lib(SC_LIB)
 suppressPackageStartupMessages({ library(ggplot2); library(dplyr); library(rstatix); library(ggpubr); library(patchwork) })
-source(file.path(SC, "lib/scRNA_seq.R"))       # wilcox_dotplot_wrapper
-source(file.path(SC, "lib/general_scripts.R"))  # save_p
+source(inp("house_code", "sc_lib_scRNA_seq.R"))       # wilcox_dotplot_wrapper
+source(inp("house_code", "sc_lib_general_scripts.R"))  # save_p
 E <- dirname(normalizePath(sub("^--file=", "", grep("^--file=", commandArgs(), value = TRUE))))
 FIG <- paste0(file.path(E, "figures"), "/"); TAB <- file.path(E, "summary_tables")
 R <- "results/exploratory"

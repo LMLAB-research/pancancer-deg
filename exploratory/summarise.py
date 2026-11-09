@@ -1,10 +1,11 @@
 import csv, statistics
-T = "/tmp/claude-501/two"
+import sys; sys.path.insert(0, "exploratory"); from paths import *  # repo-relative inputs (paths.py)
+T = overlap_results()
 sigs = ["OIS", "RS", "SIPS", "CICQ", "SSCQ"]
 classes = ["UP-UP", "UP-DOWN", "DOWN-UP", "DOWN-DOWN"]
 def load(run, sig):
     return {(r["cancer_type"], r["overlap_class"]): r for r in
-            csv.DictReader(open(f"{T}/results_{run}/heatmaps/TCGA_{sig}_heatmap_data.csv"))}
+            csv.DictReader(open(f"{T}/{'full_signatures' if run == 'main' else 'no_proliferation_genes'}/heatmaps/TCGA_{sig}_heatmap_data.csv"))}
 print(f"{'sig':5} {'class':10} | {'full: enr/dep/ns':>16} {'med log2OR':>10} | {'no-prolif: enr/dep/ns':>21} {'med log2OR':>10}")
 for s in sigs:
     m, p = load("main", s), load("sens", s)

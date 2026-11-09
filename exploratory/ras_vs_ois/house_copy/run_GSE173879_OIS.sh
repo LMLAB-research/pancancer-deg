@@ -2,10 +2,11 @@
 # Stage GSE173879 OIS arms (local copy of stage_inputs.R) and run the UNCHANGED house one-plate preprocessing
 # (senescence_stress house_rerun/scripts/scRNA_seq_preprocess_final_oneplate.R) with the house GSE173879 QC
 # (Wechter thresholds, as in run_house_preprocess.sh). All outputs in pancancer-deg/data/exploratory/house_GSE173879_OIS/.
-source /Users/ro/Academic/10_Research/senescence_stress/modules_intact/scrna_seq/GSE226225/final_analysis/env/activate.sh
-H=/Users/ro/Academic/10_Research/senescence_stress/modules/scrna_seq/cs_dataset_survey/house_rerun
+SS=${SENESCENCE_STRESS_DIR:-/Users/ro/Academic/10_Research/senescence_stress}   # house single-cell pipeline (not in this repo)
+source $SS/modules_intact/scrna_seq/GSE226225/final_analysis/env/activate.sh
+H=$SS/modules/scrna_seq/cs_dataset_survey/house_rerun
 B=${0:A:h}
-D=/Users/ro/code/academic/pancancer-deg/data/exploratory/house_GSE173879_OIS
+D=$PWD/data/exploratory/house_GSE173879_OIS   # run from the pancancer-deg repo root
 mkdir -p $D/logs
 Rscript $B/stage_inputs_GSE173879_OIS.R GSE173879 > $D/logs/stage.log 2>&1 || { echo "staging failed"; tail -20 $D/logs/stage.log; exit 1; }
 export DATA_DIR=$D/staged/ OUT_DIR=$D/ INTEGRITY_DIR=$D/integrity/

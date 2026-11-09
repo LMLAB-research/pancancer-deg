@@ -1,15 +1,15 @@
 """Partition OIS DEGs by whether other arrest types share them, then test which
 partition the TCGA tumour DEGs overlap. Exploratory; reads the local pipeline outputs."""
 import csv, glob, os, math
+import sys; sys.path.insert(0, "exploratory"); from paths import *  # repo-relative inputs (paths.py)
 from collections import defaultdict
-SRC = "/Users/ro/Academic/10_Research/senescence_stress/work/published_reference/arrest_degs_final.csv"
-TCGA = "/Users/ro/code/academic/pancancer-deg/results/tables/TCGA_deg"
-OV = "/Users/ro/code/academic/pancancer-deg/results/exploratory/two_sided_2026-11-01/full_signatures/OIS"
+SRC = ARREST_PUBLISHED
+OV = overlap_results() + "/full_signatures/OIS"  # output of run_both.sh (overlap pipeline)
 name = {"Oncogene_induced_CS": "OIS", "Replicative_CS": "RS", "Stress_induced_CS": "SIPS",
         "Contact_inhibited_CQ": "CICQ", "Serum_starved_CQ": "SSCQ"}
 LFC = math.log2(1.5)
 dirn = defaultdict(dict)
-for r in csv.DictReader(open(SRC)):
+for r in csv.DictReader(opent(SRC)):
     s = name[r["group_1"]]; g = r["gene"].upper()
     p, l = float(r["padj"]), float(r["log2FoldChange"])
     dirn[s][g] = "UP" if p < .05 and l > LFC else "DOWN" if p < .05 and l < -LFC else "NS"
@@ -35,9 +35,9 @@ for D in ["UP", "DOWN"]:
     for d in sorted(glob.glob(OV + "/TCGA-*")):
         c = os.path.basename(d)[5:]
         univ = {r[next(iter(r))].upper() for r in csv.DictReader(open(d + "/common_tested_genes.csv"))}
-        f = glob.glob(f"{TCGA}/TCGA-{c}_DGE_Raw_Results_Tumor_vs_Normal_Adjusted.csv")[0]
+        f = [x for x in tcga_deg_files() if os.path.basename(x).startswith(f"TCGA-{c}_")][0]
         tum = set()
-        for r in csv.DictReader(open(f)):
+        for r in csv.DictReader(opent(f)):
             try: p, l = float(r["padj"]), float(r["log2FoldChange"])
             except ValueError: continue
             if p < .05 and ((l > LFC) if D == "UP" else (l < -LFC)): tum.add(r["gene_name"].upper())

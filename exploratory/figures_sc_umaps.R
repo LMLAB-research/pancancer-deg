@@ -2,17 +2,17 @@
 #   (house plot_states_umaps.R: DimPlot clusters first, no labels, larger points; customSignaturePlot
 #   for scores; save_p). Scores are the UCell class scores already saved by scripts 07, 09 and 13.
 # USAGE: from the pancancer-deg repo root:
-#   Rscript --vanilla .claude/worktrees/two-sided-fisher/exploratory/figures_sc_umaps.R
+#   Rscript --vanilla exploratory/figures_sc_umaps.R
 # OUT: exploratory/figures/umap_*.png (git-tracked). Reads senescence_stress objects READ-ONLY.
+source("exploratory/paths.R")   # repo-relative inputs; run from the pancancer-deg repo root
 Sys.setenv(KMP_WARNINGS = "0")
-SC <- "/Users/ro/Academic/10_Research/senescence_stress/modules/scrna_seq/GSE226225/final_analysis"
-.libPaths(c(file.path(SC, ".Rlib/main"), .libPaths()))
+add_lib(SC_LIB)
 suppressPackageStartupMessages({ library(Seurat); library(ggplot2); library(patchwork); library(viridis) })
-source(file.path(SC, "lib/scRNA_seq.R"))       # customSignaturePlot
-source(file.path(SC, "lib/general_scripts.R"))  # save_p
+source(inp("house_code", "sc_lib_scRNA_seq.R"))       # customSignaturePlot
+source(inp("house_code", "sc_lib_general_scripts.R"))  # save_p
 FIG <- file.path(dirname(normalizePath(sub("^--file=", "", grep("^--file=", commandArgs(), value = TRUE)))), "figures")
 dir.create(FIG, showWarnings = FALSE)
-H <- "/Users/ro/Academic/10_Research/senescence_stress/modules/scrna_seq/cs_dataset_survey/house_rerun"
+H <- file.path(SS_DIR, "modules/scrna_seq/cs_dataset_survey/house_rerun")
 R <- "results/exploratory/ras_vs_ois"
 score_cols <- c(MAPK_output = "MAPK output", RASauto_UP = "RAS-autonomous UP", arrest_UP = "Arrest-coupled UP",
                 NFKB_BRD4_dep_UP = "NF-kB/BRD4-dependent UP", RASauto_DOWN = "RAS-autonomous DOWN",

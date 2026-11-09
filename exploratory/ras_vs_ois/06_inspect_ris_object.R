@@ -1,7 +1,8 @@
 # Read-only inspection of the house GSE245807 RIS final object (senescence_stress).
-.libPaths(c("/Users/ro/Academic/10_Research/senescence_stress/modules/scrna_seq/GSE226225/final_analysis/.Rlib/main", .libPaths()))
+source("exploratory/paths.R")   # repo-relative inputs; run from the pancancer-deg repo root
+add_lib(SC_LIB)
 suppressMessages(library(Seurat))
-f <- "/Users/ro/Academic/10_Research/senescence_stress/modules/scrna_seq/cs_dataset_survey/house_rerun/GSE245807/final/RIS_seurat.rds"
+f <- file.path(SS_DIR, "modules/scrna_seq/cs_dataset_survey/house_rerun/GSE245807/final/RIS_seurat.rds")
 o <- readRDS(f)
 print(o)
 md <- o@meta.data

@@ -3,8 +3,9 @@
 # direction with the classified OIS DEGs of that direction as background, so each test asks whether a
 # class holds more or fewer of the pathway's OIS genes than the other classes. All 50 Hallmark sets plus the
 # two cGAS-STING sets. Run from the pancancer-deg repo root.
-source(".claude/worktrees/two-sided-fisher/exploratory/ras_vs_ois/house_env.R")
-source(".claude/worktrees/two-sided-fisher/exploratory/ras_vs_ois/pathway_sets.R")
+source("exploratory/paths.R")   # repo-relative inputs; run from the pancancer-deg repo root
+source("exploratory/ras_vs_ois/house_env.R")
+source("exploratory/ras_vs_ois/pathway_sets.R")
 suppressMessages({ library(dplyr); library(tidyr); library(GeneOverlap) })
 out <- "results/exploratory/ras_vs_ois/pathways"
 dir.create(out, recursive = TRUE, showWarnings = FALSE)
@@ -14,7 +15,7 @@ cls <- cls[cls$arrest_class != "unassessable", ]
 nf <- cls[cls$OIS_direction == "UP" & cls$nfkb_brd4 == "dependent", ]; nf$arrest_class <- "NF-kB/BRD4-dependent"
 cl2 <- rbind(cls, nf)
 
-.libPaths(c("/Users/ro/Academic/10_Research/senescence_stress/modules/systems_analysis_arrest/bulk_RNA_seq/.Rlib", .libPaths()))
+add_lib(BULK_LIB)
 h <- msigdbr::msigdbr(species = "Homo sapiens", collection = "H")
 ps <- pathway_sets()
 pw <- rbind(data.frame(pathway = sub("^HALLMARK_", "H_", h$gs_name), gene = h$gene_symbol),

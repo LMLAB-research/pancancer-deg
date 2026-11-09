@@ -38,7 +38,7 @@ the arrest. Two datasets were downloaded but not analysed; this brief covers the
 | GSE202126 HPNE parental, HPNE KRAS (gene × cell UMI tables; first two columns are gene id and symbol; cell names carry the group, e.g. `HPNE_Kras_day2_sc14`) | `data/exploratory/GSE202126/GSE202126_HPNE_exon_UMI_count_matrix.txt.gz`, `..._HPNE_KRAS_exon_UMI_count_matrix.txt.gz` |
 | Gene classes (columns `gene`, `OIS_direction` UP/DOWN, `arrest_class`, `nfkb_brd4`) | `results/exploratory/ras_vs_ois/strict/ois_gene_classes.csv` |
 | Proliferation genes (Hallmark E2F, G2M, mitotic spindle, MYC) | `results/exploratory/two_sided_2026-11-01/prolif_genes.txt` |
-| Closest worked example: same scores, same libraries, same output style | `.claude/worktrees/two-sided-fisher/exploratory/ras_vs_ois/13_ras_withdrawal_GSE173879.R` |
+| Closest worked example: same scores, same libraries, same output style | `exploratory/ras_vs_ois/13_ras_withdrawal_GSE173879.R` |
 
 Do not use `exploratory/ras_vs_ois/12_dose_and_kras_timecourse.R` in the worktree. It is an
 incomplete draft; replace it or move it to the Trash.
@@ -74,7 +74,7 @@ incomplete draft; replace it or move it to the Trash.
 - **senescence_stress is read-only.** It belongs to another, unpublished paper: read its
   libraries and code, never write there.
 - **Save scripts in the git worktree** at
-  `~/code/academic/pancancer-deg/.claude/worktrees/two-sided-fisher/exploratory/ras_vs_ois/`
+  `~/code/academic/pancancer-deg/exploratory/ras_vs_ois/`
   (branch `roberto/two-sided-overlaps-ras-vs-ois`), numbered `14_…`. Run them from the repo
   root, `~/code/academic/pancancer-deg`; the paths in existing scripts assume that.
 - **Write outputs** to `results/exploratory/ras_vs_ois/dose_and_kras/` (gitignored, local only).

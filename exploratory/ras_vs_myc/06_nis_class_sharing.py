@@ -2,13 +2,13 @@
 Fraction of each class changed in the same direction (house sig) in NIS vs RIS, same cells.
 Run from the pancancer-deg repo root."""
 import csv
+import sys; sys.path.insert(0, "exploratory"); from paths import *  # repo-relative inputs (paths.py)
 from collections import defaultdict
-C = "results/exploratory/ras_vs_ois/contrast_degs"
 def load(n):
-    return {r["gene"].upper(): (float(r["log2FoldChange"]), r["sig"] == "y") for r in csv.DictReader(open(f"{C}/{n}.csv"))}
+    return {r["gene"].upper(): (float(r["log2FoldChange"]), r["sig"] == "y") for r in csv.DictReader(opent(contrast_deg(n)))}
 nis, ris, rnis = load("IMR90_N1ICD_NIS"), load("IMR90_N1ICD_RIS"), load("IMR90_N1ICD_RNIS")
 cls = list(csv.DictReader(open("results/exploratory/ras_vs_ois/strict/ois_gene_classes.csv")))
-prolif = set(open("results/exploratory/two_sided_2026-11-01/prolif_genes.txt").read().split())
+prolif = set(open(PROLIF).read().split())
 groups = defaultdict(list)
 for r in cls:
     groups[(r["OIS_direction"], r["arrest_class"])].append(r["gene"])

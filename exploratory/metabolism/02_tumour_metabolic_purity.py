@@ -5,11 +5,12 @@ stroma. Scores from ras_vs_myc/02_tumour_scores.R (metabolic sets keep RIS genes
 The ERK / RAS-driver associations with purity adjustment are in ras_vs_myc/{purity_adjusted/}activity_models.csv and
 driver_models.csv (rows P_GLYC_*, P_GAG_SYNTH, P_HEXOSAMINE_CORE). Exploratory, 2026-11-07; run from the repo root."""
 import pandas as pd, numpy as np, statsmodels.formula.api as smf
+import sys; sys.path.insert(0, "exploratory"); from paths import *  # repo-relative inputs (paths.py)
 from scipy.stats import spearmanr, wilcoxon
 
 R = "results/exploratory"
 d = pd.read_csv(f"{R}/ras_vs_myc/tumour_scores.csv")
-pur = pd.read_csv("data/exploratory/tcga_extra/TCGA_mastercalls.abs_tables_JSedit.fixed.txt", sep="\t")
+pur = pd.read_csv(PURITY_FILE, sep="\t")
 pur = pur[pur["call status"] == "called"][["array", "purity"]].drop_duplicates("array")
 d = d.merge(pur.rename(columns={"array": "sample15"}), on="sample15", how="inner")
 S = ["P_GLYC_SI37", "P_GLYC_HALLMARK", "P_GAG_SYNTH", "P_HEXOSAMINE_CORE", "Proliferation", "ERK_output"]

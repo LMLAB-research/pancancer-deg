@@ -7,10 +7,8 @@
 #                   class (hexosamine-pathway proper and sugar interconversion) is P_HEXOSAMINE_CORE.
 #   The GAG / core split is a gene-name rule (Claude, 2026-11-07), printed below for checking.
 # Run from the pancancer-deg repo root.
-SA <- "/Users/ro/Academic/10_Research/senescence_stress/modules/systems_analysis_arrest"
-.libPaths(c(file.path(SA, "bulk_RNA_seq/.Rlib"), .libPaths()))
-suppressPackageStartupMessages(library(readxl))
-si <- as.data.frame(read_excel(file.path(SA, "Final/final/si_tables.xlsx"), sheet = "SI Table 37", skip = 1, na = c("", "NA")))
+source("exploratory/paths.R"); add_lib(BULK_LIB)
+si <- read_si("si37")   # SI Table 37 (extracted from si_tables.xlsx; inputs/senescence_stress)
 si <- si[si$keep %in% TRUE, ]
 hex <- unique(si$gene[si$class == "Hexosamine pathway"])
 gag_rx <- "^(CHST|CHPF|CHSY|CSGALNACT|B3GAT[13]|B4GALT7|B3GALT6|XYLT|EXT|NDST|HS[236]ST|GLCE|UST|DSE|DSEL)"

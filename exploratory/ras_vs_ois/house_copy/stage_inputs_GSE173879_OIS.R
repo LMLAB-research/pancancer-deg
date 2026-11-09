@@ -16,11 +16,12 @@
 # OUT:   house_rerun/<GSE>/staged/<GSM>_<PLATE>_{matrix.mtx.gz,features.tsv.gz,barcodes.tsv.gz}
 #        house_rerun/<GSE>/integrity/integrity_keep_<PLATE>.txt, integrity_thresholds.csv
 #        house_rerun/<GSE>/staging_counts.csv (barcodes per plate before the house script), staging_map.csv
+source("exploratory/paths.R")   # repo-relative inputs; run from the pancancer-deg repo root
 suppressPackageStartupMessages({ library(Seurat); library(Matrix); library(DoubletFinder) })
 options(future.globals.maxSize = 16 * 1024^3); set.seed(1)
 GSE <- commandArgs(TRUE)[1]
-S <- "/Users/ro/Academic/10_Research/senescence_stress/modules/scrna_seq/cs_dataset_survey/"; R <- paste0(S, "data/raw/"); I <- paste0(S, "data/interim/")
-O <- "/Users/ro/code/academic/pancancer-deg/data/exploratory/house_GSE173879_OIS/"; ST <- paste0(O, "staged/"); IN <- paste0(O, "integrity/")
+S <- file.path(SS_DIR, "modules/scrna_seq/cs_dataset_survey/"); R <- paste0(S, "data/raw/"); I <- paste0(S, "data/interim/")
+O <- "data/exploratory/house_GSE173879_OIS/"; ST <- paste0(O, "staged/"); IN <- paste0(O, "integrity/")
 dir.create(ST, showWarnings = FALSE, recursive = TRUE); dir.create(IN, showWarnings = FALSE, recursive = TRUE)
 # ---- from external_preprocess.R (verbatim) ----
 rd <- function(pre) { m <- readMM(paste0(pre, "matrix.mtx.gz")); f <- read.delim(gzfile(paste0(pre, "features.tsv.gz")), header = FALSE)

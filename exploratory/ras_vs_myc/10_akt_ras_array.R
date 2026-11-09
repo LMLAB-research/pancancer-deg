@@ -2,7 +2,8 @@
 # Affymetrix HG-U133 Plus 2 (RMA). Array data, so limma rather than the house DESeq2
 # function; same DEG thresholds as the house (BH < 0.05, |log2FC| > log2(1.5)).
 # Probes collapsed to genes by the highest-mean probe. Run from the pancancer-deg root.
-.libPaths(c("/Users/ro/Academic/10_Research/senescence_stress/modules/systems_analysis_arrest/bulk_RNA_seq/.Rlib", .libPaths()))
+source("exploratory/paths.R")   # repo-relative inputs; run from the pancancer-deg repo root
+add_lib(BULK_LIB)
 suppressMessages(library(limma))
 G <- "data/exploratory/geo_oncogenes"
 out_dir <- "results/exploratory/ras_vs_ois/contrast_degs"

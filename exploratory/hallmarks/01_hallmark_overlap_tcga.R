@@ -8,25 +8,21 @@
 #   genes tested in that cancer), family = all cancers; per-inducer arms (degs_nongenotoxic.csv), one call per arm,
 #   family = all arms. Senescence arrest results are READ from the house output (stress_modules_v3/hallmark_overlap_arrest.csv).
 # Run from the pancancer-deg repo root. OUT: results/exploratory/hallmarks/
-SA <- "/Users/ro/Academic/10_Research/senescence_stress/modules/systems_analysis_arrest"
-BULK <- file.path(SA, "bulk_RNA_seq"); PD <- getwd()
+source("exploratory/paths.R"); PD <- getwd()
 OUT <- file.path(PD, "results/exploratory/hallmarks"); dir.create(OUT, recursive = TRUE, showWarnings = FALSE)
-.libPaths(c(file.path(BULK, ".Rlib"), .libPaths())); Sys.setenv(BULK_RNASEQ_DIR = SA)
-source(file.path(BULK, "R/config.R")); source(file.path(BULK, "R/functions.R"))
+source_house_bulk()   # house R/functions.R (copy in exploratory/inputs/house_code)
 suppressPackageStartupMessages({ library(dplyr); library(tidyr); library(ggplot2) })
-ex <- parse(file.path(BULK, "meta_analysis/17_stress_module_overlap_v3.R"))
-fn <- sapply(ex, function(e) is.call(e) && identical(e[[1]], as.name("<-")) && is.name(e[[2]]) && as.character(e[[2]]) %in% c("add_corr", "ARR"))
-for (e in ex[fn]) eval(e)
-hall <- read.csv(file.path(RERUN_DIR, "stress_response_pathways_RERUN.csv"))
-A <- read.csv(file.path(RERUN_DIR, "stress_modules_v3", "hallmark_overlap_arrest.csv"))
+house_add_corr()   # add_corr() and ARR from the house 17_stress_module_overlap_v3.R (copy in inputs/house_code)
+hall <- read.csv(SEN$hallmark_sets)
+A <- read.csv(SEN$hallmark_arrest)
 LFC_T <- log2(1.5)
-tf <- list.files(file.path(PD, "results/tables/TCGA_deg"), pattern = "_DGE_Raw_Results_Tumor_vs_Normal_Adjusted.csv$", full.names = TRUE)
+tf <- tcga_deg_files()
 tum <- bind_rows(lapply(tf, function(f) { d <- read.csv(f); d <- d[d$gene_type == "protein_coding" & !is.na(d$gene_name) & d$gene_name != "", ]
   d <- d[!duplicated(d$gene_name), ]; ca <- sub("^TCGA-", "", sub("_DGE.*", "", basename(f)))
   data.frame(gene = d$gene_name, sig = ifelse(!is.na(d$padj) & d$padj < .05 & abs(d$log2FoldChange) > LFC_T, "y", "n"),
              direction_1 = ifelse(d$log2FoldChange > 0, "up", "down"), group_1 = ca,
              dir_accession = paste(ca, ifelse(d$log2FoldChange > 0, "up", "down"), sep = "_")) }))
-ng <- read.csv(file.path(RERUN_DIR, "nongenotoxic", "degs_nongenotoxic.csv")); ng$group_1 <- ng$arm
+ng <- read.csv(SEN$nongenotoxic); ng$group_1 <- ng$arm
 ng$dir_accession <- paste(ng$arm, ng$direction_1, sep = "_")
 per_source <- function(D, analysis) bind_rows(lapply(unique(D$group_1), function(s) { d <- D[D$group_1 == s, ]
   o <- suppressWarnings(overlap_function(df_1 = hall, df_2 = d[d$sig == "y", ], gene_col_1 = "genes", gene_col_2 = "gene",

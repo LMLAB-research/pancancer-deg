@@ -1,12 +1,14 @@
-source("/tmp/claude-501/interp/proxyfix.R")
-.libPaths(c("/Users/ro/Academic/10_Research/senescence_stress/modules/systems_analysis_arrest/bulk_RNA_seq/.Rlib", .libPaths()))
+source("exploratory/paths.R")   # repo-relative inputs; run from the pancancer-deg repo root
+if (file.exists(".Rprofile")) eval(parse(".Rprofile")[[2]])   # sandbox proxy fix (msigdbr download)
+add_lib(BULK_LIB)
 suppressMessages({ library(msigdbr) })
-R <- "/Users/ro/code/academic/pancancer-deg/TCGA_senescence_overlapping_pipeline/results"
+R <- file.path(overlap_results(), "full_signatures")   # two-sided overlap pipeline results
 h <- msigdbr(species = "Homo sapiens", collection = "H")
 hs <- split(h$gene_symbol, h$gs_name)
 prolif <- unique(unlist(hs[c("HALLMARK_E2F_TARGETS", "HALLMARK_G2M_CHECKPOINT",
                              "HALLMARK_MITOTIC_SPINDLE", "HALLMARK_MYC_TARGETS_V1", "HALLMARK_MYC_TARGETS_V2")]))
-writeLines(prolif, "/tmp/claude-501/interp/prolif_genes.txt")
+dir.create("results/exploratory", recursive = TRUE, showWarnings = FALSE)
+writeLines(prolif, "results/exploratory/prolif_genes_msigdbr.txt")   # frozen copy used by the analyses: inputs/other/prolif_genes.txt
 sigs <- c("OIS", "RS", "SIPS", "CICQ", "SSCQ")
 classes <- c("UP-UP", "UP-DOWN", "DOWN-UP", "DOWN-DOWN")
 out <- list()

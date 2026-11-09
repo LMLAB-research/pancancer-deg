@@ -1,9 +1,9 @@
 # Non-RAS oncogene senescence: NOTCH1-ICD-induced (NIS) vs RAS-induced (RIS) senescence in
 # the same IMR90 ER:RAS cells (Hoare 2016, SRP062871; Control / NIS / RIS / RNIS, n=6).
 # House find_degs_new() for each arm vs control. Run from the pancancer-deg repo root.
-source(".claude/worktrees/two-sided-fisher/exploratory/ras_vs_ois/house_env.R")
+source("exploratory/ras_vs_ois/house_env.R")
 # sandbox proxy fix from the branch .Rprofile (2nd expression; the 1st activates renv)
-eval(parse(".claude/worktrees/two-sided-fisher/.Rprofile")[[2]])
+if (file.exists(".Rprofile")) eval(parse(".Rprofile")[[2]])
 suppressMessages(library(recount3))
 options(recount3_url = "https://duffel.rail.bio/recount3")
 in_dir <- "data/exploratory/ras_vs_ois"

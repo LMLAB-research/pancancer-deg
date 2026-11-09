@@ -1,9 +1,10 @@
 """Example genes per class, ranked by how many TCGA cancers share the OIS direction.
 Run from the pancancer-deg repo root."""
 import csv, glob, os
+import sys; sys.path.insert(0, "exploratory"); from paths import *  # repo-relative inputs (paths.py)
 from collections import Counter
 cls = {r["gene"]: r for r in csv.DictReader(open("results/exploratory/ras_vs_ois/strict/ois_gene_classes.csv"))}
-OV = "results/exploratory/two_sided_2026-11-01/full_signatures/OIS"
+OV = overlap_results() + "/full_signatures/OIS"
 freq = {"UP": Counter(), "DOWN": Counter()}
 for d in glob.glob(OV + "/TCGA-*"):
     for k, cl in (("UP", "UP-UP"), ("DOWN", "DOWN-DOWN")):

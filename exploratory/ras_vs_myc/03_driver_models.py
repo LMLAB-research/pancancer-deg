@@ -1,6 +1,7 @@
 """Within-cohort models: score ~ driver group + stroma proxy, groups = RAS-hotspot only,
 MYC-amp only, vs neither. Exploratory; run from the pancancer-deg repo root."""
 import pandas as pd, numpy as np, statsmodels.formula.api as smf
+import sys; sys.path.insert(0, "exploratory"); from paths import *  # repo-relative inputs (paths.py)
 from statsmodels.stats.multitest import multipletests
 
 OUT = "results/exploratory/ras_vs_myc"
@@ -10,7 +11,7 @@ import os
 PURITY = os.environ.get("PURITY", "0") == "1"
 if PURITY:
     # ABSOLUTE purity (TCGA PanCanAtlas mastercalls, GDC file 4f277128-...), called samples only
-    pur = pd.read_csv("data/exploratory/tcga_extra/TCGA_mastercalls.abs_tables_JSedit.fixed.txt", sep="\t")
+    pur = pd.read_csv(PURITY_FILE, sep="\t")
     pur = pur[pur["call status"] == "called"][["array", "purity"]].drop_duplicates("array")
     d = d.merge(pur.rename(columns={"array": "sample15"}), on="sample15", how="inner")
     OUT = OUT + "/purity_adjusted"; os.makedirs(OUT, exist_ok=True)

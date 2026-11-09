@@ -1,7 +1,8 @@
 # Read-only: inspect GSE245807 house objects before the LMNB1/G1 filter.
-.libPaths(c("/Users/ro/Academic/10_Research/senescence_stress/modules/scrna_seq/GSE226225/final_analysis/.Rlib/main", .libPaths()))
+source("exploratory/paths.R")   # repo-relative inputs; run from the pancancer-deg repo root
+add_lib(SC_LIB)
 suppressMessages(library(Seurat))
-H <- "/Users/ro/Academic/10_Research/senescence_stress/modules/scrna_seq/cs_dataset_survey"
+H <- file.path(SS_DIR, "modules/scrna_seq/cs_dataset_survey")
 t <- readRDS(file.path(H, "house_rerun/GSE245807/treated_clean_rebuilt_seurat_objs.rds"))
 for (p in names(t)) {
   o <- t[[p]]; cat("==", p, ncol(o), "cells; assays", Assays(o), "\n")

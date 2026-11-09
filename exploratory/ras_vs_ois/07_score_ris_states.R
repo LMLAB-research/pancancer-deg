@@ -2,10 +2,11 @@
 # filters kept, G1 senescent cells only). State 3 has MAPK output back at growing level
 # while arrested: RAS-autonomous genes should drop there, arrest-coupled genes should not.
 # Reads senescence_stress objects and scutils READ-ONLY; writes only to pancancer-deg.
-.libPaths(c("/Users/ro/Academic/10_Research/senescence_stress/modules/scrna_seq/GSE226225/final_analysis/.Rlib/main", .libPaths()))
+source("exploratory/paths.R")   # repo-relative inputs; run from the pancancer-deg repo root
+add_lib(SC_LIB)
 suppressMessages({ library(Seurat); library(UCell) })
-source("/Users/ro/code/academic/scutils/R/ucell_parallel.R")
-CS <- "/Users/ro/Academic/10_Research/senescence_stress/modules/scrna_seq/cs_dataset_survey"
+source_ucell()
+CS <- file.path(SS_DIR, "modules/scrna_seq/cs_dataset_survey")
 out <- "results/exploratory/ras_vs_ois/scrna_GSE245807"
 dir.create(out, recursive = TRUE, showWarnings = FALSE)
 
@@ -19,8 +20,8 @@ sets <- list(
   arrest_DOWN = cls$gene[cls$OIS_direction == "DOWN" & cls$arrest_class == "arrest-coupled"],
   NFKB_BRD4_dep_UP = cls$gene[cls$OIS_direction == "UP" & cls$nfkb_brd4 == "dependent"]
 )
-source(".claude/worktrees/two-sided-fisher/exploratory/ras_vs_ois/pathway_sets.R"); sets <- c(sets, pathway_sets())  # added 2026-11-07: pathway scores (TGF-beta, cGAS-STING, IFN, ...)
-groups <- read.csv(file.path(CS, "notch_secondary/out/step2/cell_scores_GSE245807_RIS.csv.gz"))[, c("cell", "group", "plate")]
+source("exploratory/ras_vs_ois/pathway_sets.R"); sets <- c(sets, pathway_sets())  # added 2026-11-07: pathway scores (TGF-beta, cGAS-STING, IFN, ...)
+groups <- read.csv(SEN$ris_groups)[, c("cell", "group", "plate")]
 
 objs <- readRDS(file.path(CS, "house_rerun/GSE245807/final/RIS_seurat.rds"))
 scores <- do.call(rbind, lapply(names(objs), function(p) {

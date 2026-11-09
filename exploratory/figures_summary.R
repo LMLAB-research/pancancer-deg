@@ -1,9 +1,10 @@
 # WHY: summary figures for FINDINGS.md, drawn from the git-tracked summary_tables/ (so they can be
 #   regenerated without the local results). Palette: dataviz reference categorical slots 1-5, validated
 #   (all checks pass; three slots < 3:1 contrast, so every series is direct-labelled).
-# USAGE: Rscript --vanilla .claude/worktrees/two-sided-fisher/exploratory/figures_summary.R  (any directory)
+# USAGE: Rscript --vanilla exploratory/figures_summary.R  (any directory)
 # OUT: exploratory/figures/fig*.png
-.libPaths(c("/Users/ro/Academic/10_Research/senescence_stress/modules/scrna_seq/GSE226225/final_analysis/.Rlib/main", .libPaths()))
+source("exploratory/paths.R")   # repo-relative inputs; run from the pancancer-deg repo root
+add_lib(SC_LIB)
 suppressPackageStartupMessages({ library(ggplot2); library(patchwork) })
 E <- dirname(normalizePath(sub("^--file=", "", grep("^--file=", commandArgs(), value = TRUE))))
 T <- file.path(E, "summary_tables"); FIG <- file.path(E, "figures"); dir.create(FIG, showWarnings = FALSE)

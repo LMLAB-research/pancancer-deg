@@ -20,12 +20,10 @@
 # components and backgrounds). Each component is also tested for house Hallmark + lysosomal sets (house_sets()),
 # background = genes tested in its source(s); BH within component.
 # Run from the pancancer-deg repo root. OUT: results/exploratory/breakdown/
-SA <- "/Users/ro/Academic/10_Research/senescence_stress/modules/systems_analysis_arrest"
-BULK <- file.path(SA, "bulk_RNA_seq"); PD <- getwd()
+source("exploratory/paths.R"); PD <- getwd()
 OUT <- file.path(PD, "results/exploratory/breakdown"); dir.create(OUT, recursive = TRUE, showWarnings = FALSE)
-.libPaths(c(file.path(BULK, ".Rlib"), .libPaths())); Sys.setenv(BULK_RNASEQ_DIR = SA)
-source(file.path(BULK, "R/config.R")); source(file.path(BULK, "R/functions.R"))
-source(file.path(PD, ".claude/worktrees/two-sided-fisher/exploratory/ras_vs_ois/pathway_sets.R"))
+source_house_bulk()   # house R/functions.R (copy in exploratory/inputs/house_code)
+source("exploratory/ras_vs_ois/pathway_sets.R")
 suppressPackageStartupMessages({ library(dplyr); library(tidyr); library(ggplot2) })
 LFC_T <- log2(1.5)
 ARR <- c(Contact_inhibited_CQ = "CICQ", Serum_starved_CQ = "SSCQ", Replicative_CS = "RS", Stress_induced_CS = "SIPS", Oncogene_induced_CS = "OIS")
@@ -33,17 +31,17 @@ ARR <- c(Contact_inhibited_CQ = "CICQ", Serum_starved_CQ = "SSCQ", Replicative_C
 # ---- senescence inputs as gene x set tables: sig (TRUE/FALSE) and dir (up/down), tested = all rows ----
 tab <- function(gene, lfc, sig) { d <- data.frame(gene = gene, dir = ifelse(lfc > 0, "up", "down"), sig = sig %in% "y")
   d[!is.na(d$gene) & d$gene != "" & !duplicated(d$gene), ] }
-ad <- read.csv(file.path(RERUN_DIR, "arrest_degs_final_RERUN.csv"))
+ad <- read.csv(SEN$arrest_rerun)
 META <- lapply(setNames(names(ARR), ARR), function(g) { x <- ad[ad$group_1 == g, ]; tab(x$gene, x$log2FoldChange, x$sig) })
-ng <- read.csv(file.path(RERUN_DIR, "nongenotoxic", "degs_nongenotoxic.csv"))
+ng <- read.csv(SEN$nongenotoxic)
 ARM <- lapply(split(ng, ng$arm), function(x) tab(x$gene, x$log2FoldChange, x$sig))
-lf <- read.csv(file.path(RERUN_DIR, "robustness", "damage_not_p53", "gse60340_degs.csv"))
+lf <- read.csv(SEN$gse60340)
 LFS <- lapply(split(lf, lf$contrast), function(x) tab(x$gene, x$log2FC, x$sig))
 IRT <- list()
 for (ct in c("Fibroblast", "Keratinocyte", "Melanocyte")) {   # per-cell-type files (combined file is corrupt on disk)
-  x <- read.csv(file.path("/Users/ro/Academic/10_Research/senescence_stress/work/results/auc/temporal", ct, "degs.csv"))
+  x <- read.csv(ir_time(ct))
   for (tp in c("4_days", "20_days")) { y <- x[x$group_1 == tp, ]; IRT[[paste(ct, tp)]] <- tab(y$gene, y$log2FoldChange, y$sig) } }
-prolif <- readLines(file.path(PD, "results/exploratory/two_sided_2026-11-01/prolif_genes.txt"))
+prolif <- readLines(PROLIF)
 
 sig_dir <- function(t, d) t$gene[t$sig & t$dir == d]
 COMP <- list()   # each: list(family, source, component, dir, genes, tested)
@@ -101,7 +99,7 @@ save_csv(bind_rows(lapply(seq_along(COMP), function(i) with(COMP[[i]], if (lengt
 cat("components:", nrow(CI), "\n"); print(CI[, -1], row.names = FALSE)
 
 # ---- tumour DEGs ----
-tf <- list.files(file.path(PD, "results/tables/TCGA_deg"), pattern = "_DGE_Raw_Results_Tumor_vs_Normal_Adjusted.csv$", full.names = TRUE)
+tf <- tcga_deg_files()
 TU <- lapply(setNames(tf, sub("^TCGA-", "", sub("_DGE.*", "", basename(tf)))), function(f) { d <- read.csv(f)
   d <- d[d$gene_type == "protein_coding" & !is.na(d$gene_name), ]; d <- d[!duplicated(d$gene_name), ]
   data.frame(gene = d$gene_name, dir = ifelse(d$log2FoldChange > 0, "up", "down"),

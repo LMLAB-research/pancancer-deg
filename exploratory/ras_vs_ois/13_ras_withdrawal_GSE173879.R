@@ -2,9 +2,10 @@
 # DMSO before harvest (OISOFF, RAS withdrawn after senescence). House-final cells from the house
 # one-plate preprocessing (all house filters applied; outputs in data/exploratory/house_GSE173879_OIS).
 # Prediction: RAS-autonomous genes revert in OISOFF, arrest-coupled genes persist. UCell via scutils.
-.libPaths(c("/Users/ro/Academic/10_Research/senescence_stress/modules/scrna_seq/GSE226225/final_analysis/.Rlib/main", .libPaths()))
+source("exploratory/paths.R")   # repo-relative inputs; run from the pancancer-deg repo root
+add_lib(SC_LIB)
 suppressMessages({ library(Seurat); library(UCell) })
-source("/Users/ro/code/academic/scutils/R/ucell_parallel.R")
+source_ucell()
 D <- "data/exploratory/house_GSE173879_OIS/"
 out <- "results/exploratory/ras_vs_ois/scrna_GSE173879"
 dir.create(out, recursive = TRUE, showWarnings = FALSE)
@@ -15,7 +16,7 @@ sets0 <- list(MAPK_output = c("DUSP6", "SPRY2", "SPRY4", "ETV4", "ETV5", "FOSL1"
               arrest_UP = sel("UP", "arrest-coupled"),
               NFKB_BRD4_dep_UP = cls$gene[cls$OIS_direction == "UP" & cls$nfkb_brd4 == "dependent"],
               RASauto_DOWN = sel("DOWN", "RAS-autonomous"), arrest_DOWN = sel("DOWN", "arrest-coupled"))
-source(".claude/worktrees/two-sided-fisher/exploratory/ras_vs_ois/pathway_sets.R"); sets0 <- c(sets0, pathway_sets())  # added 2026-11-07: pathway scores (TGF-beta, cGAS-STING, IFN, ...)
+source("exploratory/ras_vs_ois/pathway_sets.R"); sets0 <- c(sets0, pathway_sets())  # added 2026-11-07: pathway scores (TGF-beta, cGAS-STING, IFN, ...)
 score <- function(o, lab) {
   DefaultAssay(o) <- "RNA"
   s <- lapply(sets0, intersect, rownames(o))

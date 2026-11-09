@@ -79,3 +79,14 @@ inputs/other/prolif_genes.txt	/Users/ro/code/academic/pancancer-deg/results/expl
 inputs/other/TCGA_mastercalls.abs_tables_JSedit.fixed.txt.gz	/Users/ro/code/academic/pancancer-deg/data/exploratory/tcga_extra/TCGA_mastercalls.abs_tables_JSedit.fixed.txt	901812	8ea2ca92c8ae58350538999dfa1174da
 inputs/senescence_stress/SI_Table_18.csv	/Users/ro/Academic/10_Research/senescence_stress/modules/systems_analysis_arrest/Final/final/si_tables.xlsx (sheet 'SI Table 18', skip = 1)	41939221	e19050d8a45d96b0a6778eaab67babb4
 inputs/senescence_stress/SI_Table_37.csv	/Users/ro/Academic/10_Research/senescence_stress/modules/systems_analysis_arrest/Final/final/si_tables.xlsx (sheet 'SI Table 37', skip = 1)	41939221	e19050d8a45d96b0a6778eaab67babb4
+inputs/senescence_meta_analysis_deg/PROVENANCE.txt	/Users/ro/code/academic/pancancer-deg/data/senescence_meta_analysis_deg/PROVENANCE.txt	549	6933559f6b7c1c4fd8ad491b86cdea4d
+inputs/senescence_meta_analysis_deg/quiescence_CICQ_background.csv	/Users/ro/code/academic/pancancer-deg/data/senescence_meta_analysis_deg/quiescence_CICQ_background.csv	106926	9036a900b73a9cf4812ada4dcd0618fb
+inputs/senescence_meta_analysis_deg/quiescence_CICQ_genes.csv	/Users/ro/code/academic/pancancer-deg/data/senescence_meta_analysis_deg/quiescence_CICQ_genes.csv	645376	bb070190202c14e3a66ccf59893f8861
+inputs/senescence_meta_analysis_deg/quiescence_SSCQ_background.csv	/Users/ro/code/academic/pancancer-deg/data/senescence_meta_analysis_deg/quiescence_SSCQ_background.csv	106905	1e9b498da74ae0384e7cac1f6d3e4695
+inputs/senescence_meta_analysis_deg/quiescence_SSCQ_genes.csv	/Users/ro/code/academic/pancancer-deg/data/senescence_meta_analysis_deg/quiescence_SSCQ_genes.csv	645936	0fd9ae51919be8ade1f43ffc72386364
+inputs/senescence_meta_analysis_deg/senescence_OIS_background.csv	/Users/ro/code/academic/pancancer-deg/data/senescence_meta_analysis_deg/senescence_OIS_background.csv	106864	a77788b9858515cf3f416e2327a7d6e4
+inputs/senescence_meta_analysis_deg/senescence_OIS_genes.csv	/Users/ro/code/academic/pancancer-deg/data/senescence_meta_analysis_deg/senescence_OIS_genes.csv	650659	f54efb3690f13d404d59643c75977bc4
+inputs/senescence_meta_analysis_deg/senescence_RS_background.csv	/Users/ro/code/academic/pancancer-deg/data/senescence_meta_analysis_deg/senescence_RS_background.csv	106926	9036a900b73a9cf4812ada4dcd0618fb
+inputs/senescence_meta_analysis_deg/senescence_RS_genes.csv	/Users/ro/code/academic/pancancer-deg/data/senescence_meta_analysis_deg/senescence_RS_genes.csv	639084	525ab967ae7d3e8942826f0f0ba5eb5b
+inputs/senescence_meta_analysis_deg/senescence_SIPS_background.csv	/Users/ro/code/academic/pancancer-deg/data/senescence_meta_analysis_deg/senescence_SIPS_background.csv	106933	6122047998737b76df9beaee9a76f5f2
+inputs/senescence_meta_analysis_deg/senescence_SIPS_genes.csv	/Users/ro/code/academic/pancancer-deg/data/senescence_meta_analysis_deg/senescence_SIPS_genes.csv	644032	88900fd663d31155d6497f9a24694a21

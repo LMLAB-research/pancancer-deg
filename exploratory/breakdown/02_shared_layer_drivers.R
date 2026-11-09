@@ -21,11 +21,9 @@
 #   shIL1R (day 10), shp53, shp16/p21; shared vs OIS-only compared by Wilcoxon on retention.
 #   Not independent of the meta-analysis: IMR90 etoposide (SRP062872 DDIS) is in the meta SIPS group (shown, flagged).
 # Run from the pancancer-deg repo root. OUT: results/exploratory/breakdown/shared_layer/
-SA <- "/Users/ro/Academic/10_Research/senescence_stress/modules/systems_analysis_arrest"
-BULK <- file.path(SA, "bulk_RNA_seq"); PD <- getwd()
+source("exploratory/paths.R"); PD <- getwd()
 OUT <- file.path(PD, "results/exploratory/breakdown/shared_layer"); dir.create(OUT, recursive = TRUE, showWarnings = FALSE)
-.libPaths(c(file.path(BULK, ".Rlib"), .libPaths())); Sys.setenv(BULK_RNASEQ_DIR = SA)
-source(file.path(BULK, "R/config.R")); source(file.path(BULK, "R/functions.R"))
+source_house_bulk()   # house R/functions.R (copy in exploratory/inputs/house_code)
 suppressPackageStartupMessages({ library(dplyr); library(tidyr); library(ggplot2) })
 LFC_T <- log2(1.5)
 tab <- function(gene, lfc, sig) { d <- data.frame(gene = gene, lfc = lfc, dir = ifelse(lfc > 0, "up", "down"), sig = sig %in% "y")
@@ -33,7 +31,7 @@ tab <- function(gene, lfc, sig) { d <- data.frame(gene = gene, lfc = lfc, dir = 
 
 # ---- gene sets ----
 cls <- read.csv(file.path(PD, "results/exploratory/ras_vs_ois/strict/ois_gene_classes.csv"))
-ad <- read.csv(file.path(RERUN_DIR, "arrest_degs_final_RERUN.csv"))
+ad <- read.csv(SEN$arrest_rerun)
 md <- function(g) { x <- ad[ad$group_1 == g, ]; tab(x$gene, x$log2FoldChange, x$sig) }
 RS <- md("Replicative_CS"); SI <- md("Stress_induced_CS"); CI <- md("Contact_inhibited_CQ"); SS <- md("Serum_starved_CQ"); OI <- md("Oncogene_induced_CS")
 sd <- function(t, d) t$gene[t$sig & t$dir == d]
@@ -55,7 +53,7 @@ G <- bind_rows(lapply(names(SETS), function(s) data.frame(set = s, family = fam(
 save_csv(G, file_name = "shared_layer_sets", path = OUT)
 
 # ---- PART A: tumours ----
-tf <- list.files(file.path(PD, "results/tables/TCGA_deg"), pattern = "_DGE_Raw_Results_Tumor_vs_Normal_Adjusted.csv$", full.names = TRUE)
+tf <- tcga_deg_files()
 TU <- lapply(setNames(tf, sub("^TCGA-", "", sub("_DGE.*", "", basename(tf)))), function(f) { d <- read.csv(f)
   d <- d[d$gene_type == "protein_coding" & !is.na(d$gene_name), ]; d <- d[!duplicated(d$gene_name), ]
   tab(d$gene_name, d$log2FoldChange, ifelse(!is.na(d$padj) & d$padj < .05 & abs(d$log2FoldChange) > LFC_T, "y", "n")) })
@@ -85,17 +83,15 @@ print(as.data.frame(AS |> mutate(cell = sprintf("%d/%d (%.2f)", enriched, deplet
 cat("\nShared vs OIS-only, same-direction log2 OR paired across cancers:\n"); print(pc, row.names = FALSE, digits = 3)
 
 # ---- PART B: perturbation contrasts ----
-C <- file.path(PD, "results/exploratory/ras_vs_ois/contrast_degs")
-cd <- function(n) { x <- read.csv(file.path(C, paste0(n, ".csv"))); tab(x$gene, x$log2FoldChange, x$sig) }
-ng <- read.csv(file.path(RERUN_DIR, "nongenotoxic", "degs_nongenotoxic.csv"))
+cd <- function(n) { x <- read.csv(contrast_deg(n)); tab(x$gene, x$log2FoldChange, x$sig) }
+ng <- read.csv(SEN$nongenotoxic)
 arm <- function(a) { x <- ng[ng$arm == a, ]; tab(x$gene, x$log2FoldChange, x$sig) }
-lf <- read.csv(file.path(RERUN_DIR, "robustness", "damage_not_p53", "gse60340_degs.csv"))
+lf <- read.csv(SEN$gse60340)
 lfs <- function(k) { x <- lf[lf$contrast == k, ]; tab(x$gene, x$log2FC, x$sig) }
-irt <- read.csv("/Users/ro/Academic/10_Research/senescence_stress/work/results/auc/temporal/Fibroblast/degs.csv")
+irt <- read.csv(ir_time("Fibroblast"))
 ir <- function(tp) { x <- irt[irt$group_1 == tp, ]; tab(x$gene, x$log2FoldChange, x$sig) }
-MD <- file.path(BULK, "external_inputs", "stress_modules", "v3")
-am <- read.csv(file.path(MD, "stress_modules.csv")); am <- am[am$version == "full", ]; atg <- read.csv(file.path(MD, "stress_module_tested_genes.csv"))
-cm <- read.csv(file.path(MD, "chronic_modules.csv")); cm <- cm[cm$version == "full", ]; ctg <- read.csv(file.path(MD, "chronic_module_tested_genes.csv"))
+am <- read.csv(stress_module("stress_modules")); am <- am[am$version == "full", ]; atg <- read.csv(stress_module("stress_module_tested_genes"))
+cm <- read.csv(stress_module("chronic_modules")); cm <- cm[cm$version == "full", ]; ctg <- read.csv(stress_module("chronic_module_tested_genes"))
 modt <- function(mods, tg, m) { g <- unique(c(tg$gene[tg$module == m], mods$gene[mods$module == m]))
   data.frame(gene = g, lfc = ifelse(g %in% mods$gene[mods$module == m], 1, 0), dir = "up", sig = g %in% mods$gene[mods$module == m]) }
 K <- list(

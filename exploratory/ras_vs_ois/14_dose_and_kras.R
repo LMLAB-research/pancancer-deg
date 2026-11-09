@@ -12,14 +12,15 @@
 # Statistics: median per group; Spearman rho with group order; fraction of the day-5 change reached per day;
 # Wilcoxon (scores) or Fisher (detection fractions) tests, XL vs S and day 5 vs parental, BH within dataset.
 # Run from the pancancer-deg repo root with Rscript --vanilla.
-.libPaths(c("/Users/ro/Academic/10_Research/senescence_stress/modules/scrna_seq/GSE226225/final_analysis/.Rlib/main", .libPaths()))
+source("exploratory/paths.R")   # repo-relative inputs; run from the pancancer-deg repo root
+add_lib(SC_LIB)
 suppressMessages({ library(Seurat); library(UCell); library(Matrix) })
-source("/Users/ro/code/academic/scutils/R/ucell_parallel.R")
+source_ucell()
 set.seed(1)
 out <- "results/exploratory/ras_vs_ois/dose_and_kras"
 dir.create(out, recursive = TRUE, showWarnings = FALSE)
 cls <- read.csv("results/exploratory/ras_vs_ois/strict/ois_gene_classes.csv")
-prolif <- readLines("results/exploratory/two_sided_2026-11-01/prolif_genes.txt")
+prolif <- readLines(PROLIF)
 sel <- function(d, c) cls$gene[cls$OIS_direction == d & cls$arrest_class == c]
 sets0 <- list(MAPK_output = c("DUSP6", "SPRY2", "SPRY4", "ETV4", "ETV5", "FOSL1", "EGR1"),
               Proliferation = prolif,
@@ -27,7 +28,7 @@ sets0 <- list(MAPK_output = c("DUSP6", "SPRY2", "SPRY4", "ETV4", "ETV5", "FOSL1"
               arrest_UP = sel("UP", "arrest-coupled"),
               NFKB_BRD4_dep_UP = cls$gene[cls$OIS_direction == "UP" & cls$nfkb_brd4 == "dependent"],
               RASauto_DOWN = sel("DOWN", "RAS-autonomous"), arrest_DOWN = sel("DOWN", "arrest-coupled"))
-source(".claude/worktrees/two-sided-fisher/exploratory/ras_vs_ois/pathway_sets.R"); sets0 <- c(sets0, pathway_sets())  # added 2026-11-07: pathway scores (TGF-beta, cGAS-STING, IFN, ...)
+source("exploratory/ras_vs_ois/pathway_sets.R"); sets0 <- c(sets0, pathway_sets())  # added 2026-11-07: pathway scores (TGF-beta, cGAS-STING, IFN, ...)
 FRAC <- c("MKI67_pos", "CDKN1A_pos")   # detection fractions; MKI67/CDKN1A log1p(CPM) are reported as medians
 
 qc <- function(o, tag, umi_max = 120000) {

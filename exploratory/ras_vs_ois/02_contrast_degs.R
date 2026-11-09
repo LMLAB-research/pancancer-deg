@@ -3,7 +3,7 @@
 # find_degs_new() (DESeq2; padj < 0.05, |LFC| > log2(1.5)). Each contrast compares a
 # RAS/BRAF (or other) condition with its matched proliferating control in the same
 # genetic background. Run from the pancancer-deg repo root.
-source(".claude/worktrees/two-sided-fisher/exploratory/ras_vs_ois/house_env.R")
+source("exploratory/ras_vs_ois/house_env.R")
 in_dir <- "data/exploratory/ras_vs_ois"
 out_dir <- "results/exploratory/ras_vs_ois/contrast_degs"
 dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)

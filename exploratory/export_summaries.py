@@ -1,7 +1,7 @@
 """Copy or derive the summary-level tables behind FINDINGS.md into exploratory/summary_tables/
 (tracked in git; the full results stay in the gitignored results/ folder). Per-cell scores,
 per-sample tables and full DEG tables are not exported. Run from the pancancer-deg repo root:
-    python3 .claude/worktrees/two-sided-fisher/exploratory/export_summaries.py
+    python3 exploratory/export_summaries.py
 """
 import csv, os, shutil, statistics
 from collections import defaultdict

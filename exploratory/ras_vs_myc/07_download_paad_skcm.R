@@ -1,7 +1,7 @@
 # Download STAR counts for TCGA-PAAD and TCGA-SKCM (the most RAS/BRAF-driven cohorts;
 # too few normals for the tumour-vs-normal pipeline) for tumour-only driver comparisons.
 # Exploratory; run from the pancancer-deg repo root. Output in data/exploratory/tcga_extra/.
-eval(parse(".claude/worktrees/two-sided-fisher/.Rprofile")[[2]])  # sandbox proxy fix only
+if (file.exists(".Rprofile")) eval(parse(".Rprofile")[[2]])  # sandbox proxy fix only
 suppressMessages({ library(TCGAbiolinks); library(SummarizedExperiment) })
 out <- "data/exploratory/tcga_extra"
 dir.create(out, recursive = TRUE, showWarnings = FALSE)

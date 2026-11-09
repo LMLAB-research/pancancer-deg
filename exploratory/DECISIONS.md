@@ -25,7 +25,7 @@ Every choice that shaped the results in `FINDINGS.md`, in the order the analyses
 | B2 | Keep GeneOverlap's sample odds ratio; p-value from `fisher.test` | The conditional MLE odds ratio from `fisher.test` | Existing heatmap values stay unchanged | Claude | none |
 | B3 | Heatmap on a symmetric diverging scale (blue enrichment, red depletion); OR = 0 drawn at the lower limit | Separate panels | Depletion needs a colour | Claude | none |
 | B4 | Kept local, not merged into main | Merge | Roberto: exploratory for now | Roberto | none |
-| B5 | Proliferation sensitivity removes the Hallmark E2F, G2M, mitotic spindle, MYC v1 and MYC v2 sets (about 670 genes) from signatures and backgrounds | Other cell-cycle lists | Standard sets in msigdbr | Claude | none |
+| B5 | Proliferation sensitivity removes the Hallmark E2F, G2M, mitotic spindle, MYC v1 and MYC v2 sets (671 genes) from the signatures, their backgrounds and the TCGA DEG tables (rebuilt in `run_both.sh` on 2026-11-09; reproduces the 2026-11-01 results exactly) | Other cell-cycle lists | Standard sets in msigdbr | Claude | none |
 
 ## C. RAS-autonomous vs arrest-coupled classes (`ras_vs_ois/`)
 
@@ -119,6 +119,8 @@ Every choice that shaped the results in `FINDINGS.md`, in the order the analyses
 | H21 | Shared layer = same-direction DEG in meta RS or SIPS; split applied to RAS-autonomous and to OIS senescence-specific genes | RS and SIPS separately | Simplest; both groups pooled | Claude (Roberto asked for the test) | none |
 | H22 | Driver test background = the family's OIS genes of that direction tested in the contrast; contrasts from independent studies; etoposide SRP062872 shown but flagged (in meta SIPS) | All genes as background | Compares shared vs OIS-only directly | Claude | none |
 | H23 | Dependence = retention ≤ 0.5 (as the NF-κB/BRD4 tag, C7); shared vs OIS-only by Wilcoxon on retention | — | Same rule as the classes | Claude | none |
+
+| H24 | Scripts read inputs from `exploratory/inputs/` through `paths.R` / `paths.py`; regenerable intermediates from `results/` / `data/` when present; multi-GB data via `SENESCENCE_STRESS_DIR` | Keep absolute paths | Others do not have the originals | Roberto | clean copy without `data/`/`results/`: 33 outputs + 10 overlap heatmap tables + summary.txt byte-identical to the originals |
 
 ## Not decided yet
 
