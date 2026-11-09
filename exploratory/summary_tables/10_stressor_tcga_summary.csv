@@ -1,0 +1,197 @@
+"source","class","set","relation","enriched","depleted","med_log2OR"
+"GSE60340","p53-mutant","LFS 5-aza vs immortal","sen down / tumour down",2,6,-0.0673272720273137
+"GSE60340","p53-mutant","LFS 5-aza vs immortal","sen down / tumour up",9,1,0.211428330820819
+"GSE60340","p53-mutant","LFS 5-aza vs immortal","sen up / tumour down",15,0,0.695102813979826
+"GSE60340","p53-mutant","LFS 5-aza vs immortal","sen up / tumour up",15,0,0.608049822263647
+"GSE60340","p53-mutant","LFS Adriamycin vs immortal","sen down / tumour down",5,0,0.0358949493030422
+"GSE60340","p53-mutant","LFS Adriamycin vs immortal","sen down / tumour up",0,15,-0.39465798926354
+"GSE60340","p53-mutant","LFS Adriamycin vs immortal","sen up / tumour down",13,0,0.549945317454186
+"GSE60340","p53-mutant","LFS Adriamycin vs immortal","sen up / tumour up",17,0,0.764134336165027
+"GSE60340","p53-mutant","LFS H2O2 vs immortal","sen down / tumour down",0,6,-0.453610001238739
+"GSE60340","p53-mutant","LFS H2O2 vs immortal","sen down / tumour up",9,0,0.495116577647723
+"GSE60340","p53-mutant","LFS H2O2 vs immortal","sen up / tumour down",12,0,0.557868894240987
+"GSE60340","p53-mutant","LFS H2O2 vs immortal","sen up / tumour up",9,2,0.332924843966672
+"GSE60340","p53-mutant","LFS Quiescent vs immortal","sen down / tumour down",0,15,-0.705687103207364
+"GSE60340","p53-mutant","LFS Quiescent vs immortal","sen down / tumour up",14,1,0.846218396561826
+"GSE60340","p53-mutant","LFS Quiescent vs immortal","sen up / tumour down",16,0,0.739196503348704
+"GSE60340","p53-mutant","LFS Quiescent vs immortal","sen up / tumour up",10,4,0.321414443332001
+"GSE60340","p53-mutant","LFS RS vs young","sen down / tumour down",15,0,0.665009461443405
+"GSE60340","p53-mutant","LFS RS vs young","sen down / tumour up",5,4,-0.0612357022563593
+"GSE60340","p53-mutant","LFS RS vs young","sen up / tumour down",16,0,0.749425645970193
+"GSE60340","p53-mutant","LFS RS vs young","sen up / tumour up",16,0,0.532048789605723
+"IR_time","genotoxic (time course)","IR Fibroblast 10d","sen down / tumour down",3,7,-0.193573760974833
+"IR_time","genotoxic (time course)","IR Fibroblast 10d","sen down / tumour up",17,0,1.56730874355156
+"IR_time","genotoxic (time course)","IR Fibroblast 10d","sen up / tumour down",17,0,1.14236534611745
+"IR_time","genotoxic (time course)","IR Fibroblast 10d","sen up / tumour up",9,1,0.267036915094265
+"IR_time","genotoxic (time course)","IR Fibroblast 20d","sen down / tumour down",12,1,0.349132549311705
+"IR_time","genotoxic (time course)","IR Fibroblast 20d","sen down / tumour up",16,0,1.11860880734256
+"IR_time","genotoxic (time course)","IR Fibroblast 20d","sen up / tumour down",17,0,1.04380906871858
+"IR_time","genotoxic (time course)","IR Fibroblast 20d","sen up / tumour up",15,0,0.48297119259421
+"IR_time","genotoxic (time course)","IR Fibroblast 4d","sen down / tumour down",4,7,-0.044898700274357
+"IR_time","genotoxic (time course)","IR Fibroblast 4d","sen down / tumour up",17,0,1.70681370353256
+"IR_time","genotoxic (time course)","IR Fibroblast 4d","sen up / tumour down",17,0,1.02292474767235
+"IR_time","genotoxic (time course)","IR Fibroblast 4d","sen up / tumour up",8,1,0.238609304812792
+"IR_time","genotoxic (time course)","IR Keratinocyte 10d","sen down / tumour down",15,0,0.35686418859312
+"IR_time","genotoxic (time course)","IR Keratinocyte 10d","sen down / tumour up",17,0,1.00964215016978
+"IR_time","genotoxic (time course)","IR Keratinocyte 10d","sen up / tumour down",16,0,0.944359320415367
+"IR_time","genotoxic (time course)","IR Keratinocyte 10d","sen up / tumour up",15,0,0.469356699518115
+"IR_time","genotoxic (time course)","IR Keratinocyte 20d","sen down / tumour down",17,0,0.507839299190884
+"IR_time","genotoxic (time course)","IR Keratinocyte 20d","sen down / tumour up",16,0,0.771652333005059
+"IR_time","genotoxic (time course)","IR Keratinocyte 20d","sen up / tumour down",16,0,0.905436892157989
+"IR_time","genotoxic (time course)","IR Keratinocyte 20d","sen up / tumour up",14,0,0.411043284028223
+"IR_time","genotoxic (time course)","IR Keratinocyte 4d","sen down / tumour down",5,1,0.228359675868205
+"IR_time","genotoxic (time course)","IR Keratinocyte 4d","sen down / tumour up",17,0,1.91646857416463
+"IR_time","genotoxic (time course)","IR Keratinocyte 4d","sen up / tumour down",16,0,1.08471766209765
+"IR_time","genotoxic (time course)","IR Keratinocyte 4d","sen up / tumour up",15,0,0.845210383787376
+"IR_time","genotoxic (time course)","IR Melanocyte 10d","sen down / tumour down",17,0,1.10833784839152
+"IR_time","genotoxic (time course)","IR Melanocyte 10d","sen down / tumour up",1,12,-0.432993546979614
+"IR_time","genotoxic (time course)","IR Melanocyte 10d","sen up / tumour down",16,1,0.759553148834567
+"IR_time","genotoxic (time course)","IR Melanocyte 10d","sen up / tumour up",17,0,1.22169107169603
+"IR_time","genotoxic (time course)","IR Melanocyte 20d","sen down / tumour down",16,0,0.800584708261674
+"IR_time","genotoxic (time course)","IR Melanocyte 20d","sen down / tumour up",4,5,-0.118160874926335
+"IR_time","genotoxic (time course)","IR Melanocyte 20d","sen up / tumour down",16,0,1.26723470986903
+"IR_time","genotoxic (time course)","IR Melanocyte 20d","sen up / tumour up",15,0,0.61752561650313
+"IR_time","genotoxic (time course)","IR Melanocyte 4d","sen down / tumour down",17,0,0.978713859663372
+"IR_time","genotoxic (time course)","IR Melanocyte 4d","sen down / tumour up",0,11,-0.402527141646682
+"IR_time","genotoxic (time course)","IR Melanocyte 4d","sen up / tumour down",16,1,0.592810592095922
+"IR_time","genotoxic (time course)","IR Melanocyte 4d","sen up / tumour up",17,0,1.21500230713602
+"arm","CDK4/6i","Abema 1d","sen down / tumour down",13,1,0.333476214918444
+"arm","CDK4/6i","Abema 1d","sen down / tumour up",16,0,0.85891568066749
+"arm","CDK4/6i","Abema 1d","sen up / tumour down",17,0,0.687224073942669
+"arm","CDK4/6i","Abema 1d","sen up / tumour up",9,1,0.18256225295581
+"arm","CDK4/6i","Abema 8d","sen down / tumour down",13,0,0.380654611203258
+"arm","CDK4/6i","Abema 8d","sen down / tumour up",13,0,0.466465929369962
+"arm","CDK4/6i","Abema 8d","sen up / tumour down",15,0,0.360575822960094
+"arm","CDK4/6i","Abema 8d","sen up / tumour up",12,1,0.31303195175962
+"arm","CDK4/6i","Palbo (IMR90)","sen down / tumour down",1,11,-0.323124433163815
+"arm","CDK4/6i","Palbo (IMR90)","sen down / tumour up",17,0,1.59730372831784
+"arm","CDK4/6i","Palbo (IMR90)","sen up / tumour down",17,0,1.35210796290127
+"arm","CDK4/6i","Palbo (IMR90)","sen up / tumour up",3,7,-0.0338620465311925
+"arm","CDK4/6i","Palbo (NHDF)","sen down / tumour down",3,6,-0.146759956612228
+"arm","CDK4/6i","Palbo (NHDF)","sen down / tumour up",17,0,2.20280185495307
+"arm","CDK4/6i","Palbo (NHDF)","sen up / tumour down",17,0,1.59402790650745
+"arm","CDK4/6i","Palbo (NHDF)","sen up / tumour up",7,2,0.155063096364007
+"arm","CDK4/6i","Palbo (NHLF)","sen down / tumour down",5,1,0.173494074298682
+"arm","CDK4/6i","Palbo (NHLF)","sen down / tumour up",17,0,1.62259310875944
+"arm","CDK4/6i","Palbo (NHLF)","sen up / tumour down",17,0,1.16520227982043
+"arm","CDK4/6i","Palbo (NHLF)","sen up / tumour up",9,2,0.217610865663356
+"arm","MDM2i","HDM201 (IMR90)","sen down / tumour down",15,0,2.28019167027432
+"arm","MDM2i","HDM201 (IMR90)","sen down / tumour up",2,0,-0.162464275504707
+"arm","MDM2i","HDM201 (IMR90)","sen up / tumour down",12,0,1.72925178812278
+"arm","MDM2i","HDM201 (IMR90)","sen up / tumour up",4,0,-0.0868299761733353
+"arm","MDM2i","Nutlin 24h (PAAF)","sen down / tumour down",4,1,0.390389987293448
+"arm","MDM2i","Nutlin 24h (PAAF)","sen down / tumour up",17,0,2.14800999852688
+"arm","MDM2i","Nutlin 24h (PAAF)","sen up / tumour down",11,0,0.507431689512413
+"arm","MDM2i","Nutlin 24h (PAAF)","sen up / tumour up",3,0,0.119301819006995
+"arm","MDM2i","RG7388 (IMR90)","sen down / tumour down",11,0,0.731497245309439
+"arm","MDM2i","RG7388 (IMR90)","sen down / tumour up",14,0,1.17901821030097
+"arm","MDM2i","RG7388 (IMR90)","sen up / tumour down",14,0,1.40451333396316
+"arm","MDM2i","RG7388 (IMR90)","sen up / tumour up",4,0,0.152815911208111
+"arm","OIS","RAS (IMR90)","sen down / tumour down",16,0,0.718634942652874
+"arm","OIS","RAS (IMR90)","sen down / tumour up",17,0,1.06725656986144
+"arm","OIS","RAS (IMR90)","sen up / tumour down",16,0,0.815863533316946
+"arm","OIS","RAS (IMR90)","sen up / tumour up",12,0,0.354941762462293
+"arm","genotoxic","Bleo (NHDF)","sen down / tumour down",16,1,0.435155810609217
+"arm","genotoxic","Bleo (NHDF)","sen down / tumour up",17,0,1.65900823878766
+"arm","genotoxic","Bleo (NHDF)","sen up / tumour down",17,0,1.18157224776886
+"arm","genotoxic","Bleo (NHDF)","sen up / tumour up",11,1,0.462448926711563
+"arm","genotoxic","Bleo (NHLF)","sen down / tumour down",15,1,0.587096901846068
+"arm","genotoxic","Bleo (NHLF)","sen down / tumour up",16,0,1.29091175860428
+"arm","genotoxic","Bleo (NHLF)","sen up / tumour down",17,0,1.07193214320951
+"arm","genotoxic","Bleo (NHLF)","sen up / tumour up",12,1,0.343104014750181
+"arm","genotoxic","Doxo (IMR90)","sen down / tumour down",7,1,0.123863678819923
+"arm","genotoxic","Doxo (IMR90)","sen down / tumour up",17,0,1.29898557232042
+"arm","genotoxic","Doxo (IMR90)","sen up / tumour down",17,0,1.39077615592664
+"arm","genotoxic","Doxo (IMR90)","sen up / tumour up",9,3,0.271206034277145
+"arm","genotoxic","Doxo 1d (BJ)","sen down / tumour down",15,1,0.733919341463613
+"arm","genotoxic","Doxo 1d (BJ)","sen down / tumour up",17,0,1.13241682411142
+"arm","genotoxic","Doxo 1d (BJ)","sen up / tumour down",15,0,0.686578951474584
+"arm","genotoxic","Doxo 1d (BJ)","sen up / tumour up",16,0,0.756567028257643
+"arm","genotoxic","Doxo 24h (PAAF)","sen down / tumour down",15,0,0.367772583670942
+"arm","genotoxic","Doxo 24h (PAAF)","sen down / tumour up",0,13,-0.546576598526343
+"arm","genotoxic","Doxo 24h (PAAF)","sen up / tumour down",14,0,0.510054957978132
+"arm","genotoxic","Doxo 24h (PAAF)","sen up / tumour up",16,0,0.399253118307868
+"arm","genotoxic","Doxo 8d (BJ)","sen down / tumour down",11,1,0.28932958466899
+"arm","genotoxic","Doxo 8d (BJ)","sen down / tumour up",16,0,0.876543863718969
+"arm","genotoxic","Doxo 8d (BJ)","sen up / tumour down",16,0,1.08209891919597
+"arm","genotoxic","Doxo 8d (BJ)","sen up / tumour up",15,0,0.577001807902397
+"arm","genotoxic","Eto (IMR90)","sen down / tumour down",5,1,0.0800572499715243
+"arm","genotoxic","Eto (IMR90)","sen down / tumour up",17,0,1.21448933307764
+"arm","genotoxic","Eto (IMR90)","sen up / tumour down",17,0,1.27713086263922
+"arm","genotoxic","Eto (IMR90)","sen up / tumour up",10,1,0.288651134346751
+"arm","genotoxic","IR (IMR90 GSE259295)","sen down / tumour down",1,10,-0.40172603584857
+"arm","genotoxic","IR (IMR90 GSE259295)","sen down / tumour up",17,0,1.2106517220304
+"arm","genotoxic","IR (IMR90 GSE259295)","sen up / tumour down",17,0,1.05857461174982
+"arm","genotoxic","IR (IMR90 GSE259295)","sen up / tumour up",3,12,-0.237723028634956
+"arm","genotoxic","IR (IMR90)","sen down / tumour down",3,7,-0.216561872861753
+"arm","genotoxic","IR (IMR90)","sen down / tumour up",17,0,1.65009980051482
+"arm","genotoxic","IR (IMR90)","sen up / tumour down",17,0,1.49240699400026
+"arm","genotoxic","IR (IMR90)","sen up / tumour up",5,6,-0.0439321250738431
+"arm","quiescence","Quiescence (IMR90)","sen down / tumour down",5,3,0.146914027409506
+"arm","quiescence","Quiescence (IMR90)","sen down / tumour up",17,0,1.77155558636437
+"arm","quiescence","Quiescence (IMR90)","sen up / tumour down",17,0,1.59569750964911
+"arm","quiescence","Quiescence (IMR90)","sen up / tumour up",8,7,0.11842101859437
+"arm","quiescence","Rapamycin (NHDF)","sen down / tumour down",16,0,1.36054649074647
+"arm","quiescence","Rapamycin (NHDF)","sen down / tumour up",15,0,0.781980667009034
+"arm","quiescence","Rapamycin (NHDF)","sen up / tumour down",16,0,1.62024409372142
+"arm","quiescence","Rapamycin (NHDF)","sen up / tumour up",7,1,0.264344493399448
+"arm","quiescence","Rapamycin (NHLF)","sen down / tumour down",17,0,1.35113840175035
+"arm","quiescence","Rapamycin (NHLF)","sen down / tumour up",13,0,0.480661583910206
+"arm","quiescence","Rapamycin (NHLF)","sen up / tumour down",16,0,1.25114963348298
+"arm","quiescence","Rapamycin (NHLF)","sen up / tumour up",13,0,0.725384521007226
+"meta","meta-analysis group","CICQ","sen down / tumour down",0,15,-0.699815467785338
+"meta","meta-analysis group","CICQ","sen down / tumour up",17,0,1.73525516927891
+"meta","meta-analysis group","CICQ","sen up / tumour down",17,0,1.27921848983022
+"meta","meta-analysis group","CICQ","sen up / tumour up",2,13,-0.453212666756013
+"meta","meta-analysis group","OIS","sen down / tumour down",16,0,1.30207420893065
+"meta","meta-analysis group","OIS","sen down / tumour up",15,0,0.663555172158906
+"meta","meta-analysis group","OIS","sen up / tumour down",14,0,0.66324690809252
+"meta","meta-analysis group","OIS","sen up / tumour up",17,0,0.670016628711683
+"meta","meta-analysis group","RS","sen down / tumour down",10,1,0.222708835947082
+"meta","meta-analysis group","RS","sen down / tumour up",17,0,1.07827937336718
+"meta","meta-analysis group","RS","sen up / tumour down",17,0,0.965593777863517
+"meta","meta-analysis group","RS","sen up / tumour up",5,4,0.0958071371543482
+"meta","meta-analysis group","SIPS","sen down / tumour down",2,6,-0.262326878754391
+"meta","meta-analysis group","SIPS","sen down / tumour up",17,0,1.8324765877161
+"meta","meta-analysis group","SIPS","sen up / tumour down",17,0,1.25240702614089
+"meta","meta-analysis group","SIPS","sen up / tumour up",13,0,0.446847817756555
+"meta","meta-analysis group","SSCQ","sen down / tumour down",0,11,-0.321697918949791
+"meta","meta-analysis group","SSCQ","sen down / tumour up",17,0,1.82599286259937
+"meta","meta-analysis group","SSCQ","sen up / tumour down",17,0,1.49666429865041
+"meta","meta-analysis group","SSCQ","sen up / tumour up",2,10,-0.305624056584236
+"module","acute","BPTES (glutaminase) [acute]","sen up / tumour down",2,0,0.352879765365113
+"module","acute","BPTES (glutaminase) [acute]","sen up / tumour up",0,0,-0.0116053276010372
+"module","acute","Chloramphenicol (mito translation) [acute]","sen up / tumour down",1,0,1.07407121183831
+"module","acute","Chloramphenicol (mito translation) [acute]","sen up / tumour up",0,0,-0.649444148739303
+"module","acute","DNA damage [acute]","sen up / tumour down",2,0,0.543523690277385
+"module","acute","DNA damage [acute]","sen up / tumour up",6,0,0.570080574679822
+"module","acute","Heat shock [acute]","sen up / tumour down",15,0,0.504666594285393
+"module","acute","Heat shock [acute]","sen up / tumour up",9,0,0.282842504813193
+"module","acute","ISR [acute]","sen up / tumour down",3,0,0.21325689531592
+"module","acute","ISR [acute]","sen up / tumour up",7,0,0.617949391063327
+"module","acute","NF-kB [acute]","sen up / tumour down",16,0,0.680736619876912
+"module","acute","NF-kB [acute]","sen up / tumour up",7,1,-0.024284961348377
+"module","acute","Oxidative (H2O2) [acute]","sen up / tumour down",10,0,2.00710116772286
+"module","acute","Oxidative (H2O2) [acute]","sen up / tumour up",0,3,-1.77199759854408
+"module","acute","Rotenone (complex I) [acute]","sen up / tumour down",0,0,-0.404334110759
+"module","acute","Rotenone (complex I) [acute]","sen up / tumour up",3,0,0.862864253454474
+"module","acute","TNF 24 h (readout) [acute]","sen up / tumour down",11,1,0.312620320774043
+"module","acute","TNF 24 h (readout) [acute]","sen up / tumour up",15,0,0.802116217510963
+"module","acute","UPR [acute]","sen up / tumour down",12,0,0.487386620658376
+"module","acute","UPR [acute]","sen up / tumour up",1,1,-0.132110764594606
+"module","acute","UVB [acute]","sen up / tumour down",4,0,1.36509516106917
+"module","acute","UVB [acute]","sen up / tumour up",0,0,0.223819975911597
+"module","chronic","2-deoxyglucose [chronic]","sen up / tumour down",17,0,1.33372977924543
+"module","chronic","2-deoxyglucose [chronic]","sen up / tumour up",9,1,0.386984133903453
+"module","chronic","Antimycin 5 d [chronic]","sen up / tumour down",13,0,0.597961548028543
+"module","chronic","Antimycin 5 d [chronic]","sen up / tumour up",11,0,0.372415129476895
+"module","chronic","Glucocorticoid [chronic]","sen up / tumour down",17,0,1.43562715213729
+"module","chronic","Glucocorticoid [chronic]","sen up / tumour up",10,0,0.377709499049804
+"module","chronic","Heat shock (senescent) [chronic]","sen up / tumour down",16,0,0.513715218724431
+"module","chronic","Heat shock (senescent) [chronic]","sen up / tumour up",7,0,0.212900268746415
+"module","chronic","IL-1b 14 d [chronic]","sen up / tumour down",15,0,0.882881025596146
+"module","chronic","IL-1b 14 d [chronic]","sen up / tumour up",16,0,0.960876178915678
+"module","chronic","Oxygen 21% [chronic]","sen up / tumour down",16,0,0.894909560111246
+"module","chronic","Oxygen 21% [chronic]","sen up / tumour up",17,0,0.776792595826685
+"module","chronic","UPR (senescent) [chronic]","sen up / tumour down",14,0,0.711374445622081
+"module","chronic","UPR (senescent) [chronic]","sen up / tumour up",9,0,0.621921457449394

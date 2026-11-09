@@ -33,6 +33,7 @@ sets <- list(
   RASauto_DOWN = cls$gene[cls$OIS_direction == "DOWN" & cls$arrest_class == "RAS-autonomous"],
   arrest_DOWN = cls$gene[cls$OIS_direction == "DOWN" & cls$arrest_class == "arrest-coupled"]
 )
+source(".claude/worktrees/two-sided-fisher/exploratory/ras_vs_ois/pathway_sets.R"); sets <- c(sets, pathway_sets())  # added 2026-11-07: pathway scores (TGF-beta, cGAS-STING, IFN, ...)
 sets <- lapply(sets, function(g) intersect(g, rownames(o)))
 sets$Proliferation <- head(sets$Proliferation, 1400)  # UCell maxRank 1500
 o <- score_ucell_parallel(o, signatures = sets, ncores = 1, assay = "RNA", slot = "counts")

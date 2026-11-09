@@ -21,6 +21,7 @@ d["group"] = np.select([d.ras_mut & ~d.myc_amp, d.myc_amp & ~d.ras_mut, ~d.ras_m
                        ["RAS", "MYC", "neither"], "both")
 scores = ["ERK_output", "MYC_targets", "Proliferation", "RIS_RASauto_UP", "RIS_intermediate_UP",
           "RIS_arrest_UP", "RIS_NFKB_BRD4_UP", "RIS_RASauto_DOWN"]
+scores += [c for c in d.columns if c.startswith(("P_", "HS_"))]  # added 2026-11-07: pathway scores
 res = []
 for coh, g in d.groupby("cohort"):
     n = g.group.value_counts()
@@ -34,7 +35,7 @@ for coh, g in d.groupby("cohort"):
             res.append(dict(cohort=coh, driver=drv, n_driver=int(n[drv]), n_neither=int(n["neither"]),
                             score=sc, effect_sd=m.params["is_drv"], p=m.pvalues["is_drv"]))
 r = pd.DataFrame(res)
-r["padj"] = multipletests(r.p, method="fdr_bh")[1]
+r["padj"] = r.groupby(np.where(r.score.str.startswith("HS_"), "house", np.where(r.score.str.match(r"P_(GLYC|GAG|HEXOSAMINE)"), "met", np.where(r.score.str.startswith("P_"), "path", "core")))).p.transform(lambda x: multipletests(x, method="fdr_bh")[1])  # pathway scores (2026-11-07): separate BH family
 r.to_csv(f"{OUT}/driver_models.csv", index=False)
 
 pd.set_option("display.width", 250)

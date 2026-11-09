@@ -27,6 +27,7 @@ sets0 <- list(MAPK_output = c("DUSP6", "SPRY2", "SPRY4", "ETV4", "ETV5", "FOSL1"
               arrest_UP = sel("UP", "arrest-coupled"),
               NFKB_BRD4_dep_UP = cls$gene[cls$OIS_direction == "UP" & cls$nfkb_brd4 == "dependent"],
               RASauto_DOWN = sel("DOWN", "RAS-autonomous"), arrest_DOWN = sel("DOWN", "arrest-coupled"))
+source(".claude/worktrees/two-sided-fisher/exploratory/ras_vs_ois/pathway_sets.R"); sets0 <- c(sets0, pathway_sets())  # added 2026-11-07: pathway scores (TGF-beta, cGAS-STING, IFN, ...)
 FRAC <- c("MKI67_pos", "CDKN1A_pos")   # detection fractions; MKI67/CDKN1A log1p(CPM) are reported as medians
 
 qc <- function(o, tag, umi_max = 120000) {
@@ -58,7 +59,7 @@ analyse <- function(o, lev, tag, ref, top) {
     else wilcox.test(a, b)$p.value })
   tab <- data.frame(score = vars, t(med), check.names = FALSE)
   tab$spearman_rho <- rho; tab$delta <- med[top, ] - med[ref, ]
-  tab$p <- p; tab$padj_BH <- p.adjust(p, "BH"); tab$test <- ifelse(vars %in% FRAC, "Fisher", "Wilcoxon")
+  tab$p <- p; tab$padj_BH <- ave(p, ifelse(grepl("^HS_", vars), "house", ifelse(grepl("^P_(GLYC|GAG|HEXOSAMINE)", vars), "met", ifelse(grepl("^P_", vars), "path", "core"))), FUN = function(x) p.adjust(x, "BH"))  # pathway scores (2026-11-07): separate BH family; tab$test <- ifelse(vars %in% FRAC, "Fisher", "Wilcoxon")
   colnames(tab)[colnames(tab) == "delta"] <- paste0("delta_", top, "_vs_", ref)
   cat("\n==", tag, "cells per group:\n"); print(table(sc$group))
   cat("Median score per group (MKI67_pos/CDKN1A_pos = fraction of cells detected), Spearman rho with group order,",

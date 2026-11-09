@@ -15,6 +15,7 @@ sets0 <- list(MAPK_output = c("DUSP6", "SPRY2", "SPRY4", "ETV4", "ETV5", "FOSL1"
               arrest_UP = sel("UP", "arrest-coupled"),
               NFKB_BRD4_dep_UP = cls$gene[cls$OIS_direction == "UP" & cls$nfkb_brd4 == "dependent"],
               RASauto_DOWN = sel("DOWN", "RAS-autonomous"), arrest_DOWN = sel("DOWN", "arrest-coupled"))
+source(".claude/worktrees/two-sided-fisher/exploratory/ras_vs_ois/pathway_sets.R"); sets0 <- c(sets0, pathway_sets())  # added 2026-11-07: pathway scores (TGF-beta, cGAS-STING, IFN, ...)
 score <- function(o, lab) {
   DefaultAssay(o) <- "RNA"
   s <- lapply(sets0, intersect, rownames(o))

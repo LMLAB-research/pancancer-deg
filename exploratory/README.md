@@ -74,6 +74,33 @@ Later `ras_vs_ois/` scripts: `11_teo_time_course.R` (GSE115301 ER:RAS time cours
 kept vs withdrawn), `14_dose_and_kras.R` (GSE222951 RAS dose, GSE202126 KRAS time course;
 brief in `BRIEF_dose_and_kras.md`).
 
+## Pathways, metabolism, stressors (2026-11-07)
+
+- `ras_vs_ois/pathway_sets.R`: TGF-β, cGAS–STING, IFN, NF-κB, IL6–STAT3, p53, NOTCH, KRAS-up sets (msigdbr),
+  sourced by 07, 09, 11, 13, 14 (single-cell scores) and `ras_vs_myc/02` (tumour scores).
+- `ras_vs_ois/15_pathway_class_overlap.R`: which RIS class holds each pathway's genes (house `overlap_function`).
+- `ras_vs_myc/11_pathway_models.py`: class scores ~ ERK + MYC + proliferation + pathway scores + stroma (+ purity).
+- `metabolism/01_metabolic_overlap_tcga.R`: copy of the house `19_metabolic_overlap_v3.R` applied to TCGA tumour DEGs
+  and the per-inducer arms, plus a senescence-vs-tumour direction test within metabolic genes.
+- `metabolism/00_metabolic_sets.R`: glycolysis (SI37, Hallmark), GAG synthesis and hexosamine core sets for scoring.
+- `metabolism/02_tumour_metabolic_purity.py`: tumour glycolysis / GAG scores against ABSOLUTE purity and stroma, and
+  their ERK / driver associations. `NOPROLIF=1 01_metabolic_overlap_tcga.R`: proliferation genes removed.
+- `stressors/01_inducer_tcga_overlap.R`: per-stressor senescence DEGs (meta groups, 21 inducer arms, IR time course,
+  GSE60340) vs TCGA tumour DEGs, two-sided, all direction pairs.
+
+## House sets, components, modules (2026-11-09)
+
+- `ras_vs_ois/pathway_sets.R::house_sets()`: house 49 Hallmark + lysosomal sets (HS_*), now scored in all
+  single-cell scripts and tumour scores; `15_pathway_class_overlap.R` also runs them (`class_pathway_overlap_house.csv`).
+- `hallmarks/01_hallmark_overlap_tcga.R`: copy of the Hallmark family of house 17_v3 on TCGA tumour DEGs and inducer arms.
+- `breakdown/01_cq_rs_sips_components.R`: CQ / RS / SIPS (and OIS) signatures split into arrest-shared vs
+  senescence-specific, p53 programme vs rest, and early vs late components; each vs tumour DEGs.
+- `breakdown/02_shared_layer_drivers.R`: OIS genes shared with RS/SIPS vs OIS-only: tumour overlap, which non-RAS
+  perturbations (DNA damage ± p53, MDM2i, CDK4/6i, quiescence, cytokines, other oncogenes) reproduce them, and their
+  dependence on p65, BRD4, JQ1, IL-1R, p53, p16/p21 in OIS.
+- `stressors/01_inducer_tcga_overlap.R` now includes the house acute and chronic stress modules (antimycin A, 2-DG,
+  glucocorticoid, 21% O2, IL-1β, heat shock, UPR, NF-κB, ...).
+
 What was done, why, and the results: `FINDINGS.md`. Every choice and who made it: `DECISIONS.md`.
 Figures: `figures/`, from `figures_summary.R` (summary tables) and `figures_sc_umaps.R` (house UMAP calls). Summary-level CSVs: `summary_tables/`,
 written by `export_summaries.py` (run from the repo root) from the local results.

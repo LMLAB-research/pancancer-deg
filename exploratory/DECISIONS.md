@@ -89,9 +89,41 @@ Every choice that shaped the results in `FINDINGS.md`, in the order the analyses
 | G4 | Fig. 5: RAS and MYC in one panel, marker = BH < 0.05 / nominal only / n.s. | Separate rows | Roberto asked | Roberto | none |
 | G5 | Pre-filter GSE245807 UMAP recomputed (SCTransform, PCA 50, UMAP dims 1:30, res 0.12, seed 1), not a house-run embedding | House embedding (none exists for these cells) | The house run stores no embedding before the LMNB1/G1 subset | Claude | stated in legend |
 
+## H. Pathways, metabolism, stressors (2026-11-07)
+
+| # | Decision | Alternatives | Reason | Decided by | Check |
+|---|---|---|---|---|---|
+| H1 | Pathway sets: Hallmark TGF-β; KEGG cytosolic DNA sensing + Reactome STING for cGAS–STING; Hallmark IFN-α as the type-I IFN output; plus IFN-γ, TNFα/NF-κB, IL6–STAT3, p53, NOTCH, KRAS-up (control) | Curated target lists | No Hallmark cGAS–STING set; standard msigdbr sets | Claude (Roberto asked for TGF-β and cGAS–STING "for example") | KRAS-up behaves as RAS-autonomous (positive control) |
+| H2 | Class × pathway test: house `overlap_function`, background = classified OIS DEGs of the same direction | All tested genes | Asks which class, not whether OIS | Claude | none |
+| H3 | Single-cell scripts rerun with the pathway sets appended | Separate scoring script | One set definition; UCell scores signatures independently | Claude | existing per-cell scores identical (max diff 0) |
+| H4 | TCGA pathway scores exclude stromal-proxy and all RIS class genes | Full sets | No shared genes with outcomes or the stroma covariate | Claude | existing model coefficients identical (100/100 rows) |
+| H5 | Extended class models add TGF-β, cGAS–STING (KEGG), IFN-α, TNFα/NF-κB as covariates | Pathways as outcomes only | Both reported | Claude | with purity: same direction |
+| H6 | Metabolism: copy of house 19_metabolic_overlap_v3.R, inputs only changed; senescence results read from the house output | Recompute | House rule | Claude (Roberto asked to repeat the house analysis) | SI18 sensitivity background gives the same directions |
+| H7 | TCGA and inducer-arm metabolic calls: one call per cancer / arm, per-source tested background; BH family = all cancers (or all arms) per bg_type | One pooled background | Tested genes differ by source (as house modules 17/18/19) | Claude | none |
+| H8 | Stressor sets: 5 meta groups, 21 nongenotoxic arms, IR time course (AUC per-cell-type files), GSE60340 | AUC `all_time_degs.csv` | That file is corrupt on disk (almost all NUL bytes) | Claude | per-cell-type files have 13.4–13.6k genes and all 3 time points |
+| H9 | Stressor × cancer: house `overlap_function`, background = tested in both, BH across all 2,720 tests | BH per set | — | Claude | none |
+| H11 | Pathway scores form their own BH family in scripts 03, 07, 09, 14 | One family with the class scores | Existing BH values stay as committed | Claude | every committed summary value identical after the rerun |
+| H10 | Stressor summary figure is custom ggplot (median log2 OR + counts), not a house plot | House `summarise_overlaps` | 40 sets × 17 cancers × 4 pairs needs a summary | Claude | full table in results |
+
+| H12 | GAG synthesis vs hexosamine core: gene-name rule on the SI37 "Hexosamine pathway" class (`00_metabolic_sets.R`) | Use the class as is | The class is mostly GAG chain enzymes | Claude | gene lists printed by the script |
+| H13 | Metabolic score sets keep RIS class genes in tumour scores (stroma genes removed); own BH family | Remove RIS genes as for the other pathways | Score glycolysis as a whole (HK2 included); not used as covariates | Claude | committed values identical |
+| H14 | Proliferation sensitivity for metabolism: the 671-gene list of B5 removed from pathways and backgrounds; senescence arrest results recomputed with the house call | — | Same rule as the main overlaps | Claude (Roberto: "yes do it") | none |
+| H15 | Tumour purity check: within-cohort score ~ purity + stroma, ABSOLUTE called samples | ESTIMATE | Same purity source as F5 | Claude | none |
+
+| H16 | House pathway sets (49 Hallmark + Lysosomal Genes, `stress_response_pathways_RERUN.csv`) added as HS_* to the class test, single-cell scores and tumour scores; own BH family | msigdbr Hallmarks only | House rule; lysosomal set was missing | Roberto ("yes do all 3") | class test: same results as msigdbr where sets overlap; committed values identical |
+| H17 | Hallmark × tumour DEGs: copy of the Hallmark family of house 17_v3 (`hallmarks/01_hallmark_overlap_tcga.R`), inputs only changed | — | House rule | Claude | none |
+| H18 | Components: arrest-shared = same-direction DEG in CICQ or SSCQ (meta) or the GSE162175 quiescence arm; p53 programme = DEG in ≥ 2 of 3 MDM2i arms; doxorubicin p53 dependence = ≥ 2 of 4 wild-type arms vs LFS Adriamycin; timing = 4 d vs 20 d (IR), 1 d vs 8 d (doxorubicin) | Other thresholds | Simplest rules the local data support | Claude | proliferation-removed run: same pattern |
+| H19 | Stress modules: "full" version; module genes = DEGs (all up-regulated by construction), background = module tested genes; own BH family | "unique" version | — | Claude | earlier stressor results identical |
+| H20 | Single-cell pattern labels (RAS-like / arrest-like) use fixed cut-offs on withdrawal fraction, dose rho and day-2 fraction | Statistical classification | Descriptive summary only | Claude | thresholds not varied |
+
+| H21 | Shared layer = same-direction DEG in meta RS or SIPS; split applied to RAS-autonomous and to OIS senescence-specific genes | RS and SIPS separately | Simplest; both groups pooled | Claude (Roberto asked for the test) | none |
+| H22 | Driver test background = the family's OIS genes of that direction tested in the contrast; contrasts from independent studies; etoposide SRP062872 shown but flagged (in meta SIPS) | All genes as background | Compares shared vs OIS-only directly | Claude | none |
+| H23 | Dependence = retention ≤ 0.5 (as the NF-κB/BRD4 tag, C7); shared vs OIS-only by Wilcoxon on retention | — | Same rule as the classes | Claude | none |
+
 ## Not decided yet
 
 - Accept the GSE202126 uncapped run as primary (D9).
 - Test whether summing vs dropping duplicate symbols (C4) and the per-contrast CPM filter (C5)
   change the classes.
 - Vary the retention thresholds 0.5 / 0.25 (C7).
+- Run the Dou 2017 shcGAS etoposide arm (GSE99028) to tag cGAS-dependent genes.

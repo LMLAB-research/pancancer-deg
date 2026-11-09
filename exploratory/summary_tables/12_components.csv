@@ -1,0 +1,109 @@
+"id","family","source","component","dir","n_genes","n_tested","frac_prolif"
+1,"1 arrest-shared vs specific (meta)","RS","arrest-shared (also in CQ)","up",667,14181,0.004
+2,"1 arrest-shared vs specific (meta)","RS","senescence-specific (not in CQ)","up",1142,14181,0.018
+3,"1 arrest-shared vs specific (meta)","SIPS","arrest-shared (also in CQ)","up",1069,14181,0.007
+4,"1 arrest-shared vs specific (meta)","SIPS","senescence-specific (not in CQ)","up",715,14181,0.011
+5,"1 arrest-shared vs specific (meta)","OIS","arrest-shared (also in CQ)","up",526,14181,0.008
+6,"1 arrest-shared vs specific (meta)","OIS","senescence-specific (not in CQ)","up",1163,14181,0.027
+7,"1 arrest-shared vs specific (meta)","CICQ","shared with CS","up",1266,14181,0.006
+8,"1 arrest-shared vs specific (meta)","CICQ","CQ-specific","up",2191,14181,0.018
+9,"1 arrest-shared vs specific (meta)","SSCQ","shared with CS","up",1106,14181,0.008
+10,"1 arrest-shared vs specific (meta)","SSCQ","CQ-specific","up",1592,14181,0.019
+11,"1b arrest-shared vs specific (GSE162175)","IR (IMR90)","arrest-shared (also in quiescence)","up",624,12756,0.002
+12,"1b arrest-shared vs specific (GSE162175)","IR (IMR90)","senescence-specific (not in quiescence)","up",650,12756,0.011
+13,"1b arrest-shared vs specific (GSE162175)","Doxo (IMR90)","arrest-shared (also in quiescence)","up",371,12757,0
+14,"1b arrest-shared vs specific (GSE162175)","Doxo (IMR90)","senescence-specific (not in quiescence)","up",1041,12757,0.015
+15,"1b arrest-shared vs specific (GSE162175)","Eto (IMR90)","arrest-shared (also in quiescence)","up",428,12757,0.002
+16,"1b arrest-shared vs specific (GSE162175)","Eto (IMR90)","senescence-specific (not in quiescence)","up",1173,12757,0.014
+17,"1b arrest-shared vs specific (GSE162175)","Palbo (IMR90)","arrest-shared (also in quiescence)","up",675,12642,0.006
+18,"1b arrest-shared vs specific (GSE162175)","Palbo (IMR90)","senescence-specific (not in quiescence)","up",922,12642,0.011
+19,"1b arrest-shared vs specific (GSE162175)","RAS (IMR90)","arrest-shared (also in quiescence)","up",523,12757,0.006
+20,"1b arrest-shared vs specific (GSE162175)","RAS (IMR90)","senescence-specific (not in quiescence)","up",1173,12757,0.024
+21,"2 p53 programme (MDM2i)","RS","p53 programme","up",48,11264,0.021
+22,"2 p53 programme (MDM2i)","RS","not p53 programme","up",1761,11264,0.012
+23,"2 p53 programme (MDM2i)","SIPS","p53 programme","up",43,11265,0.023
+24,"2 p53 programme (MDM2i)","SIPS","not p53 programme","up",1741,11265,0.008
+25,"2 p53 programme (MDM2i)","OIS","p53 programme","up",23,11263,0.043
+26,"2 p53 programme (MDM2i)","OIS","not p53 programme","up",1666,11263,0.02
+27,"2 p53 programme (MDM2i)","CICQ","p53 programme","up",24,11264,0
+28,"2 p53 programme (MDM2i)","CICQ","not p53 programme","up",3433,11264,0.014
+29,"2 p53 programme (MDM2i)","SSCQ","p53 programme","up",19,11264,0
+30,"2 p53 programme (MDM2i)","SSCQ","not p53 programme","up",2679,11264,0.015
+31,"2 p53 programme (MDM2i)","IR (IMR90)","p53 programme","up",32,11064,0.031
+32,"2 p53 programme (MDM2i)","IR (IMR90)","not p53 programme","up",1242,11064,0.006
+33,"2 p53 programme (MDM2i)","Doxo (IMR90)","p53 programme","up",38,11064,0.026
+34,"2 p53 programme (MDM2i)","Doxo (IMR90)","not p53 programme","up",1374,11064,0.011
+35,"2 p53 programme (MDM2i)","Eto (IMR90)","p53 programme","up",41,11064,0.024
+36,"2 p53 programme (MDM2i)","Eto (IMR90)","not p53 programme","up",1560,11064,0.01
+37,"2 p53 programme (MDM2i)","Bleo (NHDF)","p53 programme","up",50,10951,0.02
+38,"2 p53 programme (MDM2i)","Bleo (NHDF)","not p53 programme","up",949,10951,0.011
+39,"2 p53 programme (MDM2i)","Doxo 8d (BJ)","p53 programme","up",44,11071,0.023
+40,"2 p53 programme (MDM2i)","Doxo 8d (BJ)","not p53 programme","up",1712,11071,0.015
+41,"2b doxorubicin p53 dependence (LFS)","Doxorubicin","p53-dependent (lost in p53-mutant)","up",826,13665,0.016
+42,"2b doxorubicin p53 dependence (LFS)","Doxorubicin","p53-independent (kept in p53-mutant)","up",529,13665,0.015
+43,"3 timing","IR Fibroblast","early-persistent (4 d and 20 d)","up",1050,13363,0.004
+44,"3 timing","IR Fibroblast","early-only (4 d)","up",400,13363,0.018
+45,"3 timing","IR Fibroblast","late-only (20 d)","up",858,13363,0.015
+46,"3 timing","IR Keratinocyte","early-persistent (4 d and 20 d)","up",376,13570,0.005
+47,"3 timing","IR Keratinocyte","early-only (4 d)","up",188,13570,0.005
+48,"3 timing","IR Keratinocyte","late-only (20 d)","up",1572,13570,0.022
+49,"3 timing","IR Melanocyte","early-persistent (4 d and 20 d)","up",1118,13489,0.014
+50,"3 timing","IR Melanocyte","early-only (4 d)","up",1128,13489,0.123
+51,"3 timing","IR Melanocyte","late-only (20 d)","up",287,13489,0.017
+52,"3 timing","Doxo BJ","early-persistent (1 d and 8 d)","up",648,12984,0.015
+53,"3 timing","Doxo BJ","early-only (1 d)","up",334,12984,0.012
+54,"3 timing","Doxo BJ","late-only (8 d)","up",1108,12984,0.015
+55,"1 arrest-shared vs specific (meta)","RS","arrest-shared (also in CQ)","down",681,14181,0.264
+56,"1 arrest-shared vs specific (meta)","RS","senescence-specific (not in CQ)","down",1285,14181,0.057
+57,"1 arrest-shared vs specific (meta)","SIPS","arrest-shared (also in CQ)","down",572,14181,0.299
+58,"1 arrest-shared vs specific (meta)","SIPS","senescence-specific (not in CQ)","down",311,14181,0.09
+59,"1 arrest-shared vs specific (meta)","OIS","arrest-shared (also in CQ)","down",682,14181,0.214
+60,"1 arrest-shared vs specific (meta)","OIS","senescence-specific (not in CQ)","down",1814,14181,0.028
+61,"1 arrest-shared vs specific (meta)","CICQ","shared with CS","down",881,14181,0.215
+62,"1 arrest-shared vs specific (meta)","CICQ","CQ-specific","down",1229,14181,0.096
+63,"1 arrest-shared vs specific (meta)","SSCQ","shared with CS","down",725,14181,0.236
+64,"1 arrest-shared vs specific (meta)","SSCQ","CQ-specific","down",840,14181,0.098
+65,"1b arrest-shared vs specific (GSE162175)","IR (IMR90)","arrest-shared (also in quiescence)","down",613,12756,0.261
+66,"1b arrest-shared vs specific (GSE162175)","IR (IMR90)","senescence-specific (not in quiescence)","down",785,12756,0.118
+67,"1b arrest-shared vs specific (GSE162175)","Doxo (IMR90)","arrest-shared (also in quiescence)","down",482,12757,0.309
+68,"1b arrest-shared vs specific (GSE162175)","Doxo (IMR90)","senescence-specific (not in quiescence)","down",1187,12757,0.081
+69,"1b arrest-shared vs specific (GSE162175)","Eto (IMR90)","arrest-shared (also in quiescence)","down",493,12757,0.3
+70,"1b arrest-shared vs specific (GSE162175)","Eto (IMR90)","senescence-specific (not in quiescence)","down",1340,12757,0.085
+71,"1b arrest-shared vs specific (GSE162175)","Palbo (IMR90)","arrest-shared (also in quiescence)","down",561,12642,0.273
+72,"1b arrest-shared vs specific (GSE162175)","Palbo (IMR90)","senescence-specific (not in quiescence)","down",835,12642,0.108
+73,"1b arrest-shared vs specific (GSE162175)","RAS (IMR90)","arrest-shared (also in quiescence)","down",596,12757,0.247
+74,"1b arrest-shared vs specific (GSE162175)","RAS (IMR90)","senescence-specific (not in quiescence)","down",1305,12757,0.045
+75,"2 p53 programme (MDM2i)","RS","p53 programme","down",37,11264,0.378
+76,"2 p53 programme (MDM2i)","RS","not p53 programme","down",1929,11264,0.124
+77,"2 p53 programme (MDM2i)","SIPS","p53 programme","down",27,11265,0.519
+78,"2 p53 programme (MDM2i)","SIPS","not p53 programme","down",856,11265,0.216
+79,"2 p53 programme (MDM2i)","OIS","p53 programme","down",36,11263,0.389
+80,"2 p53 programme (MDM2i)","OIS","not p53 programme","down",2460,11263,0.074
+81,"2 p53 programme (MDM2i)","CICQ","p53 programme","down",25,11264,0.56
+82,"2 p53 programme (MDM2i)","CICQ","not p53 programme","down",2085,11264,0.141
+83,"2 p53 programme (MDM2i)","SSCQ","p53 programme","down",25,11264,0.56
+84,"2 p53 programme (MDM2i)","SSCQ","not p53 programme","down",1540,11264,0.155
+85,"2 p53 programme (MDM2i)","IR (IMR90)","p53 programme","down",29,11064,0.483
+86,"2 p53 programme (MDM2i)","IR (IMR90)","not p53 programme","down",1369,11064,0.175
+87,"2 p53 programme (MDM2i)","Doxo (IMR90)","p53 programme","down",32,11064,0.438
+88,"2 p53 programme (MDM2i)","Doxo (IMR90)","not p53 programme","down",1637,11064,0.141
+89,"2 p53 programme (MDM2i)","Eto (IMR90)","p53 programme","down",32,11064,0.438
+90,"2 p53 programme (MDM2i)","Eto (IMR90)","not p53 programme","down",1801,11064,0.138
+91,"2 p53 programme (MDM2i)","Bleo (NHDF)","p53 programme","down",33,10951,0.455
+92,"2 p53 programme (MDM2i)","Bleo (NHDF)","not p53 programme","down",1101,10951,0.16
+93,"2 p53 programme (MDM2i)","Doxo 8d (BJ)","p53 programme","down",25,11071,0.52
+94,"2 p53 programme (MDM2i)","Doxo 8d (BJ)","not p53 programme","down",1253,11071,0.126
+95,"2b doxorubicin p53 dependence (LFS)","Doxorubicin","p53-dependent (lost in p53-mutant)","down",900,13665,0.16
+96,"2b doxorubicin p53 dependence (LFS)","Doxorubicin","p53-independent (kept in p53-mutant)","down",320,13665,0.194
+97,"3 timing","IR Fibroblast","early-persistent (4 d and 20 d)","down",801,13363,0.223
+98,"3 timing","IR Fibroblast","early-only (4 d)","down",564,13363,0.137
+99,"3 timing","IR Fibroblast","late-only (20 d)","down",555,13363,0.025
+100,"3 timing","IR Keratinocyte","early-persistent (4 d and 20 d)","down",576,13570,0.248
+101,"3 timing","IR Keratinocyte","early-only (4 d)","down",111,13570,0.054
+102,"3 timing","IR Keratinocyte","late-only (20 d)","down",1456,13570,0.034
+103,"3 timing","IR Melanocyte","early-persistent (4 d and 20 d)","down",574,13489,0.052
+104,"3 timing","IR Melanocyte","early-only (4 d)","down",1276,13489,0.022
+105,"3 timing","IR Melanocyte","late-only (20 d)","down",75,13489,0.147
+106,"3 timing","Doxo BJ","early-persistent (1 d and 8 d)","down",624,12984,0.208
+107,"3 timing","Doxo BJ","early-only (1 d)","down",474,12984,0.131
+108,"3 timing","Doxo BJ","late-only (8 d)","down",654,12984,0.063

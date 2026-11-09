@@ -1,0 +1,279 @@
+"group","contrast","family","dir","set","actual","n_set","frac","odds","pval","background_n","adj_BH"
+"DNA damage, p53 wt","IR (IMR90)","RAS-autonomous","up","RAS-autonomous | shared with RS/SIPS up",33,219,0.150684931506849,7.38692572618982,1.71856495852617e-06,433,3.34098642286906e-06
+"DNA damage, p53 wt","IR (IMR90)","RAS-autonomous","up","RAS-autonomous | OIS-only up",5,214,0.0233644859813084,0.135374313627465,1.71856495852617e-06,433,3.34098642286906e-06
+"DNA damage, p53 wt","IR (IMR90)","OIS senescence-specific","up","OIS senescence-specific | shared with RS/SIPS up",91,444,0.204954954954955,8.86898061074381,1.08295897817361e-19,976,3.62726019195498e-19
+"DNA damage, p53 wt","IR (IMR90)","OIS senescence-specific","up","OIS senescence-specific | OIS-only up",15,532,0.0281954887218045,0.112752529731389,1.08295897817361e-19,976,3.62726019195498e-19
+"DNA damage, p53 wt","IR (IMR90)","arrest-coupled (reference)","up","arrest-coupled (reference) up",6,37,0.162162162162162,0.909908163467602,1,1428,1
+"DNA damage, p53 wt","IR (IMR90)","RAS-autonomous","down","RAS-autonomous | shared with RS/SIPS down",39,172,0.226744186046512,93.413719165043,1.82945888645681e-18,493,5.77942693676129e-18
+"DNA damage, p53 wt","IR (IMR90)","RAS-autonomous","down","RAS-autonomous | OIS-only down",1,321,0.00311526479750779,0.0107050656899025,1.82945888645681e-18,493,5.77942693676129e-18
+"DNA damage, p53 wt","IR (IMR90)","OIS senescence-specific","down","OIS senescence-specific | shared with RS/SIPS down",194,601,0.32279534109817,14.7652349445848,1.82343650494909e-58,1562,3.16822092734904e-57
+"DNA damage, p53 wt","IR (IMR90)","OIS senescence-specific","down","OIS senescence-specific | OIS-only down",30,961,0.0312174817898023,0.0677266568228083,1.82343650494909e-58,1562,3.16822092734904e-57
+"DNA damage, p53 wt","IR (IMR90)","arrest-coupled (reference)","down","arrest-coupled (reference) down",191,252,0.757936507936508,11.1516355285358,1.1607169249829e-63,2170,3.22679305145246e-62
+"DNA damage, p53 wt","Doxo (IMR90)","RAS-autonomous","up","RAS-autonomous | shared with RS/SIPS up",114,220,0.518181818181818,17.9770282771945,1.00799868732911e-28,434,4.31113284734604e-28
+"DNA damage, p53 wt","Doxo (IMR90)","RAS-autonomous","up","RAS-autonomous | OIS-only up",12,214,0.0560747663551402,0.0556265465337558,1.00799868732911e-28,434,4.31113284734604e-28
+"DNA damage, p53 wt","Doxo (IMR90)","OIS senescence-specific","up","OIS senescence-specific | shared with RS/SIPS up",241,445,0.541573033707865,12.4466275951449,2.81936393678867e-57,977,4.35435096904028e-56
+"DNA damage, p53 wt","Doxo (IMR90)","OIS senescence-specific","up","OIS senescence-specific | OIS-only up",46,532,0.0864661654135338,0.0803430481353903,2.81936393678867e-57,977,4.35435096904028e-56
+"DNA damage, p53 wt","Doxo (IMR90)","arrest-coupled (reference)","up","arrest-coupled (reference) up",10,37,0.27027027027027,0.743278767362521,0.483103336005907,1429,0.537210909638569
+"DNA damage, p53 wt","Doxo (IMR90)","RAS-autonomous","down","RAS-autonomous | shared with RS/SIPS down",89,172,0.517441860465116,25.1826586872468,2.5954312747482e-35,493,1.41476449878431e-34
+"DNA damage, p53 wt","Doxo (IMR90)","RAS-autonomous","down","RAS-autonomous | OIS-only down",13,321,0.0404984423676012,0.0397098659208073,2.5954312747482e-35,493,1.41476449878431e-34
+"DNA damage, p53 wt","Doxo (IMR90)","OIS senescence-specific","down","OIS senescence-specific | shared with RS/SIPS down",385,601,0.640599001663893,16.998542516114,1.0488725605347e-117,1562,1.45793285914323e-115
+"DNA damage, p53 wt","Doxo (IMR90)","OIS senescence-specific","down","OIS senescence-specific | OIS-only down",91,961,0.0946930280957336,0.0588285730410144,1.0488725605347e-117,1562,1.45793285914323e-115
+"DNA damage, p53 wt","Doxo (IMR90)","arrest-coupled (reference)","down","arrest-coupled (reference) down",207,252,0.821428571428571,8.63868565847753,1.68444963653152e-47,2170,1.41902120895686e-46
+"DNA damage, p53 wt","Eto (IMR90)","RAS-autonomous","up","RAS-autonomous | shared with RS/SIPS up",118,220,0.536363636363636,15.2429188246483,4.71588847448162e-28,434,1.95674178493416e-27
+"DNA damage, p53 wt","Eto (IMR90)","RAS-autonomous","up","RAS-autonomous | OIS-only up",15,214,0.0700934579439252,0.065604233119904,4.71588847448162e-28,434,1.95674178493416e-27
+"DNA damage, p53 wt","Eto (IMR90)","OIS senescence-specific","up","OIS senescence-specific | shared with RS/SIPS up",261,445,0.586516853932584,12.7820453412746,3.35644299076431e-62,977,7.77575959527065e-61
+"DNA damage, p53 wt","Eto (IMR90)","OIS senescence-specific","up","OIS senescence-specific | OIS-only up",53,532,0.0996240601503759,0.0782347404738797,3.35644299076431e-62,977,7.77575959527065e-61
+"DNA damage, p53 wt","Eto (IMR90)","arrest-coupled (reference)","up","arrest-coupled (reference) up",11,37,0.297297297297297,0.743255169450591,0.489795435526006,1429,0.542482593929202
+"DNA damage, p53 wt","Eto (IMR90)","RAS-autonomous","down","RAS-autonomous | shared with RS/SIPS down",90,172,0.523255813953488,17.3128041360709,1.15106934060506e-31,493,5.71423708371798e-31
+"DNA damage, p53 wt","Eto (IMR90)","RAS-autonomous","down","RAS-autonomous | OIS-only down",19,321,0.059190031152648,0.057760718144816,1.15106934060506e-31,493,5.71423708371798e-31
+"DNA damage, p53 wt","Eto (IMR90)","OIS senescence-specific","down","OIS senescence-specific | shared with RS/SIPS down",402,601,0.668885191347754,14.1243054371351,4.99681838165953e-111,1562,3.47278877525337e-109
+"DNA damage, p53 wt","Eto (IMR90)","OIS senescence-specific","down","OIS senescence-specific | OIS-only down",120,961,0.124869927159209,0.0707999415936472,4.99681838165953e-111,1562,3.47278877525337e-109
+"DNA damage, p53 wt","Eto (IMR90)","arrest-coupled (reference)","down","arrest-coupled (reference) down",214,252,0.849206349206349,9.72325017776591,8.24412709371782e-50,2170,7.3931204259792e-49
+"DNA damage, p53 wt","Bleo (NHDF)","RAS-autonomous","up","RAS-autonomous | shared with RS/SIPS up",77,180,0.427777777777778,15.9921376123151,1.98679818950318e-20,383,6.81888761335659e-20
+"DNA damage, p53 wt","Bleo (NHDF)","RAS-autonomous","up","RAS-autonomous | OIS-only up",9,203,0.0443349753694581,0.06253072755139,1.98679818950318e-20,383,6.81888761335659e-20
+"DNA damage, p53 wt","Bleo (NHDF)","OIS senescence-specific","up","OIS senescence-specific | shared with RS/SIPS up",163,380,0.428947368421053,13.061255658406,1.7600336660905e-42,878,1.19338868091014e-41
+"DNA damage, p53 wt","Bleo (NHDF)","OIS senescence-specific","up","OIS senescence-specific | OIS-only up",27,498,0.0542168674698795,0.0765623172957668,1.7600336660905e-42,878,1.19338868091014e-41
+"DNA damage, p53 wt","Bleo (NHDF)","arrest-coupled (reference)","up","arrest-coupled (reference) up",9,35,0.257142857142857,1.01435121527651,1,1277,1
+"DNA damage, p53 wt","Bleo (NHDF)","RAS-autonomous","down","RAS-autonomous | shared with RS/SIPS down",52,173,0.300578034682081,5.7586522628626,3.39367868230863e-11,491,8.42359530073035e-11
+"DNA damage, p53 wt","Bleo (NHDF)","RAS-autonomous","down","RAS-autonomous | OIS-only down",22,318,0.0691823899371069,0.173651742517774,3.39367868230862e-11,491,8.42359530073035e-11
+"DNA damage, p53 wt","Bleo (NHDF)","OIS senescence-specific","down","OIS senescence-specific | shared with RS/SIPS down",222,577,0.38474870017331,5.81294227435948,3.03991488771664e-40,1515,1.79807731656431e-39
+"DNA damage, p53 wt","Bleo (NHDF)","OIS senescence-specific","down","OIS senescence-specific | OIS-only down",91,938,0.0970149253731343,0.172029920959467,3.03991488771664e-40,1515,1.79807731656431e-39
+"DNA damage, p53 wt","Bleo (NHDF)","arrest-coupled (reference)","down","arrest-coupled (reference) down",171,242,0.706611570247934,6.71858317181723,1.0984233939984e-40,2089,6.78581563403456e-40
+"DNA damage, p53 wt","Bleo (NHLF)","RAS-autonomous","up","RAS-autonomous | shared with RS/SIPS up",69,184,0.375,9.64368997509388,4.09112202382047e-15,390,1.12607121051692e-14
+"DNA damage, p53 wt","Bleo (NHLF)","RAS-autonomous","up","RAS-autonomous | OIS-only up",12,206,0.058252427184466,0.103694747817758,4.09112202382047e-15,390,1.12607121051692e-14
+"DNA damage, p53 wt","Bleo (NHLF)","OIS senescence-specific","up","OIS senescence-specific | shared with RS/SIPS up",196,391,0.501278772378517,9.14098118999413,5.46133311414537e-42,897,3.5308153621684e-41
+"DNA damage, p53 wt","Bleo (NHLF)","OIS senescence-specific","up","OIS senescence-specific | OIS-only up",50,506,0.0988142292490119,0.109397446424528,5.46133311414537e-42,897,3.5308153621684e-41
+"DNA damage, p53 wt","Bleo (NHLF)","arrest-coupled (reference)","up","arrest-coupled (reference) up",12,37,0.324324324324324,1.23507435181193,0.578933014529093,1327,0.63115050211407
+"DNA damage, p53 wt","Bleo (NHLF)","RAS-autonomous","down","RAS-autonomous | shared with RS/SIPS down",58,171,0.339181286549708,6.0309460194715,9.64379970360982e-13,491,2.48238547926253e-12
+"DNA damage, p53 wt","Bleo (NHLF)","RAS-autonomous","down","RAS-autonomous | OIS-only down",25,320,0.078125,0.16581146585816,9.64379970360982e-13,491,2.48238547926253e-12
+"DNA damage, p53 wt","Bleo (NHLF)","OIS senescence-specific","down","OIS senescence-specific | shared with RS/SIPS down",277,593,0.467116357504216,5.07087066754374,6.07448596770592e-43,1571,4.33001820262114e-42
+"DNA damage, p53 wt","Bleo (NHLF)","OIS senescence-specific","down","OIS senescence-specific | OIS-only down",144,978,0.147239263803681,0.197204792936354,6.07448596770592e-43,1571,4.33001820262114e-42
+"DNA damage, p53 wt","Bleo (NHLF)","arrest-coupled (reference)","down","arrest-coupled (reference) down",149,249,0.598393574297189,3.39449459637556,5.49268392415563e-19,2148,1.77554201269217e-18
+"DNA damage, p53 wt","Doxo 8d (BJ)","RAS-autonomous","up","RAS-autonomous | shared with RS/SIPS up",159,207,0.768115942028985,13.6187024690382,3.05644313505711e-33,418,1.60319092744505e-32
+"DNA damage, p53 wt","Doxo 8d (BJ)","RAS-autonomous","up","RAS-autonomous | OIS-only up",41,211,0.194312796208531,0.0734284343367863,3.05644313505711e-33,418,1.60319092744505e-32
+"DNA damage, p53 wt","Doxo 8d (BJ)","OIS senescence-specific","up","OIS senescence-specific | shared with RS/SIPS up",294,441,0.666666666666667,10.1600205329149,1.59063474864213e-58,953,3.15854614373223e-57
+"DNA damage, p53 wt","Doxo 8d (BJ)","OIS senescence-specific","up","OIS senescence-specific | OIS-only up",84,512,0.1640625,0.0984249979377839,1.59063474864213e-58,953,3.15854614373223e-57
+"DNA damage, p53 wt","Doxo 8d (BJ)","arrest-coupled (reference)","up","arrest-coupled (reference) up",14,37,0.378378378378378,0.768380505877327,0.504058084138403,1392,0.556064076946334
+"DNA damage, p53 wt","Doxo 8d (BJ)","RAS-autonomous","down","RAS-autonomous | shared with RS/SIPS down",100,174,0.574712643678161,7.40913341280594,8.94879523854769e-22,493,3.18944240553367e-21
+"DNA damage, p53 wt","Doxo 8d (BJ)","RAS-autonomous","down","RAS-autonomous | OIS-only down",49,319,0.153605015673981,0.134968550879595,8.9487952385477e-22,493,3.18944240553367e-21
+"DNA damage, p53 wt","Doxo 8d (BJ)","OIS senescence-specific","down","OIS senescence-specific | shared with RS/SIPS down",259,587,0.441226575809199,5.88052775176696,1.08258025081026e-46,1568,8.59878027786435e-46
+"DNA damage, p53 wt","Doxo 8d (BJ)","OIS senescence-specific","down","OIS senescence-specific | OIS-only down",116,981,0.118246687054027,0.170052764345771,1.08258025081026e-46,1568,8.59878027786435e-46
+"DNA damage, p53 wt","Doxo 8d (BJ)","arrest-coupled (reference)","down","arrest-coupled (reference) down",94,249,0.377510040160643,1.45972247606443,0.00824411649013447,2181,0.012388456131121
+"DNA damage, p53 wt","IR (IMR90 GSE259295)","RAS-autonomous","up","RAS-autonomous | shared with RS/SIPS up",123,207,0.594202898550725,12.0780745015935,3.79899756731932e-27,421,1.53061061407938e-26
+"DNA damage, p53 wt","IR (IMR90 GSE259295)","RAS-autonomous","up","RAS-autonomous | OIS-only up",23,214,0.107476635514019,0.0827946540541762,3.79899756731932e-27,421,1.53061061407938e-26
+"DNA damage, p53 wt","IR (IMR90 GSE259295)","OIS senescence-specific","up","OIS senescence-specific | shared with RS/SIPS up",280,447,0.626398210290828,9.58629915915705,1.14456754970288e-55,979,1.590948894087e-54
+"DNA damage, p53 wt","IR (IMR90 GSE259295)","OIS senescence-specific","up","OIS senescence-specific | OIS-only up",79,532,0.148496240601504,0.104315542775941,1.14456754970288e-55,979,1.590948894087e-54
+"DNA damage, p53 wt","IR (IMR90 GSE259295)","arrest-coupled (reference)","up","arrest-coupled (reference) up",21,37,0.567567567567568,1.65295567460284,0.135430549043966,1411,0.173500887715311
+"DNA damage, p53 wt","IR (IMR90 GSE259295)","RAS-autonomous","down","RAS-autonomous | shared with RS/SIPS down",95,174,0.545977011494253,5.81313320723551,1.40843922869747e-17,496,4.25593593019453e-17
+"DNA damage, p53 wt","IR (IMR90 GSE259295)","RAS-autonomous","down","RAS-autonomous | OIS-only down",55,322,0.170807453416149,0.172024270621447,1.40843922869747e-17,496,4.25593593019453e-17
+"DNA damage, p53 wt","IR (IMR90 GSE259295)","OIS senescence-specific","down","OIS senescence-specific | shared with RS/SIPS down",310,592,0.523648648648649,8.03517012462549,9.87992303061991e-66,1524,3.43327325314042e-64
+"DNA damage, p53 wt","IR (IMR90 GSE259295)","OIS senescence-specific","down","OIS senescence-specific | OIS-only down",112,932,0.120171673819742,0.124452872122182,9.87992303061991e-66,1524,3.43327325314042e-64
+"DNA damage, p53 wt","IR (IMR90 GSE259295)","arrest-coupled (reference)","down","arrest-coupled (reference) down",188,252,0.746031746031746,5.15668044931339,5.97788482347184e-31,2146,2.91552979109679e-30
+"DNA damage, p53 wt","IR fibroblast 4 d","RAS-autonomous","up","RAS-autonomous | shared with RS/SIPS up",47,184,0.255434782608696,17.1356681720697,9.16830908697235e-13,389,2.40451879828143e-12
+"DNA damage, p53 wt","IR fibroblast 4 d","RAS-autonomous","up","RAS-autonomous | OIS-only up",4,205,0.0195121951219512,0.0583578060661765,9.16830908697235e-13,389,2.40451879828143e-12
+"DNA damage, p53 wt","IR fibroblast 4 d","OIS senescence-specific","up","OIS senescence-specific | shared with RS/SIPS up",121,413,0.292978208232446,12.63568310563,2.68183827909595e-30,918,1.26364583320114e-29
+"DNA damage, p53 wt","IR fibroblast 4 d","OIS senescence-specific","up","OIS senescence-specific | OIS-only up",16,505,0.0316831683168317,0.0791409527795491,2.68183827909595e-30,918,1.26364583320114e-29
+"DNA damage, p53 wt","IR fibroblast 4 d","arrest-coupled (reference)","up","arrest-coupled (reference) up",15,37,0.405405405405405,2.46698469649088,0.0139716271070601,1294,0.0194205616788135
+"DNA damage, p53 wt","IR fibroblast 4 d","RAS-autonomous","down","RAS-autonomous | shared with RS/SIPS down",36,179,0.201117318435754,9.98985806878265,4.85535848125943e-11,506,1.1438895405001e-10
+"DNA damage, p53 wt","IR fibroblast 4 d","RAS-autonomous","down","RAS-autonomous | OIS-only down",8,327,0.0244648318042813,0.100101522275369,4.85535848125943e-11,506,1.1438895405001e-10
+"DNA damage, p53 wt","IR fibroblast 4 d","OIS senescence-specific","down","OIS senescence-specific | shared with RS/SIPS down",178,577,0.308492201039861,12.3247382972168,1.26121591312249e-51,1552,1.2985852735113e-50
+"DNA damage, p53 wt","IR fibroblast 4 d","OIS senescence-specific","down","OIS senescence-specific | OIS-only down",34,975,0.0348717948717949,0.0811376254720015,1.26121591312249e-51,1552,1.2985852735113e-50
+"DNA damage, p53 wt","IR fibroblast 4 d","arrest-coupled (reference)","down","arrest-coupled (reference) down",196,256,0.765625,11.2164824526752,1.73817475685245e-64,2169,5.36902869338868e-63
+"DNA damage, p53 wt","IR fibroblast 20 d","RAS-autonomous","up","RAS-autonomous | shared with RS/SIPS up",142,184,0.771739130434783,19.5008828926276,2.3171419646513e-37,389,1.31462340035319e-36
+"DNA damage, p53 wt","IR fibroblast 20 d","RAS-autonomous","up","RAS-autonomous | OIS-only up",30,205,0.146341463414634,0.0512797295130701,2.3171419646513e-37,389,1.31462340035319e-36
+"DNA damage, p53 wt","IR fibroblast 20 d","OIS senescence-specific","up","OIS senescence-specific | shared with RS/SIPS up",277,413,0.670702179176755,15.6360884208448,2.14585312622856e-71,918,9.94245281819233e-70
+"DNA damage, p53 wt","IR fibroblast 20 d","OIS senescence-specific","up","OIS senescence-specific | OIS-only up",58,505,0.114851485148515,0.0639546140367736,2.14585312622856e-71,918,9.94245281819233e-70
+"DNA damage, p53 wt","IR fibroblast 20 d","arrest-coupled (reference)","up","arrest-coupled (reference) up",17,37,0.45945945945946,1.1248490671154,0.738892254460581,1294,0.781034398251108
+"DNA damage, p53 wt","IR fibroblast 20 d","RAS-autonomous","down","RAS-autonomous | shared with RS/SIPS down",89,179,0.497206703910615,6.8662767884064,2.9779813275394e-19,506,9.73975069477592e-19
+"DNA damage, p53 wt","IR fibroblast 20 d","RAS-autonomous","down","RAS-autonomous | OIS-only down",41,327,0.125382262996942,0.145639337127872,2.9779813275394e-19,506,9.73975069477592e-19
+"DNA damage, p53 wt","IR fibroblast 20 d","OIS senescence-specific","down","OIS senescence-specific | shared with RS/SIPS down",257,577,0.445407279029463,6.57476455621576,1.15973532444501e-50,1552,1.07468806731904e-49
+"DNA damage, p53 wt","IR fibroblast 20 d","OIS senescence-specific","down","OIS senescence-specific | OIS-only down",106,975,0.108717948717949,0.152096701174585,1.15973532444501e-50,1552,1.07468806731904e-49
+"DNA damage, p53 wt","IR fibroblast 20 d","arrest-coupled (reference)","down","arrest-coupled (reference) down",131,256,0.51171875,2.30359699337883,9.04887007237356e-10,2169,2.01246870409588e-09
+"DNA damage, p53 wt","Eto IMR90 SRP062872 (in meta)","RAS-autonomous","up","RAS-autonomous | shared with RS/SIPS up",197,230,0.856521739130435,11.0260207967218,1.43419413609284e-29,453,6.53616343989852e-29
+"DNA damage, p53 wt","Eto IMR90 SRP062872 (in meta)","RAS-autonomous","up","RAS-autonomous | OIS-only up",78,223,0.349775784753363,0.0906945505034154,1.43419413609284e-29,453,6.53616343989852e-29
+"DNA damage, p53 wt","Eto IMR90 SRP062872 (in meta)","OIS senescence-specific","up","OIS senescence-specific | shared with RS/SIPS up",393,492,0.798780487804878,8.12162689137677,3.38606996677295e-54,1029,3.922197711512e-53
+"DNA damage, p53 wt","Eto IMR90 SRP062872 (in meta)","OIS senescence-specific","up","OIS senescence-specific | OIS-only up",176,537,0.327746741154562,0.123128039908083,3.38606996677295e-54,1029,3.922197711512e-53
+"DNA damage, p53 wt","Eto IMR90 SRP062872 (in meta)","arrest-coupled (reference)","up","arrest-coupled (reference) up",18,37,0.486486486486487,0.56269190123315,0.0872313958951737,1449,0.113319289994665
+"DNA damage, p53 wt","Eto IMR90 SRP062872 (in meta)","RAS-autonomous","down","RAS-autonomous | shared with RS/SIPS down",128,176,0.727272727272727,4.01921463052002,1.34443712245447e-12,500,3.39775927311221e-12
+"DNA damage, p53 wt","Eto IMR90 SRP062872 (in meta)","RAS-autonomous","down","RAS-autonomous | OIS-only down",129,324,0.398148148148148,0.248804826795382,1.34443712245447e-12,500,3.39775927311221e-12
+"DNA damage, p53 wt","Eto IMR90 SRP062872 (in meta)","OIS senescence-specific","down","OIS senescence-specific | shared with RS/SIPS down",358,547,0.654478976234004,4.77174210744648,3.70265340335973e-43,1417,2.78199363820001e-42
+"DNA damage, p53 wt","Eto IMR90 SRP062872 (in meta)","OIS senescence-specific","down","OIS senescence-specific | OIS-only down",247,870,0.283908045977011,0.209567067432135,3.70265340335973e-43,1417,2.78199363820001e-42
+"DNA damage, p53 wt","Eto IMR90 SRP062872 (in meta)","arrest-coupled (reference)","down","arrest-coupled (reference) down",201,253,0.794466403162055,4.15895969535753,9.95592724196412e-22,2014,3.50347819400763e-21
+"DNA damage, p53 lost","Adriamycin LFS p53-mut","RAS-autonomous","up","RAS-autonomous | shared with RS/SIPS up",123,241,0.510373443983402,2.52855585257432,2.01464339275909e-06,464,3.81000587202059e-06
+"DNA damage, p53 lost","Adriamycin LFS p53-mut","RAS-autonomous","up","RAS-autonomous | OIS-only up",65,223,0.291479820627803,0.395482662161447,2.01464339275909e-06,464,3.81000587202059e-06
+"DNA damage, p53 lost","Adriamycin LFS p53-mut","OIS senescence-specific","up","OIS senescence-specific | shared with RS/SIPS up",236,519,0.454720616570328,2.34079807252744,3.95742665979989e-11,1098,9.65056676688043e-11
+"DNA damage, p53 lost","Adriamycin LFS p53-mut","OIS senescence-specific","up","OIS senescence-specific | OIS-only up",152,579,0.262521588946459,0.427204726343723,3.95742665979989e-11,1098,9.65056676688043e-11
+"DNA damage, p53 lost","Adriamycin LFS p53-mut","arrest-coupled (reference)","up","arrest-coupled (reference) up",14,37,0.378378378378378,1.01658029637269,1,1591,1
+"DNA damage, p53 lost","Adriamycin LFS p53-mut","RAS-autonomous","down","RAS-autonomous | shared with RS/SIPS down",52,179,0.290502793296089,0.917349770323727,0.686409946628303,503,0.733930635241032
+"DNA damage, p53 lost","Adriamycin LFS p53-mut","RAS-autonomous","down","RAS-autonomous | OIS-only down",100,324,0.308641975308642,1.09009674646467,0.686409946628303,503,0.733930635241032
+"DNA damage, p53 lost","Adriamycin LFS p53-mut","OIS senescence-specific","down","OIS senescence-specific | shared with RS/SIPS down",131,619,0.211631663974152,1.14243754792476,0.310526673652526,1686,0.364246477955284
+"DNA damage, p53 lost","Adriamycin LFS p53-mut","OIS senescence-specific","down","OIS senescence-specific | OIS-only down",203,1067,0.190253045923149,0.875321370359805,0.310526673652526,1686,0.364246477955284
+"DNA damage, p53 lost","Adriamycin LFS p53-mut","arrest-coupled (reference)","down","arrest-coupled (reference) down",27,258,0.104651162790698,0.448899477414681,4.20547944904508e-05,2339,7.59170965476969e-05
+"DNA damage, p53 lost","H2O2 LFS p53-mut","RAS-autonomous","up","RAS-autonomous | shared with RS/SIPS up",69,232,0.297413793103448,4.78158376472124,2.55927573511069e-09,454,5.34946356662235e-09
+"DNA damage, p53 lost","H2O2 LFS p53-mut","RAS-autonomous","up","RAS-autonomous | OIS-only up",18,222,0.0810810810810811,0.209135727659536,2.55927573511069e-09,454,5.34946356662235e-09
+"DNA damage, p53 lost","H2O2 LFS p53-mut","OIS senescence-specific","up","OIS senescence-specific | shared with RS/SIPS up",99,495,0.2,3.59707989737257,4.74100734939286e-11,1065,1.13620693373381e-10
+"DNA damage, p53 lost","H2O2 LFS p53-mut","OIS senescence-specific","up","OIS senescence-specific | OIS-only up",37,570,0.0649122807017544,0.278003277250092,4.74100734939286e-11,1065,1.13620693373381e-10
+"DNA damage, p53 lost","H2O2 LFS p53-mut","arrest-coupled (reference)","up","arrest-coupled (reference) up",5,37,0.135135135135135,0.836721372082833,1,1543,1
+"DNA damage, p53 lost","H2O2 LFS p53-mut","RAS-autonomous","down","RAS-autonomous | shared with RS/SIPS down",11,178,0.0617977528089888,1.84197407487085,0.175251901845329,497,0.216533460946673
+"DNA damage, p53 lost","H2O2 LFS p53-mut","RAS-autonomous","down","RAS-autonomous | OIS-only down",11,319,0.0344827586206897,0.542895805995599,0.175251901845329,497,0.216533460946673
+"DNA damage, p53 lost","H2O2 LFS p53-mut","OIS senescence-specific","down","OIS senescence-specific | shared with RS/SIPS down",23,603,0.0381426202321725,2.24157802651538,0.0130718022848722,1639,0.0185406175265024
+"DNA damage, p53 lost","H2O2 LFS p53-mut","OIS senescence-specific","down","OIS senescence-specific | OIS-only down",18,1036,0.0173745173745174,0.446114294559955,0.0130718022848722,1639,0.0185406175265024
+"DNA damage, p53 lost","H2O2 LFS p53-mut","arrest-coupled (reference)","down","arrest-coupled (reference) down",1,256,0.00390625,0.13033241940908,0.0115002188479617,2275,0.0168266359985966
+"p53 on, no damage","Nutlin (PAAF)","RAS-autonomous","up","RAS-autonomous | shared with RS/SIPS up",16,201,0.0796019900497512,1.71018999658598,0.22620658678817,409,0.277028330956437
+"p53 on, no damage","Nutlin (PAAF)","RAS-autonomous","up","RAS-autonomous | OIS-only up",10,208,0.0480769230769231,0.584730352765648,0.22620658678817,409,0.277028330956437
+"p53 on, no damage","Nutlin (PAAF)","OIS senescence-specific","up","OIS senescence-specific | shared with RS/SIPS up",41,419,0.0978520286396181,2.8056136367875,0.00023774488953467,930,0.000413081745566489
+"p53 on, no damage","Nutlin (PAAF)","OIS senescence-specific","up","OIS senescence-specific | OIS-only up",19,511,0.0371819960861057,0.356428264707546,0.00023774488953467,930,0.000413081745566489
+"p53 on, no damage","Nutlin (PAAF)","arrest-coupled (reference)","up","arrest-coupled (reference) up",3,33,0.0909090909090909,1.18709183669706,0.738804316618226,1346,0.781034398251108
+"p53 on, no damage","Nutlin (PAAF)","RAS-autonomous","down","RAS-autonomous | shared with RS/SIPS down",9,167,0.0538922155688623,2.82241534183132,0.0551101664529284,471,0.0733044319326033
+"p53 on, no damage","Nutlin (PAAF)","RAS-autonomous","down","RAS-autonomous | OIS-only down",6,304,0.0197368421052632,0.354306464105023,0.0551101664529284,471,0.0733044319326033
+"p53 on, no damage","Nutlin (PAAF)","OIS senescence-specific","down","OIS senescence-specific | shared with RS/SIPS down",20,539,0.0371057513914657,1.93661517414506,0.0593230329161254,1462,0.0777915242956739
+"p53 on, no damage","Nutlin (PAAF)","OIS senescence-specific","down","OIS senescence-specific | OIS-only down",18,923,0.019501625135428,0.516364847983549,0.0593230329161254,1462,0.0777915242956739
+"p53 on, no damage","Nutlin (PAAF)","arrest-coupled (reference)","down","arrest-coupled (reference) down",31,243,0.127572016460905,2.28594951283726,0.000332964724991258,2007,0.0005678784880219
+"p53 on, no damage","RG7388 (IMR90)","RAS-autonomous","up","RAS-autonomous | shared with RS/SIPS up",9,174,0.0517241379310345,Inf,0.000700413248941439,385,0.00118009020124679
+"p53 on, no damage","RG7388 (IMR90)","RAS-autonomous","up","RAS-autonomous | OIS-only up",0,211,0,0,0.000700413248941439,385,0.00118009020124679
+"p53 on, no damage","RG7388 (IMR90)","OIS senescence-specific","up","OIS senescence-specific | shared with RS/SIPS up",18,380,0.0473684210526316,Inf,1.29634889135875e-07,905,2.5926977827175e-07
+"p53 on, no damage","RG7388 (IMR90)","OIS senescence-specific","up","OIS senescence-specific | OIS-only up",0,525,0,0,1.29634889135875e-07,905,2.5926977827175e-07
+"p53 on, no damage","RG7388 (IMR90)","arrest-coupled (reference)","up","arrest-coupled (reference) up",2,35,0.0571428571428571,2.13360572502984,0.261951806130799,1267,0.3166200091494
+"p53 on, no damage","RG7388 (IMR90)","RAS-autonomous","down","RAS-autonomous | shared with RS/SIPS down",2,174,0.0114942528735632,3.72214584123655,0.282438430273746,496,0.338439153517678
+"p53 on, no damage","RG7388 (IMR90)","RAS-autonomous","down","RAS-autonomous | OIS-only down",1,322,0.0031055900621118,0.268662229438007,0.282438430273746,496,0.338439153517678
+"p53 on, no damage","RG7388 (IMR90)","OIS senescence-specific","down","OIS senescence-specific | shared with RS/SIPS down",42,582,0.0721649484536082,6.75047920097214,1.0417070425231e-09,1461,2.28027210883009e-09
+"p53 on, no damage","RG7388 (IMR90)","OIS senescence-specific","down","OIS senescence-specific | OIS-only down",10,879,0.0113765642775882,0.148137631452294,1.0417070425231e-09,1461,2.28027210883009e-09
+"p53 on, no damage","RG7388 (IMR90)","arrest-coupled (reference)","down","arrest-coupled (reference) down",27,251,0.107569721115538,2.80895032631928,5.7667401440579e-05,2075,0.000102111704461662
+"p53 on, no damage","HDM201 (IMR90)","RAS-autonomous","up","RAS-autonomous | shared with RS/SIPS up",3,207,0.0144927536231884,3.12468528744546,0.365049680740516,421,0.417628852863636
+"p53 on, no damage","HDM201 (IMR90)","RAS-autonomous","up","RAS-autonomous | OIS-only up",1,214,0.00467289719626168,0.32003222981139,0.365049680740516,421,0.417628852863636
+"p53 on, no damage","HDM201 (IMR90)","OIS senescence-specific","up","OIS senescence-specific | shared with RS/SIPS up",7,446,0.015695067264574,Inf,0.00399732249327136,978,0.00631395257459908
+"p53 on, no damage","HDM201 (IMR90)","OIS senescence-specific","up","OIS senescence-specific | OIS-only up",0,532,0,0,0.00399732249327136,978,0.00631395257459908
+"p53 on, no damage","HDM201 (IMR90)","arrest-coupled (reference)","up","arrest-coupled (reference) up",2,37,0.0540540540540541,5.95996539584977,0.056773040277701,1410,0.0751566914152423
+"p53 on, no damage","HDM201 (IMR90)","OIS senescence-specific","down","OIS senescence-specific | shared with RS/SIPS down",10,592,0.0168918918918919,7.97796566815804,0.00208940052651408,1524,0.00337705433936578
+"p53 on, no damage","HDM201 (IMR90)","OIS senescence-specific","down","OIS senescence-specific | OIS-only down",2,932,0.00214592274678112,0.125345237319222,0.00208940052651408,1524,0.00337705433936578
+"p53 on, no damage","HDM201 (IMR90)","arrest-coupled (reference)","down","arrest-coupled (reference) down",0,252,0,0,0.241853523101374,2146,0.293603840271537
+"arrest, no damage","Palbo (IMR90)","RAS-autonomous","up","RAS-autonomous | shared with RS/SIPS up",42,218,0.192660550458716,16.7032362967266,1.36860943905056e-10,432,3.11863462341029e-10
+"arrest, no damage","Palbo (IMR90)","RAS-autonomous","up","RAS-autonomous | OIS-only up",3,214,0.014018691588785,0.0598686375643224,1.36860943905056e-10,432,3.11863462341029e-10
+"arrest, no damage","Palbo (IMR90)","OIS senescence-specific","up","OIS senescence-specific | shared with RS/SIPS up",105,440,0.238636363636364,8.86203881355698,1.97094139258399e-22,968,7.40434739376148e-22
+"arrest, no damage","Palbo (IMR90)","OIS senescence-specific","up","OIS senescence-specific | OIS-only up",18,528,0.0340909090909091,0.112840850851411,1.97094139258399e-22,968,7.40434739376148e-22
+"arrest, no damage","Palbo (IMR90)","arrest-coupled (reference)","up","arrest-coupled (reference) up",4,37,0.108108108108108,0.527335456720731,0.285529684179918,1417,0.34067490215458
+"arrest, no damage","Palbo (IMR90)","RAS-autonomous","down","RAS-autonomous | shared with RS/SIPS down",38,172,0.22093023255814,44.9261384275753,8.61487702444553e-17,493,2.54780405616581e-16
+"arrest, no damage","Palbo (IMR90)","RAS-autonomous","down","RAS-autonomous | OIS-only down",2,321,0.00623052959501558,0.0222587570398929,8.61487702444553e-17,493,2.54780405616581e-16
+"arrest, no damage","Palbo (IMR90)","OIS senescence-specific","down","OIS senescence-specific | shared with RS/SIPS down",183,601,0.304492512479201,15.0652117648319,1.71559567056281e-55,1559,2.16788907462028e-54
+"arrest, no damage","Palbo (IMR90)","OIS senescence-specific","down","OIS senescence-specific | OIS-only down",27,958,0.0281837160751566,0.0663780911685805,1.71559567056281e-55,1559,2.16788907462028e-54
+"arrest, no damage","Palbo (IMR90)","arrest-coupled (reference)","down","arrest-coupled (reference) down",172,252,0.682539682539683,8.28328718947837,3.18964363275275e-51,2166,3.16686046394737e-50
+"arrest, no damage","Palbo (NHDF)","RAS-autonomous","up","RAS-autonomous | shared with RS/SIPS up",26,180,0.144444444444444,33.9003236192308,3.18449065687338e-08,383,6.46195914314452e-08
+"arrest, no damage","Palbo (NHDF)","RAS-autonomous","up","RAS-autonomous | OIS-only up",1,203,0.00492610837438424,0.0294982434749601,3.18449065687338e-08,383,6.46195914314452e-08
+"arrest, no damage","Palbo (NHDF)","OIS senescence-specific","up","OIS senescence-specific | shared with RS/SIPS up",44,381,0.115485564304462,6.35904935793277,5.98734572418614e-09,879,1.23294971209166e-08
+"arrest, no damage","Palbo (NHDF)","OIS senescence-specific","up","OIS senescence-specific | OIS-only up",10,498,0.0200803212851406,0.157256209806347,5.98734572418614e-09,879,1.23294971209166e-08
+"arrest, no damage","Palbo (NHDF)","arrest-coupled (reference)","up","arrest-coupled (reference) up",3,35,0.0857142857142857,0.824696669805411,1,1279,1
+"arrest, no damage","Palbo (NHDF)","RAS-autonomous","down","RAS-autonomous | shared with RS/SIPS down",14,173,0.0809248554913295,2.70601256044091,0.0261333463096558,491,0.03596569442616
+"arrest, no damage","Palbo (NHDF)","RAS-autonomous","down","RAS-autonomous | OIS-only down",10,318,0.0314465408805031,0.369547434708534,0.0261333463096558,491,0.03596569442616
+"arrest, no damage","Palbo (NHDF)","OIS senescence-specific","down","OIS senescence-specific | shared with RS/SIPS down",66,577,0.114384748700173,3.66190245669123,2.18405836011203e-09,1517,4.63487193977973e-09
+"arrest, no damage","Palbo (NHDF)","OIS senescence-specific","down","OIS senescence-specific | OIS-only down",32,940,0.0340425531914894,0.273082096485873,2.18405836011203e-09,1517,4.63487193977973e-09
+"arrest, no damage","Palbo (NHDF)","arrest-coupled (reference)","down","arrest-coupled (reference) down",153,244,0.627049180327869,9.23780853593305,3.93327329971256e-53,2091,4.37379990928037e-52
+"arrest, no damage","Palbo (NHLF)","RAS-autonomous","up","RAS-autonomous | shared with RS/SIPS up",50,184,0.271739130434783,8.12626630188936,1.89446903702773e-10,390,4.24727735720733e-10
+"arrest, no damage","Palbo (NHLF)","RAS-autonomous","up","RAS-autonomous | OIS-only up",9,206,0.0436893203883495,0.123057744214891,1.89446903702773e-10,390,4.24727735720733e-10
+"arrest, no damage","Palbo (NHLF)","OIS senescence-specific","up","OIS senescence-specific | shared with RS/SIPS up",126,391,0.322250639386189,6.01403031262479,4.49793700613402e-22,897,1.6452980101385e-21
+"arrest, no damage","Palbo (NHLF)","OIS senescence-specific","up","OIS senescence-specific | OIS-only up",37,506,0.0731225296442688,0.166277844975401,4.49793700613402e-22,897,1.6452980101385e-21
+"arrest, no damage","Palbo (NHLF)","arrest-coupled (reference)","up","arrest-coupled (reference) up",7,37,0.189189189189189,0.947072628202403,1,1327,1
+"arrest, no damage","Palbo (NHLF)","RAS-autonomous","down","RAS-autonomous | shared with RS/SIPS down",42,171,0.245614035087719,10.0402160042813,8.11721184288347e-13,491,2.16979316569385e-12
+"arrest, no damage","Palbo (NHLF)","RAS-autonomous","down","RAS-autonomous | OIS-only down",10,320,0.03125,0.0995994508059964,8.11721184288347e-13,491,2.16979316569385e-12
+"arrest, no damage","Palbo (NHLF)","OIS senescence-specific","down","OIS senescence-specific | shared with RS/SIPS down",193,593,0.325463743676223,4.58647119491943,2.16719910896899e-29,1571,9.56319606814888e-29
+"arrest, no damage","Palbo (NHLF)","OIS senescence-specific","down","OIS senescence-specific | OIS-only down",93,978,0.0950920245398773,0.218032547791366,2.16719910896899e-29,1571,9.56319606814888e-29
+"arrest, no damage","Palbo (NHLF)","arrest-coupled (reference)","down","arrest-coupled (reference) down",147,249,0.590361445783133,4.4661560417385,4.37533997676909e-27,2148,1.73763501934544e-26
+"arrest, no damage","Abema 8d","RAS-autonomous","up","RAS-autonomous | shared with RS/SIPS up",93,207,0.449275362318841,2.76333624961709,1.76521213287638e-06,418,3.38433774441127e-06
+"arrest, no damage","Abema 8d","RAS-autonomous","up","RAS-autonomous | OIS-only up",48,211,0.227488151658768,0.361881403371947,1.76521213287638e-06,418,3.38433774441127e-06
+"arrest, no damage","Abema 8d","OIS senescence-specific","up","OIS senescence-specific | shared with RS/SIPS up",213,440,0.484090909090909,3.12939002351617,2.68974538320195e-16,952,7.55302238919335e-16
+"arrest, no damage","Abema 8d","OIS senescence-specific","up","OIS senescence-specific | OIS-only up",118,512,0.23046875,0.319551092220971,2.68974538320195e-16,952,7.55302238919335e-16
+"arrest, no damage","Abema 8d","arrest-coupled (reference)","up","arrest-coupled (reference) up",16,37,0.432432432432432,1.07693003326833,0.866502260823447,1391,0.905592588379392
+"arrest, no damage","Abema 8d","RAS-autonomous","down","RAS-autonomous | shared with RS/SIPS down",98,174,0.563218390804598,2.6983580181442,3.15877286406394e-07,493,6.22793515042394e-07
+"arrest, no damage","Abema 8d","RAS-autonomous","down","RAS-autonomous | OIS-only down",103,319,0.322884012539185,0.37059574499597,3.15877286406394e-07,493,6.22793515042394e-07
+"arrest, no damage","Abema 8d","OIS senescence-specific","down","OIS senescence-specific | shared with RS/SIPS down",295,587,0.502555366269165,3.02847388910591,6.25310393286139e-24,1567,2.41439290741037e-23
+"arrest, no damage","Abema 8d","OIS senescence-specific","down","OIS senescence-specific | OIS-only down",245,980,0.25,0.330199313785477,6.25310393286139e-24,1567,2.41439290741037e-23
+"arrest, no damage","Abema 8d","arrest-coupled (reference)","down","arrest-coupled (reference) down",172,249,0.690763052208835,3.13619385735383,2.35755800227639e-16,2180,6.75671262508079e-16
+"arrest, no damage","Quiescence (IMR90)","RAS-autonomous","up","RAS-autonomous | shared with RS/SIPS up",28,220,0.127272727272727,2.44998870248676,0.0123417378621293,434,0.0176855831220203
+"arrest, no damage","Quiescence (IMR90)","RAS-autonomous","up","RAS-autonomous | OIS-only up",12,214,0.0560747663551402,0.40816514744945,0.0123417378621293,434,0.0176855831220203
+"arrest, no damage","Quiescence (IMR90)","OIS senescence-specific","up","OIS senescence-specific | shared with RS/SIPS up",29,443,0.0654627539503386,1.30978751315732,0.336490179670328,975,0.391398619030758
+"arrest, no damage","Quiescence (IMR90)","OIS senescence-specific","up","OIS senescence-specific | OIS-only up",27,532,0.0507518796992481,0.763482618329027,0.336490179670328,975,0.391398619030758
+"arrest, no damage","Quiescence (IMR90)","arrest-coupled (reference)","up","arrest-coupled (reference) up",12,37,0.324324324324324,2.48325433597941,0.0136513541114027,1427,0.0190707358943214
+"arrest, no damage","Quiescence (IMR90)","RAS-autonomous","down","RAS-autonomous | shared with RS/SIPS down",15,172,0.0872093023255814,1.18190285895521,0.605027319796038,493,0.654465349818282
+"arrest, no damage","Quiescence (IMR90)","RAS-autonomous","down","RAS-autonomous | OIS-only down",24,321,0.0747663551401869,0.846093223671544,0.605027319796038,493,0.654465349818282
+"arrest, no damage","Quiescence (IMR90)","OIS senescence-specific","down","OIS senescence-specific | shared with RS/SIPS down",24,601,0.0399334442595674,0.827482444639358,0.530256450144574,1562,0.580359421811778
+"arrest, no damage","Quiescence (IMR90)","OIS senescence-specific","down","OIS senescence-specific | OIS-only down",46,961,0.0478668054110302,1.20848485243193,0.530256450144573,1562,0.580359421811778
+"arrest, no damage","Quiescence (IMR90)","arrest-coupled (reference)","down","arrest-coupled (reference) down",127,252,0.503968253968254,5.40946443106488,9.27018257060652e-32,2170,4.77242732338632e-31
+"arrest, no damage","Quiescence TIG3","RAS-autonomous","up","RAS-autonomous | shared with RS/SIPS up",20,182,0.10989010989011,3.16999400539927,0.00571548267319369,396,0.00882724546193248
+"arrest, no damage","Quiescence TIG3","RAS-autonomous","up","RAS-autonomous | OIS-only up",8,214,0.0373831775700935,0.315458009793315,0.00571548267319369,396,0.00882724546193248
+"arrest, no damage","Quiescence TIG3","OIS senescence-specific","up","OIS senescence-specific | shared with RS/SIPS up",14,372,0.0376344086021505,1.92642097393792,0.142336641036932,875,0.179047901394874
+"arrest, no damage","Quiescence TIG3","OIS senescence-specific","up","OIS senescence-specific | OIS-only up",10,503,0.0198807157057654,0.519097338291463,0.142336641036932,875,0.179047901394874
+"arrest, no damage","Quiescence TIG3","arrest-coupled (reference)","up","arrest-coupled (reference) up",11,36,0.305555555555556,2.01773152868047,0.0757775039405522,1232,0.0989020943449461
+"arrest, no damage","Quiescence TIG3","RAS-autonomous","down","RAS-autonomous | shared with RS/SIPS down",24,178,0.134831460674157,1.3450546706609,0.307132894502502,496,0.363331679454024
+"arrest, no damage","Quiescence TIG3","RAS-autonomous","down","RAS-autonomous | OIS-only down",33,318,0.10377358490566,0.743464203955864,0.307132894502502,496,0.363331679454024
+"arrest, no damage","Quiescence TIG3","OIS senescence-specific","down","OIS senescence-specific | shared with RS/SIPS down",26,552,0.0471014492753623,1.78070966311728,0.0534498867657941,1441,0.0717829397144481
+"arrest, no damage","Quiescence TIG3","OIS senescence-specific","down","OIS senescence-specific | OIS-only down",24,889,0.0269966254218223,0.5615738605301,0.0534498867657941,1441,0.0717829397144481
+"arrest, no damage","Quiescence TIG3","arrest-coupled (reference)","down","arrest-coupled (reference) down",154,256,0.6015625,6.68036681044471,1.26048910229238e-41,2010,7.96399932812004e-41
+"arrest, no damage","Rapamycin (NHDF)","RAS-autonomous","up","RAS-autonomous | shared with RS/SIPS up",15,180,0.0833333333333333,4.50648466511613,0.00451672913784877,383,0.00705421741753909
+"arrest, no damage","Rapamycin (NHDF)","RAS-autonomous","up","RAS-autonomous | OIS-only up",4,203,0.0197044334975369,0.221902452645807,0.00451672913784877,383,0.00705421741753909
+"arrest, no damage","Rapamycin (NHDF)","OIS senescence-specific","up","OIS senescence-specific | shared with RS/SIPS up",26,381,0.068241469816273,5.12828790705655,4.09354892506601e-05,879,7.43795164162321e-05
+"arrest, no damage","Rapamycin (NHDF)","OIS senescence-specific","up","OIS senescence-specific | OIS-only up",7,498,0.0140562248995984,0.194996852384981,4.09354892506601e-05,879,7.43795164162321e-05
+"arrest, no damage","Rapamycin (NHDF)","arrest-coupled (reference)","up","arrest-coupled (reference) up",2,35,0.0571428571428571,1.17519999902838,0.689306188730175,1279,0.734203526693443
+"arrest, no damage","Rapamycin (NHDF)","RAS-autonomous","down","RAS-autonomous | shared with RS/SIPS down",20,173,0.115606936416185,3.32449778269755,0.00171139245635093,491,0.00283194704086642
+"arrest, no damage","Rapamycin (NHDF)","RAS-autonomous","down","RAS-autonomous | OIS-only down",12,318,0.0377358490566038,0.300797312966949,0.00171139245635093,491,0.00283194704086642
+"arrest, no damage","Rapamycin (NHDF)","OIS senescence-specific","down","OIS senescence-specific | shared with RS/SIPS down",82,577,0.1421143847487,1.56214972769764,0.00746637623980906,1516,0.0112807206231898
+"arrest, no damage","Rapamycin (NHDF)","OIS senescence-specific","down","OIS senescence-specific | OIS-only down",90,939,0.0958466453674121,0.640143503704879,0.00746637623980907,1516,0.0112807206231898
+"arrest, no damage","Rapamycin (NHDF)","arrest-coupled (reference)","down","arrest-coupled (reference) down",32,244,0.131147540983607,1.27130961532858,0.230685762903152,2091,0.281274745995948
+"cytokines (modules)","NF-kB: TNF+IL-1b 3 h","RAS-autonomous","up","RAS-autonomous | shared with RS/SIPS up",64,165,0.387878787878788,2.66408786545759,5.52891979884826e-05,358,9.85281861589626e-05
+"cytokines (modules)","NF-kB: TNF+IL-1b 3 h","RAS-autonomous","up","RAS-autonomous | OIS-only up",37,193,0.191709844559585,0.375362994954463,5.52891979884826e-05,358,9.85281861589626e-05
+"cytokines (modules)","NF-kB: TNF+IL-1b 3 h","OIS senescence-specific","up","OIS senescence-specific | shared with RS/SIPS up",93,353,0.263456090651558,1.56102378984542,0.00865451240974546,836,0.0128660665770547
+"cytokines (modules)","NF-kB: TNF+IL-1b 3 h","OIS senescence-specific","up","OIS senescence-specific | OIS-only up",90,483,0.186335403726708,0.640605227482817,0.00865451240974546,836,0.0128660665770547
+"cytokines (modules)","NF-kB: TNF+IL-1b 3 h","arrest-coupled (reference)","up","arrest-coupled (reference) up",9,36,0.25,1.19983060557472,0.681814557760248,1209,0.733930635241032
+"cytokines (modules)","TNF 24 h","RAS-autonomous","up","RAS-autonomous | shared with RS/SIPS up",95,181,0.524861878453039,2.14184244019931,0.000302918634323177,387,0.000519823335443477
+"cytokines (modules)","TNF 24 h","RAS-autonomous","up","RAS-autonomous | OIS-only up",70,206,0.339805825242718,0.466887751046218,0.000302918634323177,387,0.000519823335443477
+"cytokines (modules)","TNF 24 h","OIS senescence-specific","up","OIS senescence-specific | shared with RS/SIPS up",162,379,0.427440633245383,1.84462649117734,1.84870049993843e-05,886,3.44925328176432e-05
+"cytokines (modules)","TNF 24 h","OIS senescence-specific","up","OIS senescence-specific | OIS-only up",146,507,0.287968441814596,0.542115167912257,1.84870049993843e-05,886,3.44925328176432e-05
+"cytokines (modules)","TNF 24 h","arrest-coupled (reference)","up","arrest-coupled (reference) up",9,34,0.264705882352941,0.648514591008424,0.363719156501094,1314,0.417628852863636
+"cytokines (modules)","IL-1b 14 d","RAS-autonomous","up","RAS-autonomous | shared with RS/SIPS up",77,206,0.37378640776699,2.63262670471321,2.64645972509114e-05,412,4.87229008990289e-05
+"cytokines (modules)","IL-1b 14 d","RAS-autonomous","up","RAS-autonomous | OIS-only up",38,206,0.184466019417476,0.379848764053671,2.64645972509114e-05,412,4.87229008990289e-05
+"cytokines (modules)","IL-1b 14 d","OIS senescence-specific","up","OIS senescence-specific | shared with RS/SIPS up",106,425,0.249411764705882,1.67646632373893,0.00184127603489295,927,0.00301102786882494
+"cytokines (modules)","IL-1b 14 d","OIS senescence-specific","up","OIS senescence-specific | OIS-only up",83,502,0.165338645418327,0.596492745389459,0.00184127603489295,927,0.00301102786882494
+"cytokines (modules)","IL-1b 14 d","arrest-coupled (reference)","up","arrest-coupled (reference) up",7,34,0.205882352941176,1.05757510114551,0.829382598491611,1314,0.873365009017681
+"other oncogenes","NOTCH1-ICD (IMR90)","RAS-autonomous","up","RAS-autonomous | shared with RS/SIPS up",41,206,0.199029126213592,1.53900552903264,0.118169536321475,422,0.152088569895232
+"other oncogenes","NOTCH1-ICD (IMR90)","RAS-autonomous","up","RAS-autonomous | OIS-only up",30,216,0.138888888888889,0.649770245223588,0.118169536321475,422,0.152088569895232
+"other oncogenes","NOTCH1-ICD (IMR90)","OIS senescence-specific","up","OIS senescence-specific | shared with RS/SIPS up",98,420,0.233333333333333,1.39494571874558,0.042111803239437,945,0.0571077136612853
+"other oncogenes","NOTCH1-ICD (IMR90)","OIS senescence-specific","up","OIS senescence-specific | OIS-only up",94,525,0.179047619047619,0.716873772621966,0.042111803239437,945,0.0571077136612853
+"other oncogenes","NOTCH1-ICD (IMR90)","arrest-coupled (reference)","up","arrest-coupled (reference) up",8,37,0.216216216216216,0.895032372184911,1,1323,1
+"other oncogenes","NOTCH1-ICD (IMR90)","RAS-autonomous","down","RAS-autonomous | shared with RS/SIPS down",54,171,0.31578947368421,1.72881832715891,0.0116454987301836,494,0.0168617117030783
+"other oncogenes","NOTCH1-ICD (IMR90)","RAS-autonomous","down","RAS-autonomous | OIS-only down",68,323,0.210526315789474,0.578429777316953,0.0116454987301836,494,0.0168617117030783
+"other oncogenes","NOTCH1-ICD (IMR90)","OIS senescence-specific","down","OIS senescence-specific | shared with RS/SIPS down",205,542,0.378228782287823,2.81496490883179,1.37666612536693e-16,1398,3.9865956547084e-16
+"other oncogenes","NOTCH1-ICD (IMR90)","OIS senescence-specific","down","OIS senescence-specific | OIS-only down",152,856,0.177570093457944,0.355244215252046,1.37666612536693e-16,1398,3.9865956547084e-16
+"other oncogenes","NOTCH1-ICD (IMR90)","arrest-coupled (reference)","down","arrest-coupled (reference) down",199,251,0.792828685258964,8.45587227090203,5.01121196450632e-48,1976,4.35349039416487e-47
+"other oncogenes","AKT (BJ)","RAS-autonomous","up","RAS-autonomous | shared with RS/SIPS up",76,153,0.496732026143791,4.71549106669561,9.92019414352348e-11,356,2.29817830991628e-10
+"other oncogenes","AKT (BJ)","RAS-autonomous","up","RAS-autonomous | OIS-only up",35,203,0.172413793103448,0.212066990660372,9.92019414352349e-11,356,2.29817830991628e-10
+"other oncogenes","AKT (BJ)","OIS senescence-specific","up","OIS senescence-specific | shared with RS/SIPS up",143,351,0.407407407407407,4.16570769713375,2.1532897590458e-18,853,6.6512728112748e-18
+"other oncogenes","AKT (BJ)","OIS senescence-specific","up","OIS senescence-specific | OIS-only up",71,502,0.141434262948207,0.240055249360886,2.1532897590458e-18,853,6.6512728112748e-18
+"other oncogenes","AKT (BJ)","arrest-coupled (reference)","up","arrest-coupled (reference) up",10,36,0.277777777777778,1.05199388757125,0.85044561910345,1179,0.892165592870789
+"other oncogenes","AKT (BJ)","RAS-autonomous","down","RAS-autonomous | shared with RS/SIPS down",65,172,0.377906976744186,1.87446047368085,0.00248082230790254,491,0.00396361265285578
+"other oncogenes","AKT (BJ)","RAS-autonomous","down","RAS-autonomous | OIS-only down",78,319,0.244514106583072,0.53348684276938,0.00248082230790254,491,0.00396361265285578
+"other oncogenes","AKT (BJ)","OIS senescence-specific","down","OIS senescence-specific | shared with RS/SIPS down",208,534,0.389513108614232,2.06638832463435,1.07995176890946e-09,1416,2.32733792059558e-09
+"other oncogenes","AKT (BJ)","OIS senescence-specific","down","OIS senescence-specific | OIS-only down",208,882,0.235827664399093,0.483936145050063,1.07995176890946e-09,1416,2.32733792059558e-09
+"other oncogenes","AKT (BJ)","arrest-coupled (reference)","down","arrest-coupled (reference) down",145,246,0.589430894308943,2.72319438255308,3.59436958681364e-13,2005,9.79641906994306e-13
+"other oncogenes","AKT (IMR90 array)","RAS-autonomous","up","RAS-autonomous | shared with RS/SIPS up",47,235,0.2,1.48308523840574,0.137366678806913,457,0.174374140220648
+"other oncogenes","AKT (IMR90 array)","RAS-autonomous","up","RAS-autonomous | OIS-only up",32,222,0.144144144144144,0.67427007841772,0.137366678806913,457,0.174374140220648
+"other oncogenes","AKT (IMR90 array)","OIS senescence-specific","up","OIS senescence-specific | shared with RS/SIPS up",73,499,0.146292585170341,1.15466454470798,0.46965376464455,1033,0.532913251310959
+"other oncogenes","AKT (IMR90 array)","OIS senescence-specific","up","OIS senescence-specific | OIS-only up",69,534,0.129213483146067,0.866052399879411,0.46965376464455,1033,0.532913251310959
+"other oncogenes","AKT (IMR90 array)","arrest-coupled (reference)","up","arrest-coupled (reference) up",8,33,0.242424242424242,1.5210755749955,0.351032616650288,1512,0.40661278095325
+"other oncogenes","AKT (IMR90 array)","RAS-autonomous","down","RAS-autonomous | shared with RS/SIPS down",31,176,0.176136363636364,0.832453479115112,0.47805483102441,494,0.533731899697936
+"other oncogenes","AKT (IMR90 array)","RAS-autonomous","down","RAS-autonomous | OIS-only down",65,318,0.20440251572327,1.201268329208,0.47805483102441,494,0.533731899697936
+"other oncogenes","AKT (IMR90 array)","OIS senescence-specific","down","OIS senescence-specific | shared with RS/SIPS down",70,607,0.115321252059308,0.79661536610182,0.150490186074453,1638,0.18760659968026
+"other oncogenes","AKT (IMR90 array)","OIS senescence-specific","down","OIS senescence-specific | OIS-only down",145,1031,0.140640155189137,1.25531096003513,0.150490186074453,1638,0.18760659968026
+"other oncogenes","AKT (IMR90 array)","arrest-coupled (reference)","down","arrest-coupled (reference) down",15,246,0.0609756097560976,0.426619761581935,0.000958796224462167,2244,0.00160569488193062
+"other oncogenes","MYC (RPE1 p53-wt)","RAS-autonomous","up","RAS-autonomous | shared with RS/SIPS up",23,169,0.136094674556213,0.480427644390142,0.010434828911235,355,0.0153485843244621
+"other oncogenes","MYC (RPE1 p53-wt)","RAS-autonomous","up","RAS-autonomous | OIS-only up",46,186,0.247311827956989,2.0814788900614,0.010434828911235,355,0.0153485843244621
+"other oncogenes","MYC (RPE1 p53-wt)","OIS senescence-specific","up","OIS senescence-specific | shared with RS/SIPS up",33,313,0.105431309904153,0.540738191196241,0.00634041764747772,743,0.00968481376922421
+"other oncogenes","MYC (RPE1 p53-wt)","OIS senescence-specific","up","OIS senescence-specific | OIS-only up",77,430,0.17906976744186,1.84932378789034,0.00634041764747771,743,0.00968481376922421
+"other oncogenes","MYC (RPE1 p53-wt)","arrest-coupled (reference)","up","arrest-coupled (reference) up",0,28,0,0,0.0396556510852213,1039,0.0543067537029139
+"other oncogenes","MYC (RPE1 p53-wt)","RAS-autonomous","down","RAS-autonomous | shared with RS/SIPS down",20,98,0.204081632653061,0.783294219087682,0.477048762720807,329,0.533731899697936
+"other oncogenes","MYC (RPE1 p53-wt)","RAS-autonomous","down","RAS-autonomous | OIS-only down",57,231,0.246753246753247,1.27665949222084,0.477048762720807,329,0.533731899697936
+"other oncogenes","MYC (RPE1 p53-wt)","OIS senescence-specific","down","OIS senescence-specific | shared with RS/SIPS down",35,332,0.105421686746988,0.597155626265528,0.0136208761237987,896,0.0190707358943214
+"other oncogenes","MYC (RPE1 p53-wt)","OIS senescence-specific","down","OIS senescence-specific | OIS-only down",93,564,0.164893617021277,1.67460533907011,0.0136208761237987,896,0.0190707358943214
+"other oncogenes","MYC (RPE1 p53-wt)","arrest-coupled (reference)","down","arrest-coupled (reference) down",9,198,0.0454545454545455,0.305528125982605,0.000135898150264231,1295,0.000239111935275039
+"other oncogenes","Cyclin E (RPE1 p53-wt)","RAS-autonomous","up","RAS-autonomous | shared with RS/SIPS up",1,181,0.00552486187845304,1.04988133721276,1,371,1
+"other oncogenes","Cyclin E (RPE1 p53-wt)","RAS-autonomous","up","RAS-autonomous | OIS-only up",1,190,0.00526315789473684,0.952488595191926,1,371,1
+"other oncogenes","Cyclin E (RPE1 p53-wt)","OIS senescence-specific","up","OIS senescence-specific | shared with RS/SIPS up",1,354,0.00282485875706215,0.640566457161853,1,808,1
+"other oncogenes","Cyclin E (RPE1 p53-wt)","OIS senescence-specific","up","OIS senescence-specific | OIS-only up",2,454,0.00440528634361234,1.56111827089837,1,808,1
+"other oncogenes","Cyclin E (RPE1 p53-wt)","arrest-coupled (reference)","up","arrest-coupled (reference) up",0,31,0,0,1,1136,1

@@ -28,6 +28,17 @@ sets <- list(
 )
 # keep the class sets free of the stromal proxy genes and of each other's overlaps with MYC/prolif
 for (k in grep("^RIS_", names(sets), value = TRUE)) sets[[k]] <- setdiff(sets[[k]], stroma)
+# added 2026-11-07: pathway scores (TGF-beta, cGAS-STING, IFN, NF-kB, ...; pathway_sets.R). Stromal-proxy genes and
+# every gene in a RIS class set are removed, so a pathway score shares no genes with the class scores or the stroma covariate.
+source(".claude/worktrees/two-sided-fisher/exploratory/ras_vs_ois/pathway_sets.R")
+ris_genes <- unique(unlist(sets[grep("^RIS_", names(sets))]))
+ps <- pathway_sets()
+# metabolic score sets keep RIS class genes (glycolysis is scored as a whole, HK2 included; not used as covariates)
+met <- grepl("^P_(GLYC|GAG|HEXOSAMINE)", names(ps))
+ps[!met] <- lapply(ps[!met], function(g) setdiff(g, c(stroma, ris_genes)))
+ps[met] <- lapply(ps[met], function(g) setdiff(g, stroma))
+cat("pathway genes kept after removing stroma and RIS class genes:\n"); print(sapply(ps, length))
+sets <- c(sets, ps)
 
 files <- c(list.files("data/TCGA_deg/processed", pattern = "_DGE_ready_RSE.rds$", full.names = TRUE),
            # tumour-only cohorts downloaded for the driver analysis (07_download_paad_skcm.R)

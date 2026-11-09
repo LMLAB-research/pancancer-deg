@@ -19,6 +19,7 @@ sets <- list(
   arrest_DOWN = cls$gene[cls$OIS_direction == "DOWN" & cls$arrest_class == "arrest-coupled"],
   NFKB_BRD4_dep_UP = cls$gene[cls$OIS_direction == "UP" & cls$nfkb_brd4 == "dependent"]
 )
+source(".claude/worktrees/two-sided-fisher/exploratory/ras_vs_ois/pathway_sets.R"); sets <- c(sets, pathway_sets())  # added 2026-11-07: pathway scores (TGF-beta, cGAS-STING, IFN, ...)
 groups <- read.csv(file.path(CS, "notch_secondary/out/step2/cell_scores_GSE245807_RIS.csv.gz"))[, c("cell", "group", "plate")]
 
 objs <- readRDS(file.path(CS, "house_rerun/GSE245807/final/RIS_seurat.rds"))
@@ -45,6 +46,6 @@ res <- do.call(rbind, lapply(feat, function(f) {
                p = wilcox.test(a, b)$p.value)
   }))
 }))
-res$padj_BH <- p.adjust(res$p, "BH")
+res$padj_BH <- ave(res$p, ifelse(grepl("^HS_", res$score), "house", ifelse(grepl("^P_(GLYC|GAG|HEXOSAMINE)", res$score), "met", ifelse(grepl("^P_", res$score), "path", "core"))), FUN = function(p) p.adjust(p, "BH"))  # pathway scores (2026-11-07) are a separate BH family
 write.csv(res, file.path(out, "state3_vs_states12.csv"), row.names = FALSE)
 print(res, digits = 3, row.names = FALSE)

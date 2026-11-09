@@ -86,5 +86,36 @@ for sub, tag in (("", "stroma"), ("purity_adjusted/", "stroma_purity")):
     copy(f"{R}/ras_vs_myc/{sub}driver_models.csv", f"05_tcga_driver_models_{tag}.csv")
     copy(f"{R}/ras_vs_myc/{sub}activity_models.csv", f"05_tcga_activity_models_{tag}.csv")
 
+# 6. Pathways (TGF-beta, cGAS-STING, IFN, ...; 2026-11-07)
+copy(f"{R}/ras_vs_ois/pathways/class_pathway_overlap.csv", "08_ois_class_pathway_overlap.csv")
+copy(f"{R}/ras_vs_ois/pathways/pathway_genes_by_class.csv", "08_pathway_genes_by_class.csv")
+copy(f"{R}/ras_vs_ois/pathways/sc_pathway_summary.csv", "08_sc_pathway_summary.csv")
+for sub, tag in (("", "stroma"), ("purity_adjusted/", "stroma_purity")):
+    copy(f"{R}/ras_vs_myc/{sub}pathway_extended_models_summary.csv", f"08_tcga_pathway_extended_models_{tag}.csv")
+
+# 7. Metabolism, senescence vs tumours (2026-11-07)
+for f in ("metabolic_overlap_tcga.csv", "metabolic_overlap_inducer_arms.csv", "metabolic_genes_senescence_vs_tumour.csv",
+          "metabolic_genes_direction_table.csv"):
+    copy(f"{R}/metabolism/{f}", "09_" + f)
+
+for f in ("noprolif/metabolic_overlap_tcga.csv", "noprolif/metabolic_overlap_arrest_noprolif.csv",
+          "tumour_metabolic_purity_models.csv", "sc_metabolic_summary.csv", "metabolic_score_sets.csv"):
+    copy(f"{R}/metabolism/{f}", "09_" + f.replace("noprolif/", "noprolif_"))
+
+# 9. House Hallmark + lysosomal sets, components, modules (2026-11-09)
+copy(f"{R}/ras_vs_ois/pathways/class_pathway_overlap_house.csv", "11_ois_class_house_pathway_overlap.csv")
+copy(f"{R}/ras_vs_ois/pathways/sc_house_pathway_summary.csv", "11_sc_house_pathway_summary.csv")
+copy(f"{R}/hallmarks/hallmark_senescence_vs_tumour_table.csv", "11_hallmark_senescence_vs_tumour_table.csv")
+copy(f"{R}/hallmarks/hallmark_overlap_tcga.csv", "11_hallmark_overlap_tcga.csv")
+copy(f"{R}/hallmarks/hallmark_overlap_inducer_arms.csv", "11_hallmark_overlap_inducer_arms.csv")
+for f in ("components.csv", "component_tcga_summary.csv", "component_house_pathways.csv"):
+    copy(f"{R}/breakdown/{f}", "12_" + f)
+
+for f in ("shared_layer_tcga_summary.csv", "shared_layer_tcga_paired.csv", "shared_layer_perturbations.csv", "shared_layer_ois_dependence.csv"):
+    copy(f"{R}/breakdown/shared_layer/{f}", "13_" + f)
+
+# 8. Per-stressor senescence DEGs vs tumour DEGs (2026-11-07)
+copy(f"{R}/stressors/stressor_tcga_summary.csv", "10_stressor_tcga_summary.csv")
+
 total = sum(os.path.getsize(os.path.join(OUT, f)) for f in written)
 print(f"{len(written)} files, {total / 1e6:.2f} MB -> {OUT}")

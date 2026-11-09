@@ -51,6 +51,7 @@ sets <- list(
   arrest_DOWN = cls$gene[cls$OIS_direction == "DOWN" & cls$arrest_class == "arrest-coupled"],
   NFKB_BRD4_dep_UP = cls$gene[cls$OIS_direction == "UP" & cls$nfkb_brd4 == "dependent"]
 )
+source(".claude/worktrees/two-sided-fisher/exploratory/ras_vs_ois/pathway_sets.R"); sets <- c(sets, pathway_sets())  # added 2026-11-07: pathway scores (TGF-beta, cGAS-STING, IFN, ...)
 sc <- do.call(rbind, lapply(names(cells), function(b) {
   o <- cells[[b]]; DefaultAssay(o) <- "RNA"
   s <- lapply(sets, function(g) intersect(g, rownames(o)))
@@ -76,7 +77,7 @@ res <- do.call(rbind, lapply(feat, function(f) do.call(rbind, lapply(cmp, functi
              median1 = median(a), median2 = median(b), diff = median(a) - median(b),
              p = wilcox.test(a, b)$p.value)
 }))))
-res$padj_BH <- p.adjust(res$p, "BH")
+res$padj_BH <- ave(res$p, ifelse(grepl("^HS_", res$score), "house", ifelse(grepl("^P_(GLYC|GAG|HEXOSAMINE)", res$score), "met", ifelse(grepl("^P_", res$score), "path", "core"))), FUN = function(p) p.adjust(p, "BH"))  # pathway scores (2026-11-07) are a separate BH family
 write.csv(res, file.path(out, "cycling_vs_arrested_comparisons.csv"), row.names = FALSE)
 # retention: RAS effect in cycling cells as a fraction of the RAS effect in house-final G1 cells
 ret <- sapply(feat, function(f) {

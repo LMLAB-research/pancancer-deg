@@ -16,6 +16,7 @@ if PURITY:
     OUT = OUT + "/purity_adjusted"; os.makedirs(OUT, exist_ok=True)
 COV = " + Stroma" + (" + purity" if PURITY else "")
 targets = ["RIS_RASauto_UP", "RIS_intermediate_UP", "RIS_arrest_UP", "RIS_NFKB_BRD4_UP", "RIS_RASauto_DOWN"]
+targets += [c for c in d.columns if c.startswith(("P_", "HS_"))]  # HS_ = house Hallmark + lysosomal (2026-11-09)  # added 2026-11-07: pathway scores as outcomes
 preds = ["ERK_output", "MYC_targets", "Proliferation", "Stroma"]
 res = []
 for coh, g in d.groupby("cohort"):
