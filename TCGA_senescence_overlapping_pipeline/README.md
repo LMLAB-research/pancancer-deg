@@ -54,13 +54,16 @@ Genes are classified using `padj < 0.05` and `abs(log2FoldChange) > log2(1.5)`.
 Four overlaps are tested: `UP-UP`, `UP-DOWN`, `DOWN-UP`, `DOWN-DOWN`
 (cancer first, signature second).
 
-Each one-sided Fisher test uses **TCGA protein-coding genes with non-missing
+Each Fisher test is two-sided by default (`fisher_alternative` in `config.R`;
+`"greater"` restores the original enrichment-only test), so both enrichment and
+depletion are detected. Each test uses **TCGA protein-coding genes with non-missing
 adjusted p-values and fold changes ∩ signature
 background** as its universe. Both DEG sets are restricted to this universe.
 Duplicate symbols with opposing significant directions are excluded;
 other duplicates use one representative and are exported for review.
 
-Heatmap colors show log2 odds ratios for significant overlaps. Stars use
+Heatmap colors show log2 odds ratios for significant overlaps on a diverging
+scale: blue for enrichment, red for depletion. Stars use
 BH-adjusted p-values across all cancer-by-class tests within each signature.
 
 ## Results
