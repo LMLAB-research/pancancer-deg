@@ -156,6 +156,54 @@ run_overlap_test <- function(
   )
 }
 
+# Fisher's exact test on a 2x2 table [[n11, n12], [n21, n22]] (rows: cancer,
+# columns: signature). Returns the conditional MLE odds ratio, its 95% CI and
+# the two-sided p-value; NA if a row or column is empty.
+fisher_2x2 <- function(test, n11, n12, n21, n22) {
+  table_2x2 <- matrix(c(n11, n21, n12, n22), nrow = 2)
+  empty_margin <- any(rowSums(table_2x2) == 0) || any(colSums(table_2x2) == 0)
+  fit <- if (empty_margin) NULL else fisher.test(table_2x2, alternative = "two.sided")
+  data.frame(
+    test = test,
+    n11 = n11, n12 = n12, n21 = n21, n22 = n22,
+    odds_ratio = if (empty_margin) NA_real_ else unname(fit$estimate),
+    ci_low = if (empty_margin) NA_real_ else fit$conf.int[1],
+    ci_high = if (empty_margin) NA_real_ else fit$conf.int[2],
+    p_value = if (empty_margin) NA_real_ else fit$p.value,
+    stringsAsFactors = FALSE
+  )
+}
+
+# Split the cancer-signature association into two questions:
+# - share: are genes DE in the signature more often DE in the cancer?
+#   All genes in the universe; rows cancer DE/NS, columns signature DE/NS.
+# - direction: among genes DE in both, do they change in the same direction?
+#   Rows cancer UP/DOWN, columns signature UP/DOWN; odds ratio > 1 means same
+#   direction, < 1 opposite direction.
+run_share_direction_tests <- function(cancer_sets, signature_sets, universe) {
+  cancer_de <- union(cancer_sets$UP, cancer_sets$DOWN)
+  signature_de <- union(signature_sets$UP, signature_sets$DOWN)
+  n_both <- length(intersect(cancer_de, signature_de))
+  n_overlap <- function(a, b) length(intersect(a, b))
+
+  rbind(
+    fisher_2x2(
+      "share",
+      n11 = n_both,
+      n12 = length(cancer_de) - n_both,
+      n21 = length(signature_de) - n_both,
+      n22 = length(universe) - length(union(cancer_de, signature_de))
+    ),
+    fisher_2x2(
+      "direction",
+      n11 = n_overlap(cancer_sets$UP, signature_sets$UP),
+      n12 = n_overlap(cancer_sets$UP, signature_sets$DOWN),
+      n21 = n_overlap(cancer_sets$DOWN, signature_sets$UP),
+      n22 = n_overlap(cancer_sets$DOWN, signature_sets$DOWN)
+    )
+  )
+}
+
 read_background <- function(file) {
   x <- read.csv(file, stringsAsFactors = FALSE, check.names = FALSE)
   columns <- intersect(c("gene", "gene_symbol", "gene_name"), names(x))
@@ -260,6 +308,9 @@ analyze_one_cancer <- function(
   # Correct the four directional tests within this cancer/signature pair
   statistics$BH_within_cancer <- p.adjust( statistics$p_value, method = "BH" )
 
+  share_direction <- run_share_direction_tests(cancer_sets, signature_sets, universe)
+  share_direction$signature <- signature_name
+
   genes <- data.frame(
     gene_symbol = unlist(overlaps, use.names = FALSE),
     overlap_class = rep(class_order, lengths(overlaps))
@@ -340,6 +391,7 @@ analyze_one_cancer <- function(
     overlap_all_classes = overlap_table,
     overlap_counts = counts,
     overlap_statistics = statistics,
+    share_direction_statistics = share_direction,
     common_tested_genes = data.frame(gene_symbol = sort(unique(universe))),
     CANCER_duplicates_for_review = cancer$audit[cancer$audit$needs_review, , drop = FALSE]
   )
