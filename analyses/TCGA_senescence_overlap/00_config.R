@@ -1,17 +1,15 @@
-# Input paths. An optional base directory supports the original two-folder layout.
-repo_dir <- dirname(project_dir)
-base_dir <- Sys.getenv("TCGA_SENESCENCE_BASE_DIR", unset = "")
-senescence_input_dir <- if (nzchar(base_dir)) {
-  file.path(base_dir, "meta_analysis")
-} else {
-  file.path(repo_dir, "data", "senescence_meta_analysis_deg")
-}
-cancer_input_dir <- if (nzchar(base_dir)) {
-  file.path(base_dir, "TCGA_deg")
-} else {
-  file.path(repo_dir, "results", "tables", "TCGA_deg")
-}
-results_dir <- Sys.getenv("TCGA_SENESCENCE_RESULTS_DIR", unset = file.path(project_dir, "results"))
+#### Paths ####
+# Scripts are run from the repository root.
+
+analysis_name <- "TCGA_senescence_overlap"
+
+# Senescence/quiescence signatures and their backgrounds.
+senescence_input_dir <- file.path("data", "senescence_meta_analysis_deg")
+# Full TCGA DESeq2 tables from analyses/TCGA_deg (step 04).
+cancer_input_dir <- file.path("results", "tables", "TCGA_deg")
+
+results_dir <- file.path("results", "tables", analysis_name)
+figures_dir <- file.path("results", "figures", analysis_name)
 
 expected_signatures <- c("OIS", "RS", "SIPS", "CICQ", "SSCQ")
 cancer_file_pattern <- "^TCGA-[A-Za-z0-9-]+_DGE_Raw_Results_Tumor_vs_Normal_Adjusted\\.csv$"
@@ -19,6 +17,10 @@ cancer_file_pattern <- "^TCGA-[A-Za-z0-9-]+_DGE_Raw_Results_Tumor_vs_Normal_Adju
 # Thresholds 
 padj_threshold <- 0.05
 lfc_threshold <- log2(1.5)
+
+# Fisher test sidedness: "two.sided" tests for enrichment and depletion;
+# "greater" tests enrichment only (the original one-sided test).
+fisher_alternative <- "two.sided"
 
 # Heatmap settings
 

@@ -1,16 +1,7 @@
-script_arg <- grep("^--file=", commandArgs(), value = TRUE)
-script_file <- if (length(script_arg)) sub("^--file=", "", script_arg[1]) else sys.frame(1)$ofile
-project_dir <- dirname(normalizePath(script_file))
-source(file.path(project_dir, "config.R"))
+source(file.path("analyses", "TCGA_senescence_overlap", "00_config.R"))
 
 status_file <- file.path(results_dir, "batch_run_status.csv")
 if (file.exists(status_file) && !file.remove(status_file)) stop("Cannot replace batch status.")
-
-if (!requireNamespace("GeneOverlap", quietly = TRUE)) {
-  stop("Install GeneOverlap with BiocManager::install('GeneOverlap')")
-}
-
-library(GeneOverlap)
 
 # Assign UP, DOWN, or NS using adjusted p-value and fold-change thresholds
 classify_regulation <- function(padj, lfc) {
@@ -57,59 +48,56 @@ resolve_symbol_duplicates <- function(
     stop("No valid gene symbols remain.")
   }
 
-  groups <- split(x, x[[symbol_column]])
-  selected <- list()
-  audit <- list()
+  symbol <- x[[symbol_column]]
+  duplicate_n <- as.vector(table(symbol)[symbol])
 
-  for (symbol in names(groups)) {
-    group <- groups[[symbol]]
+  # Opposite significant directions exclude this symbol from the analysis.
+  up_symbols <- unique(symbol[x$regulation == "UP"])
+  down_symbols <- unique(symbol[x$regulation == "DOWN"])
+  conflict <- symbol %in% intersect(up_symbols, down_symbols)
 
-    directions <- unique( group$regulation[ group$regulation %in% c("UP", "DOWN") ] )
+  status <- ifelse(
+    duplicate_n == 1,
+    "UNIQUE",
+    ifelse(conflict, "CONFLICT_OPPOSITE_DIRECTIONS", "REVIEW_DUPLICATE_SAME_DIRECTION")
+  )
 
-    # Opposite significant directions exclude this symbol from the analysis.
-    conflict <- length(directions) > 1
+  # Representative per symbol: lowest padj, then largest absolute fold change,
+  # then source ID.
+  preference <- order(
+    symbol,
+    is.na(x$padj),
+    x$padj,
+    -abs(x$log2FoldChange),
+    x[[source_id_column]],
+    na.last = TRUE
+  )
+  representative_rows <- preference[!duplicated(symbol[preference])]
+  is_representative <- seq_len(nrow(x)) %in% representative_rows
 
-    # Prefer lowest padj, then largest absolute fold change, then source ID.
-    row_order <- order(
-      is.na(group$padj),
-      group$padj,
-      -abs(group$log2FoldChange),
-      group[[source_id_column]],
-      na.last = TRUE
-    )
+  data <- x[representative_rows, , drop = FALSE]
+  data$duplicate_n <- duplicate_n[representative_rows]
+  data$duplicate_status <- status[representative_rows]
+  data$needs_review <- data$duplicate_n > 1
+  data$exclude_from_overlap <- conflict[representative_rows]
 
-    selected_row <- row_order[[1]]
-    representative <- group[selected_row, , drop = FALSE]
+  # Audit: all rows, grouped by symbol, original order within each symbol.
+  audit <- x
+  audit$duplicate_n <- duplicate_n
+  audit$duplicate_status <- status
+  audit$needs_review <- duplicate_n > 1
+  audit$direction_conflict <- conflict
+  audit$exclude_from_overlap <- conflict
+  audit$selected_representative <- is_representative
+  audit <- audit[order(symbol), , drop = FALSE]
 
-    status <- if (nrow(group) == 1) {
-      "UNIQUE"
-    } else if (conflict) {
-      "CONFLICT_OPPOSITE_DIRECTIONS"
-    } else {
-      "REVIEW_DUPLICATE_SAME_DIRECTION"
-    }
-
-    representative$duplicate_n <- nrow(group)
-    representative$duplicate_status <- status
-    representative$needs_review <- nrow(group) > 1
-    representative$exclude_from_overlap <- conflict
-
-    group$duplicate_n <- nrow(group)
-    group$duplicate_status <- status
-    group$needs_review <- nrow(group) > 1
-    group$direction_conflict <- conflict
-    group$exclude_from_overlap <- conflict
-    group$selected_representative <-
-      seq_len(nrow(group)) == selected_row
-
-    selected[[symbol]] <- representative
-    audit[[symbol]] <- group
-  }
-
-  list( data = do.call(rbind, selected), audit = do.call(rbind, audit) )
+  list(data = data, audit = audit)
 }
 
-# Test whether two directional gene sets overlap more than expected by chance.
+# Test whether two directional gene sets overlap more (or, two-sided, also less)
+# than expected by chance. Fisher's exact test on the 2x2 table within the universe;
+# the sidedness is set by fisher_alternative in 00_config.R. The odds ratio is
+# the conditional maximum-likelihood estimate from fisher.test.
 run_overlap_test <- function(
     cancer_genes,
     signature_genes,
@@ -119,11 +107,18 @@ run_overlap_test <- function(
   cancer_genes <- intersect(unique(cancer_genes), universe)
   signature_genes <- intersect(unique(signature_genes), universe)
 
-  test <- testGeneOverlap(
-    newGeneOverlap( cancer_genes, signature_genes, genome.size = length(universe) )
-  )
-
   observed <- length( intersect(cancer_genes, signature_genes) )
+
+  contingency <- matrix(
+    c(
+      observed,
+      length(cancer_genes) - observed,
+      length(signature_genes) - observed,
+      length(universe) - length(union(cancer_genes, signature_genes))
+    ),
+    nrow = 2
+  )
+  fit <- fisher.test( contingency, alternative = fisher_alternative )
 
   expected <-
     length(cancer_genes) *
@@ -138,9 +133,58 @@ run_overlap_test <- function(
     observed_overlap = observed,
     expected_overlap = expected,
     fold_enrichment = if (expected > 0) observed / expected else NA_real_,
-    odds_ratio = getOddsRatio(test),
-    p_value = getPval(test),
+    odds_ratio = unname(fit$estimate),
+    p_value = fit$p.value,
+    test_alternative = fisher_alternative,
     stringsAsFactors = FALSE
+  )
+}
+
+# Fisher's exact test on a 2x2 table [[n11, n12], [n21, n22]] (rows: cancer,
+# columns: signature). Returns the conditional MLE odds ratio, its 95% CI and
+# the two-sided p-value; NA if a row or column is empty.
+fisher_2x2 <- function(test, n11, n12, n21, n22) {
+  table_2x2 <- matrix(c(n11, n21, n12, n22), nrow = 2)
+  empty_margin <- any(rowSums(table_2x2) == 0) || any(colSums(table_2x2) == 0)
+  fit <- if (empty_margin) NULL else fisher.test(table_2x2, alternative = "two.sided")
+  data.frame(
+    test = test,
+    n11 = n11, n12 = n12, n21 = n21, n22 = n22,
+    odds_ratio = if (empty_margin) NA_real_ else unname(fit$estimate),
+    ci_low = if (empty_margin) NA_real_ else fit$conf.int[1],
+    ci_high = if (empty_margin) NA_real_ else fit$conf.int[2],
+    p_value = if (empty_margin) NA_real_ else fit$p.value,
+    stringsAsFactors = FALSE
+  )
+}
+
+# Split the cancer-signature association into two questions:
+# - share: are genes DE in the signature more often DE in the cancer?
+#   All genes in the universe; rows cancer DE/NS, columns signature DE/NS.
+# - direction: among genes DE in both, do they change in the same direction?
+#   Rows cancer UP/DOWN, columns signature UP/DOWN; odds ratio > 1 means same
+#   direction, < 1 opposite direction.
+run_share_direction_tests <- function(cancer_sets, signature_sets, universe) {
+  cancer_de <- union(cancer_sets$UP, cancer_sets$DOWN)
+  signature_de <- union(signature_sets$UP, signature_sets$DOWN)
+  n_both <- length(intersect(cancer_de, signature_de))
+  n_overlap <- function(a, b) length(intersect(a, b))
+
+  rbind(
+    fisher_2x2(
+      "share",
+      n11 = n_both,
+      n12 = length(cancer_de) - n_both,
+      n21 = length(signature_de) - n_both,
+      n22 = length(universe) - length(union(cancer_de, signature_de))
+    ),
+    fisher_2x2(
+      "direction",
+      n11 = n_overlap(cancer_sets$UP, signature_sets$UP),
+      n12 = n_overlap(cancer_sets$UP, signature_sets$DOWN),
+      n21 = n_overlap(cancer_sets$DOWN, signature_sets$UP),
+      n22 = n_overlap(cancer_sets$DOWN, signature_sets$DOWN)
+    )
   )
 }
 
@@ -245,8 +289,10 @@ analyze_one_cancer <- function(
 
   statistics$signature <- signature_name
 
-  # Correct the four directional tests within this cancer/signature pair
-  statistics$BH_within_cancer <- p.adjust( statistics$p_value, method = "BH" )
+  # Multiple-testing correction across cancers is done in 02_plot_heatmaps.R.
+
+  share_direction <- run_share_direction_tests(cancer_sets, signature_sets, universe)
+  share_direction$signature <- signature_name
 
   genes <- data.frame(
     gene_symbol = unlist(overlaps, use.names = FALSE),
@@ -328,6 +374,7 @@ analyze_one_cancer <- function(
     overlap_all_classes = overlap_table,
     overlap_counts = counts,
     overlap_statistics = statistics,
+    share_direction_statistics = share_direction,
     common_tested_genes = data.frame(gene_symbol = sort(unique(universe))),
     CANCER_duplicates_for_review = cancer$audit[cancer$audit$needs_review, , drop = FALSE]
   )
