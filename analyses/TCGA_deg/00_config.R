@@ -66,7 +66,12 @@ normal_sample_type <- "Solid Tissue Normal"
 
 tumor_sample_types <- "Primary Tumor"
 
+# Non-primary tumour samples are known but excluded from tumour-vs-normal models.
 uncharacterized_sample_types <- c(
+  "Metastatic",
+  "Recurrent Tumor",
+  "Primary Blood Derived Cancer - Peripheral Blood",
+  "Additional Metastatic",
   "Additional - New Primary"
 )
 
