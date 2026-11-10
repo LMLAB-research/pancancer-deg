@@ -15,7 +15,7 @@ library(recount3)
 library(SummarizedExperiment)
 library(TCGAbiolinks)
 
-#### Analysis Parameters ####
+#### Analysis parameters ####
 
 analysis_name <- "TCGA_deg"
 
@@ -64,15 +64,14 @@ tcga_clinical_data_format <- "BCR Biotab"
 # If GDC adds a new sample type, script 01 stops so this list can be reviewed.
 normal_sample_type <- "Solid Tissue Normal"
 
-tumor_sample_types <- c(
-  "Primary Tumor",
+tumor_sample_types <- "Primary Tumor"
+
+# Non-primary tumour samples are known but excluded from tumour-vs-normal models.
+uncharacterized_sample_types <- c(
   "Metastatic",
   "Recurrent Tumor",
   "Primary Blood Derived Cancer - Peripheral Blood",
-  "Additional Metastatic"
-)
-
-uncharacterized_sample_types <- c(
+  "Additional Metastatic",
   "Additional - New Primary"
 )
 
@@ -106,11 +105,16 @@ lfc_shrinkage_type <- "ashr"
 candidate_covariates <- c(
   "sex",
   "race",
-  "ethnicity",
   "smoking_status"
 )
 
-#### Plot Settings ####
+# Sample subsets/models crossed with the naive and adjusted designs:
+# "all" = all samples (tumor effect); "female"/"male" = one sex only;
+# "sex_interaction" = both sexes with sex x condition, testing the difference
+# between the male and female tumor effects.
+sex_models <- c("all", "female", "male", "sex_interaction")
+
+#### Plot settings ####
 
 pca_blind <- FALSE
 pca_max_groups <- 12
@@ -138,7 +142,6 @@ deg_neutral_color <- "grey70"
 metadata_column_patterns <- list(
   sex = "gender|sex",
   race = "race",
-  ethnicity = "ethnic",
   smoking_status = "smok|tobacco|cigarette|pack",
   age = "age",
   stage_grade = "stage|grade",
@@ -265,27 +268,35 @@ tcga_project_dds_file <- function(project_id, design_type) {
   )
 }
 
+# Result file label of a design type, e.g. "adjusted" -> "Tumor_vs_Normal_Adjusted",
+# "adjusted_female" -> "Tumor_vs_Normal_Adjusted_Female",
+# "adjusted_sex_interaction" -> "Sex_Interaction_Adjusted".
+tcga_design_file_label <- function(design_type) {
+  parts <- strsplit(design_type, "_", fixed = TRUE)[[1]]
+  adjustment <- tools::toTitleCase(parts[[1]])
+  sex_model <- paste(parts[-1], collapse = "_")
+
+  if (sex_model == "sex_interaction") {
+    return(paste0("Sex_Interaction_", adjustment))
+  }
+
+  paste(
+    c("Tumor_vs_Normal", adjustment, if (nzchar(sex_model)) tools::toTitleCase(sex_model)),
+    collapse = "_"
+  )
+}
+
 tcga_deseq_results_file <- function(project_id, design_type) {
   file.path(
     results_table_dir,
-    paste0(
-      project_id,
-      "_DGE_Results_Tumor_vs_Normal_",
-      tools::toTitleCase(design_type),
-      ".csv"
-    )
+    paste0(project_id, "_DGE_Results_", tcga_design_file_label(design_type), ".csv")
   )
 }
 
 tcga_deseq_raw_results_file <- function(project_id, design_type) {
   file.path(
     results_table_dir,
-    paste0(
-      project_id,
-      "_DGE_Raw_Results_Tumor_vs_Normal_",
-      tools::toTitleCase(design_type),
-      ".csv"
-    )
+    paste0(project_id, "_DGE_Raw_Results_", tcga_design_file_label(design_type), ".csv")
   )
 }
 
@@ -306,7 +317,7 @@ tcga_volcano_figure_file <- function(project_id) {
   file.path(results_figure_dir, paste0(project_id, "_Volcano_plot.png"))
 }
 
-#### Create Expected Directories ####
+#### Create expected directories ####
 
 dir.create(data_raw_tcga_dir, recursive = TRUE, showWarnings = FALSE)
 dir.create(data_processed_tcga_dir, recursive = TRUE, showWarnings = FALSE)

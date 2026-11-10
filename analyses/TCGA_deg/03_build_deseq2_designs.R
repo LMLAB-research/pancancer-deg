@@ -2,213 +2,14 @@
 #
 # This script chooses usable covariates separately for each cohort, creates
 # DESeq2 objects, and writes a design plan for manual review before analysis.
+#
+# Each cohort gets a naive and an adjusted design for every sex model in
+# `sex_models` (00_config.R): all samples, females only, males only, and the
+# sex x condition interaction model.
 
 source(file.path("analyses", "TCGA_deg", "00_config.R"))
 
-#### Helper Functions ####
-
-# Standardize common "unknown" labels before testing categorical covariates.
-normalise_covariate <- function(x) {
-  x <- as.character(x)
-  x <- trimws(x)
-  x[x %in% metadata_missing_value_labels] <- NA
-  x <- factor(x)
-  levels(x) <- make.names(levels(x), unique = TRUE)
-  x
-}
-
-# A categorical covariate must be present, sufficiently complete, and variable
-# in groups large enough to estimate without fragile model terms.
-evaluate_categorical_covariate <- function(metadata, covariate) {
-  if (!covariate %in% colnames(metadata)) {
-    return(data.frame(
-      covariate = covariate,
-      type = "categorical",
-      selected = FALSE,
-      reason = "missing column",
-      missing_fraction = NA_real_,
-      n_groups = NA_integer_,
-      smallest_group_size = NA_integer_,
-      stringsAsFactors = FALSE
-    ))
-  }
-
-  x <- normalise_covariate(metadata[[covariate]])
-  missing_fraction <- mean(is.na(x))
-  tab <- table(x, useNA = "no")
-  n_groups <- length(tab)
-  smallest_group_size <- if (n_groups == 0) NA_integer_ else min(tab)
-
-  selected <- missing_fraction <= max_covariate_missing_fraction &&
-    n_groups >= 2 &&
-    smallest_group_size >= min_covariate_group_size
-
-  reason <- if (selected) {
-    NA_character_
-  } else if (missing_fraction > max_covariate_missing_fraction) {
-    "too many missing values"
-  } else if (n_groups < 2) {
-    "fewer than two observed groups"
-  } else {
-    "smallest group below threshold"
-  }
-
-  data.frame(
-    covariate = covariate,
-    type = "categorical",
-    selected = selected,
-    reason = reason,
-    missing_fraction = missing_fraction,
-    n_groups = n_groups,
-    smallest_group_size = smallest_group_size,
-    stringsAsFactors = FALSE
-  )
-}
-
-# Numeric covariates need enough observed values and variation.
-evaluate_numeric_covariate <- function(metadata, covariate) {
-  if (!covariate %in% colnames(metadata)) {
-    return(data.frame(
-      covariate = covariate,
-      type = "numeric",
-      selected = FALSE,
-      reason = "missing column",
-      missing_fraction = NA_real_,
-      n_groups = NA_integer_,
-      smallest_group_size = NA_integer_,
-      stringsAsFactors = FALSE
-    ))
-  }
-
-  x <- suppressWarnings(as.numeric(metadata[[covariate]]))
-  missing_fraction <- mean(is.na(x))
-  n_distinct <- length(unique(x[!is.na(x)]))
-
-  selected <- missing_fraction <= max_covariate_missing_fraction &&
-    n_distinct >= min_covariate_group_size
-
-  reason <- if (selected) {
-    NA_character_
-  } else if (missing_fraction > max_covariate_missing_fraction) {
-    "too many missing values"
-  } else {
-    "insufficient numeric variation"
-  }
-
-  data.frame(
-    covariate = covariate,
-    type = "numeric",
-    selected = selected,
-    reason = reason,
-    missing_fraction = missing_fraction,
-    n_groups = n_distinct,
-    smallest_group_size = NA_integer_,
-    stringsAsFactors = FALSE
-  )
-}
-
-# DESeq2 requires a full-rank model matrix.
-formula_is_full_rank <- function(metadata, design_formula) {
-  tryCatch(
-    {
-      design_matrix <- model.matrix(design_formula, data = metadata)
-      qr(design_matrix)$rank == ncol(design_matrix)
-    },
-    error = function(e) FALSE
-  )
-}
-
-# Use scaled age in years; convert defensively if older metadata is day-scale.
-add_scaled_age_covariate <- function(metadata) {
-  if (!"age_at_diagnosis_numeric" %in% colnames(metadata)) {
-    return(metadata)
-  }
-
-  age <- suppressWarnings(as.numeric(metadata$age_at_diagnosis_numeric))
-  if (all(is.na(age))) {
-    metadata$age_at_diagnosis_years_scaled <- NA_real_
-    return(metadata)
-  }
-
-  age_years <- if (stats::median(age, na.rm = TRUE) > 365) age / 365.25 else age
-  metadata$age_at_diagnosis_years_scaled <- as.numeric(scale(
-    age_years,
-    center = TRUE,
-    scale = TRUE
-  ))
-  metadata
-}
-
-# Select candidate covariates that pass basic availability checks.
-select_covariates <- function(metadata) {
-  metadata <- add_scaled_age_covariate(metadata)
-
-  age_report <- evaluate_numeric_covariate(
-    metadata,
-    "age_at_diagnosis_years_scaled"
-  )
-  covariate_report <- dplyr::bind_rows(
-    age_report,
-    lapply(candidate_covariates, function(covariate) {
-      evaluate_categorical_covariate(metadata, covariate)
-    })
-  )
-
-  selected <- covariate_report$covariate[covariate_report$selected]
-
-  list(
-    metadata = metadata,
-    selected_covariates = selected,
-    covariate_report = covariate_report
-  )
-}
-
-prepare_selected_covariates <- function(metadata, selected_covariates) {
-  if (length(selected_covariates) == 0) {
-    return(metadata)
-  }
-
-  prepared <- lapply(selected_covariates, function(covariate) {
-    if (covariate == "age_at_diagnosis_years_scaled") {
-      metadata[[covariate]]
-    } else {
-      normalise_covariate(metadata[[covariate]])
-    }
-  })
-  names(prepared) <- selected_covariates
-
-  metadata[selected_covariates] <- prepared
-  metadata
-}
-
-# Put condition last so the tumor-vs-normal contrast is explicit.
-make_design_formula <- function(covariates) {
-  if (length(covariates) == 0) {
-    return(as.formula("~ condition"))
-  }
-
-  as.formula(paste("~", paste(c(covariates, "condition"), collapse = " + ")))
-}
-
-format_design_formula <- function(design_formula) {
-  gsub("\\s+", " ", paste(deparse(design_formula), collapse = ""))
-}
-
-filter_complete_design_samples <- function(rse, metadata, selected_covariates) {
-  complete_columns <- c("condition", selected_covariates)
-  complete_samples <- stats::complete.cases(metadata[, complete_columns, drop = FALSE])
-
-  filtered_metadata <- metadata[complete_samples, , drop = FALSE]
-  filtered_metadata$condition <- factor(
-    filtered_metadata$condition,
-    levels = c("normal", "tumor")
-  )
-
-  list(
-    rse = rse[, complete_samples],
-    metadata = filtered_metadata
-  )
-}
+source(file.path(analysis_dir, "utils.R"))
 
 #### Select Projects From Discovery Step ####
 
@@ -218,11 +19,31 @@ eligible_projects <- project_status |>
   dplyr::pull(project_id)
 eligible_projects <- limit_projects(eligible_projects)
 
-#### Build Designs And DESeq2 Objects ####
+#### Design Helpers ####
+
+# "naive"/"adjusted" for all samples; otherwise e.g. "adjusted_female".
+make_design_type <- function(adjustment, sex_model) {
+  if (sex_model == "all") adjustment else paste(adjustment, sex_model, sep = "_")
+}
+
+# DESeq2 coefficient tested in script 04. With female and normal as reference
+# levels, the interaction is (male tumor effect) - (female tumor effect).
+design_coefficient <- function(sex_model) {
+  if (sex_model == "sex_interaction") {
+    "sexmale.conditiontumor"
+  } else {
+    "condition_tumor_vs_normal"
+  }
+}
+
+is_interaction <- function(sex_model) {
+  sex_model == "sex_interaction"
+}
 
 make_design_plan_row <- function(
   project_id,
   design_type,
+  sex_model,
   eligible,
   reason,
   n_normal = NA_integer_,
@@ -234,6 +55,7 @@ make_design_plan_row <- function(
   data.frame(
     project_id = project_id,
     design_type = design_type,
+    sex_model = sex_model,
     eligible = eligible,
     reason = reason,
     n_normal = n_normal,
@@ -249,15 +71,77 @@ make_design_plan_row <- function(
   )
 }
 
+# One ineligible row for both the naive and adjusted designs of a sex model.
+make_ineligible_rows <- function(project_id, sex_model, reason, n_normal, n_tumor) {
+  dplyr::bind_rows(lapply(c("naive", "adjusted"), function(adjustment) {
+    make_design_plan_row(
+      project_id, make_design_type(adjustment, sex_model), sex_model,
+      FALSE, reason, n_normal, n_tumor
+    )
+  }))
+}
+
+# Sample groups used for size checks and the low-count gene filter:
+# condition, or sex x condition for the interaction model.
+design_group_counts <- function(metadata, sex_model) {
+  sex_group <- if (is_interaction(sex_model)) metadata$sex else rep("all", nrow(metadata))
+  table(
+    factor(metadata$condition, levels = c("normal", "tumor")),
+    sex_group
+  )
+}
+
+has_enough_samples <- function(metadata, sex_model) {
+  counts <- design_group_counts(metadata, sex_model)
+  ncol(counts) > 0 &&
+    all(counts["normal", ] >= min_normal_samples) &&
+    all(counts["tumor", ] >= min_tumor_samples)
+}
+
+# Columns that must be complete in the adjusted model, besides condition.
+required_design_columns <- function(sex_model, covariates) {
+  c(if (is_interaction(sex_model)) "sex", covariates)
+}
+
+# Standardise sex labels to a female/male factor; other labels are an error.
+standardise_sex <- function(sex) {
+  x <- tolower(trimws(as.character(sex)))
+  x[x %in% tolower(metadata_missing_value_labels)] <- NA
+  unexpected <- setdiff(unique(x[!is.na(x)]), c("female", "male"))
+  if (length(unexpected) > 0) {
+    stop("Unexpected sex labels: ", paste(unexpected, collapse = ", "))
+  }
+  factor(x, levels = c("female", "male"))
+}
+
+# Keep the samples of one sex model. "all" is returned unchanged.
+select_sex_model_samples <- function(rse, metadata, sex_model) {
+  if (sex_model == "all") {
+    return(list(rse = rse, metadata = metadata))
+  }
+
+  metadata$sex <- standardise_sex(metadata$sex)
+  keep <- if (is_interaction(sex_model)) {
+    !is.na(metadata$sex)
+  } else {
+    !is.na(metadata$sex) & metadata$sex == sex_model
+  }
+
+  rse <- rse[, keep]
+  rse$sex <- metadata$sex[keep]
+  list(rse = rse, metadata = metadata[keep, , drop = FALSE])
+}
+
 build_and_save_dds <- function(
   rse,
   project_id,
   design_type,
+  sex_model,
   design_formula,
   covariates
 ) {
   dds <- DESeqDataSet(rse, design = design_formula)
-  smallest_group_size <- min(table(colData(dds)$condition))
+  smallest_group_size <- min(design_group_counts(colData(dds), sex_model))
   required_samples <- max(min_count_samples, smallest_group_size)
   keep_genes <- rowSums(counts(dds) >= min_count) >= required_samples
   dds <- dds[keep_genes, ]
@@ -269,7 +153,9 @@ build_and_save_dds <- function(
     list(
       project_id = project_id,
       design_type = design_type,
+      sex_model = sex_model,
       design_formula = design_formula,
+      coefficient = design_coefficient(sex_model),
       covariates = covariates,
       n_normal = sum(colData(dds)$condition == "normal"),
       n_tumor = sum(colData(dds)$condition == "tumor"),
@@ -281,13 +167,183 @@ build_and_save_dds <- function(
   dds
 }
 
+#### Build Designs And DESeq2 Objects ####
+
+# Build the naive and adjusted designs of one sex model.
+build_sex_model_designs <- function(project_id, rse, metadata, sex_model) {
+  naive_type <- make_design_type("naive", sex_model)
+  adjusted_type <- make_design_type("adjusted", sex_model)
+  interaction <- is_interaction(sex_model)
+
+  selected <- select_sex_model_samples(rse, metadata, sex_model)
+  rse <- selected$rse
+  metadata <- selected$metadata
+
+  n_normal <- sum(metadata$condition == "normal", na.rm = TRUE)
+  n_tumor <- sum(metadata$condition == "tumor", na.rm = TRUE)
+
+  if (!has_enough_samples(metadata, sex_model)) {
+    return(list(
+      design_plan = make_ineligible_rows(
+        project_id, sex_model,
+        "insufficient tumor/normal samples after preparation",
+        n_normal, n_tumor
+      ),
+      covariate_report = data.frame()
+    ))
+  }
+
+  # The naive model uses every available sample of this sex model and no
+  # covariates.
+  rse$condition <- metadata$condition
+  naive_formula <- make_design_formula(character(), interaction)
+  naive_dds <- build_and_save_dds(
+    rse, project_id, naive_type, sex_model, naive_formula, character()
+  )
+  naive_plan <- make_design_plan_row(
+    project_id = project_id,
+    design_type = naive_type,
+    sex_model = sex_model,
+    eligible = TRUE,
+    reason = NA_character_,
+    n_normal = sum(colData(naive_dds)$condition == "normal"),
+    n_tumor = sum(colData(naive_dds)$condition == "tumor"),
+    n_genes = nrow(naive_dds),
+    covariates = character(),
+    design_formula = naive_formula
+  )
+
+  # Sex is a covariate only in the all-samples model; sex-specific models
+  # either fix sex or model it through the interaction term.
+  candidates <- if (sex_model == "all") {
+    candidate_covariates
+  } else {
+    setdiff(candidate_covariates, "sex")
+  }
+  selection <- select_covariates(metadata, candidates)
+  metadata <- prepare_selected_covariates(
+    selection$metadata,
+    selection$selected_covariates
+  )
+  selected_covariates <- selection$selected_covariates
+  covariate_report <- selection$covariate_report
+  covariate_report$project_id <- project_id
+  covariate_report$design_type <- adjusted_type
+
+  adjusted_ineligible <- function(reason, n_normal, n_tumor, ...) {
+    list(
+      design_plan = dplyr::bind_rows(
+        naive_plan,
+        make_design_plan_row(
+          project_id, adjusted_type, sex_model, FALSE, reason,
+          n_normal, n_tumor, ...
+        )
+      ),
+      covariate_report = covariate_report
+    )
+  }
+
+  # If no covariates are usable, the adjusted model would duplicate the naive
+  # model exactly, so only the canonical naive result is produced.
+  if (length(selected_covariates) == 0) {
+    return(adjusted_ineligible(
+      "no usable covariates; adjusted design equals naive design",
+      n_normal, n_tumor,
+      design_formula = naive_formula
+    ))
+  }
+
+  base_rse <- rse
+  base_metadata <- metadata
+
+  # Complete-case filtering can remove samples, so re-check cohort size after it.
+  filtered <- filter_complete_design_samples(
+    base_rse, base_metadata,
+    required_design_columns(sex_model, selected_covariates)
+  )
+  rse <- filtered$rse
+  metadata <- filtered$metadata
+
+  if (!has_enough_samples(metadata, sex_model)) {
+    return(adjusted_ineligible(
+      "insufficient tumor/normal samples after covariate complete-case filtering",
+      sum(metadata$condition == "normal", na.rm = TRUE),
+      sum(metadata$condition == "tumor", na.rm = TRUE),
+      covariates = selected_covariates
+    ))
+  }
+
+  design_formula <- make_design_formula(selected_covariates, interaction)
+
+  # Remove covariates from the end until the model matrix is estimable.
+  while (!formula_is_full_rank(metadata, design_formula) && length(selected_covariates) > 0) {
+    dropped_covariate <- selected_covariates[[length(selected_covariates)]]
+    covariate_report$selected[covariate_report$covariate == dropped_covariate] <- FALSE
+    covariate_report$reason[covariate_report$covariate == dropped_covariate] <-
+      "dropped to restore full-rank design"
+    selected_covariates <- selected_covariates[-length(selected_covariates)]
+    filtered <- filter_complete_design_samples(
+      base_rse,
+      base_metadata,
+      required_design_columns(sex_model, selected_covariates)
+    )
+    rse <- filtered$rse
+    metadata <- filtered$metadata
+    design_formula <- make_design_formula(selected_covariates, interaction)
+  }
+
+  if (!formula_is_full_rank(metadata, design_formula)) {
+    return(adjusted_ineligible(
+      "design matrix is not full rank",
+      sum(metadata$condition == "normal"),
+      sum(metadata$condition == "tumor"),
+      covariates = selected_covariates,
+      design_formula = design_formula
+    ))
+  }
+
+  # Full-rank restoration can remove every selected covariate. In that case,
+  # the adjusted model is again identical to the already-saved naive model.
+  if (length(selected_covariates) == 0) {
+    return(adjusted_ineligible(
+      "all covariates dropped; adjusted design equals naive design",
+      n_normal, n_tumor,
+      design_formula = naive_formula
+    ))
+  }
+
+  colData(rse) <- S4Vectors::DataFrame(metadata)
+  dds <- build_and_save_dds(
+    rse, project_id, adjusted_type, sex_model, design_formula, selected_covariates
+  )
+
+  list(
+    design_plan = dplyr::bind_rows(
+      naive_plan,
+      make_design_plan_row(
+        project_id = project_id,
+        design_type = adjusted_type,
+        sex_model = sex_model,
+        eligible = TRUE,
+        reason = NA_character_,
+        n_normal = sum(colData(dds)$condition == "normal"),
+        n_tumor = sum(colData(dds)$condition == "tumor"),
+        n_genes = nrow(dds),
+        covariates = selected_covariates,
+        design_formula = design_formula
+      )
+    ),
+    covariate_report = covariate_report
+  )
+}
+
 build_project_design <- function(project_id) {
-  message("Building DESeq2 design for ", project_id)
+  message("Building DESeq2 designs for ", project_id)
 
   if (!file.exists(tcga_project_rse_file(project_id))) {
     return(list(
       design_plan = make_design_plan_row(
-        project_id, "naive", FALSE, "prepared RSE file not found"
+        project_id, "naive", "all", FALSE, "prepared RSE file not found"
       ),
       covariate_report = data.frame()
     ))
@@ -302,165 +358,21 @@ build_project_design <- function(project_id) {
 
   metadata$condition <- factor(metadata$condition, levels = c("normal", "tumor"))
 
-  n_normal <- sum(metadata$condition == "normal", na.rm = TRUE)
-  n_tumor <- sum(metadata$condition == "tumor", na.rm = TRUE)
-
-  if (n_normal < min_normal_samples || n_tumor < min_tumor_samples) {
-    return(list(
-      design_plan = make_design_plan_row(
-        project_id, "naive", FALSE,
-        "insufficient tumor/normal samples after preparation",
-        n_normal, n_tumor
-      ),
-      covariate_report = data.frame()
-    ))
-  }
-
-  # The naive model uses every available tumor/normal sample and no covariates.
-  naive_formula <- make_design_formula(character())
-  naive_dds <- build_and_save_dds(
-    rse, project_id, "naive", naive_formula, character()
-  )
-  naive_plan <- make_design_plan_row(
-    project_id = project_id,
-    design_type = "naive",
-    eligible = TRUE,
-    reason = NA_character_,
-    n_normal = sum(colData(naive_dds)$condition == "normal"),
-    n_tumor = sum(colData(naive_dds)$condition == "tumor"),
-    n_genes = nrow(naive_dds),
-    covariates = character(),
-    design_formula = naive_formula
-  )
-
-  selection <- select_covariates(metadata)
-  metadata <- prepare_selected_covariates(
-    selection$metadata,
-    selection$selected_covariates
-  )
-  selected_covariates <- selection$selected_covariates
-  covariate_report <- selection$covariate_report
-  covariate_report$project_id <- project_id
-
-  # If no covariates are usable, the adjusted model would duplicate the naive
-  # model exactly, so only the canonical naive result is produced.
-  if (length(selected_covariates) == 0) {
-    return(list(
-      design_plan = dplyr::bind_rows(
-        naive_plan,
-        make_design_plan_row(
-          project_id, "adjusted", FALSE,
-          "no usable covariates; adjusted design equals naive design",
-          n_normal, n_tumor,
-          design_formula = naive_formula
-        )
-      ),
-      covariate_report = covariate_report
-    ))
-  }
-
-  base_rse <- rse
-  base_metadata <- metadata
-
-  # Complete-case filtering can remove samples, so re-check cohort size after it.
-  filtered <- filter_complete_design_samples(base_rse, base_metadata, selected_covariates)
-  rse <- filtered$rse
-  metadata <- filtered$metadata
-
-  n_normal_complete <- sum(metadata$condition == "normal", na.rm = TRUE)
-  n_tumor_complete <- sum(metadata$condition == "tumor", na.rm = TRUE)
-
-  if (
-    n_normal_complete < min_normal_samples ||
-      n_tumor_complete < min_tumor_samples
-  ) {
-    return(list(
-      design_plan = dplyr::bind_rows(
-        naive_plan,
-        make_design_plan_row(
-          project_id, "adjusted", FALSE,
-          "insufficient tumor/normal samples after covariate complete-case filtering",
-          n_normal_complete, n_tumor_complete,
-          covariates = selected_covariates
-        )
-      ),
-      covariate_report = covariate_report
-    ))
-  }
-
-  design_formula <- make_design_formula(selected_covariates)
-
-  # Remove covariates from the end until the model matrix is estimable.
-  while (!formula_is_full_rank(metadata, design_formula) && length(selected_covariates) > 0) {
-    dropped_covariate <- selected_covariates[[length(selected_covariates)]]
-    covariate_report$selected[covariate_report$covariate == dropped_covariate] <- FALSE
-    covariate_report$reason[covariate_report$covariate == dropped_covariate] <-
-      "dropped to restore full-rank design"
-    selected_covariates <- selected_covariates[-length(selected_covariates)]
-    filtered <- filter_complete_design_samples(
-      base_rse,
-      base_metadata,
-      selected_covariates
-    )
-    rse <- filtered$rse
-    metadata <- filtered$metadata
-    design_formula <- make_design_formula(selected_covariates)
-  }
-
-  if (!formula_is_full_rank(metadata, design_formula)) {
-    return(list(
-      design_plan = dplyr::bind_rows(
-        naive_plan,
-        make_design_plan_row(
-          project_id, "adjusted", FALSE, "design matrix is not full rank",
-          sum(metadata$condition == "normal"),
-          sum(metadata$condition == "tumor"),
-          covariates = selected_covariates,
-          design_formula = design_formula
-        )
-      ),
-      covariate_report = covariate_report
-    ))
-  }
-
-  # Full-rank restoration can remove every selected covariate. In that case,
-  # the adjusted model is again identical to the already-saved naive model.
-  if (length(selected_covariates) == 0) {
-    return(list(
-      design_plan = dplyr::bind_rows(
-        naive_plan,
-        make_design_plan_row(
-          project_id, "adjusted", FALSE,
-          "all covariates dropped; adjusted design equals naive design",
-          n_normal, n_tumor,
-          design_formula = naive_formula
-        )
-      ),
-      covariate_report = covariate_report
-    ))
-  }
-
-  colData(rse) <- S4Vectors::DataFrame(metadata)
-  dds <- build_and_save_dds(
-    rse, project_id, "adjusted", design_formula, selected_covariates
-  )
+  outputs <- lapply(sex_models, function(sex_model) {
+    if (sex_model != "all" && !"sex" %in% colnames(metadata)) {
+      return(list(
+        design_plan = make_ineligible_rows(
+          project_id, sex_model, "missing sex column", NA_integer_, NA_integer_
+        ),
+        covariate_report = data.frame()
+      ))
+    }
+    build_sex_model_designs(project_id, rse, metadata, sex_model)
+  })
 
   list(
-    design_plan = dplyr::bind_rows(
-      naive_plan,
-      make_design_plan_row(
-        project_id = project_id,
-        design_type = "adjusted",
-        eligible = TRUE,
-        reason = NA_character_,
-        n_normal = sum(colData(dds)$condition == "normal"),
-        n_tumor = sum(colData(dds)$condition == "tumor"),
-        n_genes = nrow(dds),
-        covariates = selected_covariates,
-        design_formula = design_formula
-      )
-    ),
-    covariate_report = covariate_report
+    design_plan = dplyr::bind_rows(lapply(outputs, `[[`, "design_plan")),
+    covariate_report = dplyr::bind_rows(lapply(outputs, `[[`, "covariate_report"))
   )
 }
 
