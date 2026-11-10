@@ -3,12 +3,6 @@ source(file.path("analyses", "TCGA_senescence_overlap", "00_config.R"))
 status_file <- file.path(results_dir, "batch_run_status.csv")
 if (file.exists(status_file) && !file.remove(status_file)) stop("Cannot replace batch status.")
 
-if (!requireNamespace("GeneOverlap", quietly = TRUE)) {
-  stop("Install GeneOverlap with BiocManager::install('GeneOverlap')")
-}
-
-library(GeneOverlap)
-
 # Assign UP, DOWN, or NS using adjusted p-value and fold-change thresholds
 classify_regulation <- function(padj, lfc) {
   ifelse(
@@ -102,8 +96,8 @@ resolve_symbol_duplicates <- function(
 
 # Test whether two directional gene sets overlap more (or, two-sided, also less)
 # than expected by chance. Fisher's exact test on the 2x2 table within the universe;
-# the sidedness is set by fisher_alternative in 00_config.R. The odds ratio is the
-# sample odds ratio reported by GeneOverlap.
+# the sidedness is set by fisher_alternative in 00_config.R. The odds ratio is
+# the conditional maximum-likelihood estimate from fisher.test.
 run_overlap_test <- function(
     cancer_genes,
     signature_genes,
@@ -112,10 +106,6 @@ run_overlap_test <- function(
 ) {
   cancer_genes <- intersect(unique(cancer_genes), universe)
   signature_genes <- intersect(unique(signature_genes), universe)
-
-  test <- testGeneOverlap(
-    newGeneOverlap( cancer_genes, signature_genes, genome.size = length(universe) )
-  )
 
   observed <- length( intersect(cancer_genes, signature_genes) )
 
@@ -128,7 +118,7 @@ run_overlap_test <- function(
     ),
     nrow = 2
   )
-  fisher_p <- fisher.test( contingency, alternative = fisher_alternative )$p.value
+  fit <- fisher.test( contingency, alternative = fisher_alternative )
 
   expected <-
     length(cancer_genes) *
@@ -143,8 +133,8 @@ run_overlap_test <- function(
     observed_overlap = observed,
     expected_overlap = expected,
     fold_enrichment = if (expected > 0) observed / expected else NA_real_,
-    odds_ratio = getOddsRatio(test),
-    p_value = fisher_p,
+    odds_ratio = unname(fit$estimate),
+    p_value = fit$p.value,
     test_alternative = fisher_alternative,
     stringsAsFactors = FALSE
   )

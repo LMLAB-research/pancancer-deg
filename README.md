@@ -116,8 +116,7 @@ Rscript analyses/TCGA_senescence_overlap/01_compute_overlaps.R
 Rscript analyses/TCGA_senescence_overlap/02_plot_heatmaps.R
 ```
 
-Script 02 only redraws the heatmaps from the outputs of script 01. Both need the
-Bioconductor package `GeneOverlap`.
+Script 02 only redraws the heatmaps from the outputs of script 01.
 
 ### Inputs
 
