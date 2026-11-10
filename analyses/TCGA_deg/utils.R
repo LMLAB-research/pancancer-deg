@@ -608,13 +608,6 @@ skip_model <- function(reason) {
                  class = c("model_skip", "error", "condition")))
 }
 
-hash_object <- function(x) {
-  path <- tempfile()
-  on.exit(unlink(path))
-  saveRDS(x, path, version = 3)
-  unname(tools::md5sum(path))
-}
-
 cell_counts <- function(meta) {
   counts <- table(
     factor(meta$sex, c("female", "male")),
@@ -641,8 +634,7 @@ validate_labels <- function(x, allowed, column) {
 # Project data ---------------------------------------------------------------
 
 load_sex_project <- function(project_id, adjusted_projects) {
-  input <- tcga_project_rse_file(project_id)
-  rse <- readRDS(input)
+  rse <- readRDS(tcga_project_rse_file(project_id))
   meta <- as.data.frame(colData(rse))
   
   # Restore sample identifiers from the existing TCGA metadata.
@@ -699,7 +691,6 @@ load_sex_project <- function(project_id, adjusted_projects) {
       stop("Adjusted design has no covariates field")
     }
     covariates <- setdiff(info$covariates, c("sex", "condition"))
-    input <- c(input, design_path)
     design_source <- "Covariates inherited from eligible adjusted design"
   }
   meta <- add_scaled_age_covariate(meta)
@@ -713,7 +704,7 @@ load_sex_project <- function(project_id, adjusted_projects) {
     }
   }
   list(rse = rse, meta = meta, covariates = covariates,
-       design_source = design_source, input_hashes = unname(tools::md5sum(input)))
+       design_source = design_source)
 }
 
 # Sample preparation ---------------------------------------------------------
@@ -1142,8 +1133,6 @@ model_report <- function(model, status, reason = NA_character_, warnings = chara
     n_tested_genes = model$n_tested,
     n_significant_deg = model$n_significant,
     warnings = paste(unique(warnings), collapse = "; "),
-    signature = model$signature,
-    resumed = FALSE,
     output_directory = model$output_directory
   )
   audit <- model$audit
@@ -1211,11 +1200,10 @@ save_model_outputs <- function(model, fit, tab, universe, context, warnings) {
       context$figure_dir, paste0(prefix, "_sample_distance.png")
     )
   )
-  
-  if (any(file.exists(c(unlist(paths), unlist(qc_paths))))) {
-    stop("Output collision; refusing to overwrite")
-  }
-  
+
+  # Remove previous QC figures so a failed QC plot cannot leave a stale file.
+  unlink(unlist(qc_paths))
+
   # Export one complete table with raw statistics and shrunken effect sizes.
   # Keep genes with missing adjusted p-values and rank available padj first.
   # Preserve the complete sex-specific results table.
@@ -1314,7 +1302,7 @@ save_model_outputs <- function(model, fit, tab, universe, context, warnings) {
     }
   )
   
-  # Only include QC files that were actually generated in restart checksums.
+  # Record only the QC files that were actually generated.
   qc_generated <- qc_paths[file.exists(unlist(qc_paths))]
   paths <- c(paths, qc_generated)
   
@@ -1331,7 +1319,6 @@ save_model_outputs <- function(model, fit, tab, universe, context, warnings) {
     },
     required_count_samples = model$required_samples,
     sample_ids = colnames(dds),
-    signature = model$signature,
     paths = paths,
     qc = qc_info,
     warnings = unique(warnings),
@@ -1344,30 +1331,13 @@ save_model_outputs <- function(model, fit, tab, universe, context, warnings) {
   paths
 }
 
-# Restart support ------------------------------------------------------------
-
-reuse_completed_model <- function(signature, markers) {
-  # Reuse only completed analyses with matching signatures and file checksums.
-  # Leave incomplete attempts untouched and run them in the new directory.
-  for (marker in markers) {
-    old <- tryCatch(readRDS(marker), error = function(e) NULL)
-    if (is.null(old) || !identical(old$signature, signature)) next
-    paths <- names(old$checksums)
-    if (!all(file.exists(paths))) next
-    if (!identical(tools::md5sum(paths), old$checksums)) next
-    old$result$status$resumed <- TRUE
-    return(old$result)
-  }
-  NULL
-}
-
 # Individual analysis execution ----------------------------------------------
 
 run_sex_model <- function(project_id, analysis, project, context) {
   model <- list(
     project_id = project_id, analysis = analysis,
     used = character(), dropped = character(),
-    design_source = NA_character_, signature = NA_character_,
+    design_source = NA_character_,
     n_tested = NA_integer_, n_significant = NA_integer_,
     output_directory = context$table_dir
   )
@@ -1381,14 +1351,7 @@ run_sex_model <- function(project_id, analysis, project, context) {
     }
     model$used <- project$covariates
     model$design_source <- project$design_source
-    model$signature <- hash_object(list(
-      project_id, analysis, project$input_hashes, context$settings
-    ))
-    previous <- reuse_completed_model(model$signature, context$previous_markers)
-    if (!is.null(previous)) {
-      return(previous)
-    }
-    
+
     model <- prepare_model_samples(model, project)
     model <- prepare_model_design(model)
     if (!is.null(model$skip_reason)) {
@@ -1404,17 +1367,8 @@ run_sex_model <- function(project_id, analysis, project, context) {
     universe <- make_gene_universe(project$rse, model$keep_genes, tab)
     model$n_tested <- sum(tab$tested)
     model$n_significant <- sum(tab$significant_deg)
-    paths <- save_model_outputs(model, fit, tab, universe, context, warnings)
-    result <- model_report(model, "success", warnings = warnings)
-    
-    # Write the completion marker after all result files are saved.
-    marker <- sub("_results[.]csv$", "_completed.rds", paths$results)
-    saveRDS(list(
-      signature = model$signature,
-      checksums = tools::md5sum(unlist(paths)),
-      result = result
-    ), marker)
-    result
+    save_model_outputs(model, fit, tab, universe, context, warnings)
+    model_report(model, "success", warnings = warnings)
   }, warning = function(w) {
     warnings <<- c(warnings, conditionMessage(w))
     invokeRestart("muffleWarning")
@@ -1424,29 +1378,12 @@ run_sex_model <- function(project_id, analysis, project, context) {
 }
 
 create_run_context <- function() {
-  # Create separate output directories for each run; reuse valid completed
-  # models without overwriting earlier reports or partial attempts.
-  base <- file.path(results_table_dir, "05_sex_specific")
-  dir.create(base, recursive = TRUE, showWarnings = FALSE)
-  previous_markers <- list.files(
-    base, pattern = "_completed[.]rds$", recursive = TRUE, full.names = TRUE
-  )
-  table_dir <- tempfile(
-    paste0(format(Sys.time(), "%Y%m%d_%H%M%S"), "_"), tmpdir = base
-  )
-  run_id <- "current"
-  source_files <- c(
-    file.path(analysis_dir, c(
-      "00_config.R", "utils.R", "05_run_sex_specific_deseq2_deg.R"
-    )),
-    tcga_design_plan_rds
-  )
+  # Use one fixed output directory per output type; reruns overwrite files.
   packages <- c(
     "DESeq2", "ashr", "SummarizedExperiment", "org.Hs.eg.db",
     "ggplot2", "pheatmap", "matrixStats"
   )
   settings <- list(
-    source_hashes = unname(tools::md5sum(source_files)),
     min_normal_samples = min_normal_samples,
     min_tumor_samples = min_tumor_samples,
     min_count = min_count,
@@ -1459,14 +1396,13 @@ create_run_context <- function() {
     packages = sapply(packages, function(p) as.character(packageVersion(p)))
   )
   context <- list(
-    table_dir = table_dir,
-    data_dir = file.path(data_processed_tcga_dir, "05_sex_specific", run_id),
-    figure_dir = file.path(results_figure_dir, "05_sex_specific", run_id),
-    previous_markers = previous_markers,
+    table_dir = file.path(results_table_dir, "05_sex_specific"),
+    data_dir = file.path(data_processed_tcga_dir, "05_sex_specific"),
+    figure_dir = file.path(results_figure_dir, "05_sex_specific"),
     settings = settings
   )
   for (path in context[c("table_dir", "data_dir", "figure_dir")]) {
-    dir.create(path, recursive = TRUE)
+    dir.create(path, recursive = TRUE, showWarnings = FALSE)
   }
   context
 }
