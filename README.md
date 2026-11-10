@@ -135,11 +135,31 @@ A gene is up (down) if $\text{padj} < 0.05$ and $\log_2\text{FC} > \log_2 1.5$
 $S^\pm$. The universe $U$ is the TCGA protein-coding genes with a padj,
 intersected with the signature background; all sets are restricted to $U$.
 
-Four overlaps are tested, $T^a \cap S^b$ for $a, b \in \{+, -\}$ (UP-UP,
-UP-DOWN, DOWN-UP, DOWN-DOWN; cancer first), with Fisher's exact test on the
-2x2 table of $U$. The test is two-sided by default (`fisher_alternative`), so
-both enrichment (odds ratio > 1) and depletion (< 1) are detected. P-values are
-BH-adjusted across all cancer x class tests within each signature.
+Three readouts are computed, each with Fisher's exact test on a 2x2 table:
+
+1. **Class overlaps** (reference). For each class $T^a \cap S^b$,
+   $a, b \in \{+, -\}$ (UP-UP, UP-DOWN, DOWN-UP, DOWN-DOWN; cancer first), the
+   table is "in $T^a$ or not" x "in $S^b$ or not" over $U$. Two-sided by default
+   (`fisher_alternative`). BH across all cancer x class tests within each
+   signature.
+2. **Sharing.** Over $U$: "DE in cancer or not" x "DE in signature or not".
+   Odds ratio > 1: DE genes are shared more than by chance.
+3. **Direction.** Over genes DE in both: "up or down in cancer" x "up or down
+   in signature". Odds ratio > 1: same direction; < 1: opposite direction.
+
+Readouts 2 and 3 are always two-sided, with BH across cancers within each
+signature.
+
+How they relate: the class-overlap enrichment mixes sharing and direction. For
+UP-UP, with ratios of fractions,
+
+$$\frac{P(S^+ \mid T^+)}{P(S^+ \mid \text{not } T^+)}
+= \frac{P(S\ \text{DE} \mid T^+)}{P(S\ \text{DE} \mid \text{not } T^+)}
+\times \frac{P(S^+ \mid T^+, S\ \text{DE})}{P(S^+ \mid \text{not } T^+, S\ \text{DE})}.$$
+
+Because sharing is strong, all four classes can be enriched at once even when
+the shared genes move in opposite directions. Use the direction readout to
+compare directions.
 
 Duplicate gene symbols with opposite significant directions are excluded; other
 duplicates keep one representative and are listed for review.
@@ -147,9 +167,15 @@ duplicates keep one representative and are listed for review.
 ### Outputs
 
 - `results/tables/TCGA_senescence_overlap/<signature>/<project>/`: shared gene
-  lists, overlap statistics and the exact universe (`common_tested_genes.csv`).
+  lists, class-overlap statistics (`overlap_statistics.csv`), sharing and
+  direction statistics (`share_direction_statistics.csv`) and the exact
+  universe (`common_tested_genes.csv`).
 - `results/tables/TCGA_senescence_overlap/batch_run_status.csv`: one row per
   cancer x signature; check it for failures.
 - `results/figures/TCGA_senescence_overlap/TCGA_<signature>_heatmap.png`: log2
-  odds ratios of significant overlaps (blue = enrichment, red = depletion);
-  the plotted values are in `results/tables/TCGA_senescence_overlap/`.
+  odds ratios of significant class overlaps (blue = enrichment, red = depletion).
+- `results/figures/TCGA_senescence_overlap/TCGA_share_heatmap.png` and
+  `TCGA_direction_heatmap.png`: cancers x signatures (direction: blue = same,
+  red = opposite).
+- The plotted values of each heatmap are in
+  `results/tables/TCGA_senescence_overlap/TCGA_*_heatmap_data.csv`.
