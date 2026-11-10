@@ -54,56 +54,50 @@ resolve_symbol_duplicates <- function(
     stop("No valid gene symbols remain.")
   }
 
-  groups <- split(x, x[[symbol_column]])
-  selected <- list()
-  audit <- list()
+  symbol <- x[[symbol_column]]
+  duplicate_n <- as.vector(table(symbol)[symbol])
 
-  for (symbol in names(groups)) {
-    group <- groups[[symbol]]
+  # Opposite significant directions exclude this symbol from the analysis.
+  up_symbols <- unique(symbol[x$regulation == "UP"])
+  down_symbols <- unique(symbol[x$regulation == "DOWN"])
+  conflict <- symbol %in% intersect(up_symbols, down_symbols)
 
-    directions <- unique( group$regulation[ group$regulation %in% c("UP", "DOWN") ] )
+  status <- ifelse(
+    duplicate_n == 1,
+    "UNIQUE",
+    ifelse(conflict, "CONFLICT_OPPOSITE_DIRECTIONS", "REVIEW_DUPLICATE_SAME_DIRECTION")
+  )
 
-    # Opposite significant directions exclude this symbol from the analysis.
-    conflict <- length(directions) > 1
+  # Representative per symbol: lowest padj, then largest absolute fold change,
+  # then source ID.
+  preference <- order(
+    symbol,
+    is.na(x$padj),
+    x$padj,
+    -abs(x$log2FoldChange),
+    x[[source_id_column]],
+    na.last = TRUE
+  )
+  representative_rows <- preference[!duplicated(symbol[preference])]
+  is_representative <- seq_len(nrow(x)) %in% representative_rows
 
-    # Prefer lowest padj, then largest absolute fold change, then source ID.
-    row_order <- order(
-      is.na(group$padj),
-      group$padj,
-      -abs(group$log2FoldChange),
-      group[[source_id_column]],
-      na.last = TRUE
-    )
+  data <- x[representative_rows, , drop = FALSE]
+  data$duplicate_n <- duplicate_n[representative_rows]
+  data$duplicate_status <- status[representative_rows]
+  data$needs_review <- data$duplicate_n > 1
+  data$exclude_from_overlap <- conflict[representative_rows]
 
-    selected_row <- row_order[[1]]
-    representative <- group[selected_row, , drop = FALSE]
+  # Audit: all rows, grouped by symbol, original order within each symbol.
+  audit <- x
+  audit$duplicate_n <- duplicate_n
+  audit$duplicate_status <- status
+  audit$needs_review <- duplicate_n > 1
+  audit$direction_conflict <- conflict
+  audit$exclude_from_overlap <- conflict
+  audit$selected_representative <- is_representative
+  audit <- audit[order(symbol), , drop = FALSE]
 
-    status <- if (nrow(group) == 1) {
-      "UNIQUE"
-    } else if (conflict) {
-      "CONFLICT_OPPOSITE_DIRECTIONS"
-    } else {
-      "REVIEW_DUPLICATE_SAME_DIRECTION"
-    }
-
-    representative$duplicate_n <- nrow(group)
-    representative$duplicate_status <- status
-    representative$needs_review <- nrow(group) > 1
-    representative$exclude_from_overlap <- conflict
-
-    group$duplicate_n <- nrow(group)
-    group$duplicate_status <- status
-    group$needs_review <- nrow(group) > 1
-    group$direction_conflict <- conflict
-    group$exclude_from_overlap <- conflict
-    group$selected_representative <-
-      seq_len(nrow(group)) == selected_row
-
-    selected[[symbol]] <- representative
-    audit[[symbol]] <- group
-  }
-
-  list( data = do.call(rbind, selected), audit = do.call(rbind, audit) )
+  list(data = data, audit = audit)
 }
 
 # Test whether two directional gene sets overlap more (or, two-sided, also less)
