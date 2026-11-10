@@ -289,8 +289,7 @@ analyze_one_cancer <- function(
 
   statistics$signature <- signature_name
 
-  # Correct the four directional tests within this cancer/signature pair
-  statistics$BH_within_cancer <- p.adjust( statistics$p_value, method = "BH" )
+  # Multiple-testing correction across cancers is done in 02_plot_heatmaps.R.
 
   share_direction <- run_share_direction_tests(cancer_sets, signature_sets, universe)
   share_direction$signature <- signature_name
