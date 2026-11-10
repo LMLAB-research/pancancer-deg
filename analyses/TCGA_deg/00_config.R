@@ -268,27 +268,35 @@ tcga_project_dds_file <- function(project_id, design_type) {
   )
 }
 
+# Result file label of a design type, e.g. "adjusted" -> "Tumor_vs_Normal_Adjusted",
+# "adjusted_female" -> "Tumor_vs_Normal_Adjusted_Female",
+# "adjusted_sex_interaction" -> "Sex_Interaction_Adjusted".
+tcga_design_file_label <- function(design_type) {
+  parts <- strsplit(design_type, "_", fixed = TRUE)[[1]]
+  adjustment <- tools::toTitleCase(parts[[1]])
+  sex_model <- paste(parts[-1], collapse = "_")
+
+  if (sex_model == "sex_interaction") {
+    return(paste0("Sex_Interaction_", adjustment))
+  }
+
+  paste(
+    c("Tumor_vs_Normal", adjustment, if (nzchar(sex_model)) tools::toTitleCase(sex_model)),
+    collapse = "_"
+  )
+}
+
 tcga_deseq_results_file <- function(project_id, design_type) {
   file.path(
     results_table_dir,
-    paste0(
-      project_id,
-      "_DGE_Results_Tumor_vs_Normal_",
-      tools::toTitleCase(design_type),
-      ".csv"
-    )
+    paste0(project_id, "_DGE_Results_", tcga_design_file_label(design_type), ".csv")
   )
 }
 
 tcga_deseq_raw_results_file <- function(project_id, design_type) {
   file.path(
     results_table_dir,
-    paste0(
-      project_id,
-      "_DGE_Raw_Results_Tumor_vs_Normal_",
-      tools::toTitleCase(design_type),
-      ".csv"
-    )
+    paste0(project_id, "_DGE_Raw_Results_", tcga_design_file_label(design_type), ".csv")
   )
 }
 

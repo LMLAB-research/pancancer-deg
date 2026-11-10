@@ -1,7 +1,8 @@
 #### Run DESeq2 Differential Expression ####
 #
-# This script runs projects marked eligible in the design plan, writes raw and
-# shrunken DEG tables, and creates first-pass QC plots.
+# This script runs every design marked eligible in the design plan (all
+# samples, female, male, and sex interaction; naive and adjusted), writes raw
+# and shrunken DEG tables, and creates first-pass QC plots.
 
 source(file.path("analyses", "TCGA_deg", "00_config.R"))
 
@@ -15,9 +16,12 @@ eligible_designs <- design_plan |>
 eligible_projects <- limit_projects(unique(eligible_designs$project_id))
 eligible_designs <- eligible_designs |>
   dplyr::filter(project_id %in% eligible_projects) |>
+  # QC plots are made once per project, for the all-samples adjusted design
+  # (or the naive one if no adjusted design is eligible).
   dplyr::mutate(
     create_plots = design_type == "adjusted" |
-      !project_id %in% project_id[design_type == "adjusted"]
+      (design_type == "naive" &
+        !project_id %in% project_id[design_type == "adjusted"])
   )
 
 #### Run Each Eligible Project ####

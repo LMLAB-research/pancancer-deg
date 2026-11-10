@@ -530,13 +530,22 @@ run_project_deseq2 <- function(project_id, design_type, create_plots) {
     BPPARAM = design_info$BPPARAM
   )
   
-  # Use normal as the reference level for the tumor-versus-normal contrast.
-  contrast <- c("condition", "tumor", "normal")
-  raw_results <- results(dds, contrast = contrast, alpha = deseq_alpha)
+  # Test the coefficient chosen in script 03: the tumor-vs-normal effect, or
+  # for the interaction model, (male tumor effect) - (female tumor effect).
+  # Normal and female are the reference levels.
+  coefficient <- design_info$coefficient
+  if (is.null(coefficient)) {
+    stop("Design file has no coefficient; rerun script 03")
+  }
+  if (!coefficient %in% resultsNames(dds)) {
+    stop("Coefficient ", coefficient, " not in model: ",
+         paste(resultsNames(dds), collapse = ", "))
+  }
+  raw_results <- results(dds, name = coefficient, alpha = deseq_alpha)
   shrunken_results <- if (use_lfc_shrinkage) {
     lfcShrink(
       dds,
-      contrast = contrast,
+      coef = coefficient,
       res = raw_results,
       type = lfc_shrinkage_type,
       parallel = parallel_enabled,
@@ -582,6 +591,7 @@ run_project_deseq2 <- function(project_id, design_type, create_plots) {
     biocparallel_backend = class(design_info$BPPARAM)[[1]],
     biocparallel_workers = BiocParallel::bpnworkers(design_info$BPPARAM),
     design_type = design_type,
+    coefficient = coefficient,
     raw_results_file = tcga_deseq_raw_results_file(project_id, design_type),
     shrunken_results_file = tcga_deseq_results_file(project_id, design_type)
   )
