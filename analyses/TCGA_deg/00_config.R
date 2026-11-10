@@ -1,4 +1,4 @@
- #### Libraries ####
+#### Libraries ####
 
 library(AnnotationDbi)
 library(ashr)
@@ -21,10 +21,10 @@ analysis_name <- "TCGA_deg"
 
 # During development, limit scripts to the first N project IDs for faster runs.
 # Set to Inf when running the full analysis.
-debug_project_limit <- 2
+debug_project_limit <- Inf
 
 # Parallel execution for DESeq2 model fitting and log2FC shrinkage.
-use_biocparallel <- FALSE
+use_biocparallel <- TRUE
 detected_cores <- parallel::detectCores(logical = FALSE)
 if (is.na(detected_cores)) {
   detected_cores <- 1
