@@ -1,7 +1,4 @@
-script_arg <- grep("^--file=", commandArgs(), value = TRUE)
-script_file <- if (length(script_arg)) sub("^--file=", "", script_arg[1]) else sys.frame(1)$ofile
-project_dir <- dirname(normalizePath(script_file))
-source(file.path(project_dir, "config.R"))
+source(file.path("analyses", "TCGA_senescence_overlap", "00_config.R"))
 
 status_file <- file.path(results_dir, "batch_run_status.csv")
 if (file.exists(status_file) && !file.remove(status_file)) stop("Cannot replace batch status.")
@@ -111,7 +108,7 @@ resolve_symbol_duplicates <- function(
 
 # Test whether two directional gene sets overlap more (or, two-sided, also less)
 # than expected by chance. Fisher's exact test on the 2x2 table within the universe;
-# the sidedness is set by fisher_alternative in config.R. The odds ratio is the
+# the sidedness is set by fisher_alternative in 00_config.R. The odds ratio is the
 # sample odds ratio reported by GeneOverlap.
 run_overlap_test <- function(
     cancer_genes,

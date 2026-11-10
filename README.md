@@ -22,13 +22,16 @@ RENV_CONFIG_AUTOLOADER_ENABLED=FALSE Rscript --vanilla setup/check_setup.R
 ```text
 pancancer-deg/
 |-- analyses/
-|   `-- TCGA_deg/
+|   |-- TCGA_deg/
+|   `-- TCGA_senescence_overlap/
 |-- data/
 |-- results/
 |   |-- figures/
-|   |   `-- TCGA_deg/
+|   |   |-- TCGA_deg/
+|   |   `-- TCGA_senescence_overlap/
 |   `-- tables/
-|       `-- TCGA_deg/
+|       |-- TCGA_deg/
+|       `-- TCGA_senescence_overlap/
 |-- setup/
 |   |-- check_setup.R
 |   |-- install_dependencies.R
@@ -38,9 +41,9 @@ pancancer-deg/
 `-- pancancer_deg.Rproj
 ```
 
-The `analyses/` directory contains analysis scripts grouped by analysis module. The current module is `TCGA_deg/`; future modules can be added as sibling directories under `analyses/`.
+The `analyses/` directory contains analysis scripts grouped by analysis module. Current modules are `TCGA_deg/` and `TCGA_senescence_overlap/`; future modules can be added as sibling directories under `analyses/`.
 
-The `results/` directory is organized by output type first, then by analysis module. Generated figures for the TCGA differential expression analysis should go under `results/figures/TCGA_deg/`, and generated tables should go under `results/tables/TCGA_deg/`.
+The `results/` directory is organized by output type first, then by analysis module. For example, the TCGA differential expression analysis writes figures to `results/figures/TCGA_deg/` and tables to `results/tables/TCGA_deg/`.
 
 The `data/` directory is intended for local input data, downloaded resources, and intermediate analysis objects. Large or generated data files should generally stay out of Git.
 
@@ -101,3 +104,52 @@ In `results/tables/TCGA_deg/`, per cancer and design:
 
 QC figures (PCA, MA, volcano) are made for the all-samples model only, in
 `results/figures/TCGA_deg/`.
+
+## TCGA_senescence_overlap Analysis
+
+Tests whether tumor DEGs (from `TCGA_deg`, all-samples adjusted design) overlap
+senescence (OIS, RS, SIPS) and quiescence (CICQ, SSCQ) signatures. Settings are
+in `analyses/TCGA_senescence_overlap/00_config.R`. Run from the repository root:
+
+```bash
+Rscript analyses/TCGA_senescence_overlap/01_compute_overlaps.R
+Rscript analyses/TCGA_senescence_overlap/02_plot_heatmaps.R
+```
+
+Script 02 only redraws the heatmaps from the outputs of script 01. Both need the
+Bioconductor package `GeneOverlap`.
+
+### Inputs
+
+- `data/senescence_meta_analysis_deg/`: one `<group>_<signature>_genes.csv`
+  (columns `gene`, `log2FoldChange`, `padj`) and one
+  `<group>_<signature>_background.csv` (all genes tested in that signature,
+  column `gene`, `gene_symbol` or `gene_name`) per signature, e.g.
+  `senescence_OIS_genes.csv`, `quiescence_SSCQ_background.csv`.
+- `results/tables/TCGA_deg/<project>_DGE_Raw_Results_Tumor_vs_Normal_Adjusted.csv`.
+
+### Method
+
+A gene is up (down) if $\text{padj} < 0.05$ and $\log_2\text{FC} > \log_2 1.5$
+($< -\log_2 1.5$). For each cancer and signature this gives sets $T^\pm$ and
+$S^\pm$. The universe $U$ is the TCGA protein-coding genes with a padj,
+intersected with the signature background; all sets are restricted to $U$.
+
+Four overlaps are tested, $T^a \cap S^b$ for $a, b \in \{+, -\}$ (UP-UP,
+UP-DOWN, DOWN-UP, DOWN-DOWN; cancer first), with Fisher's exact test on the
+2x2 table of $U$. The test is two-sided by default (`fisher_alternative`), so
+both enrichment (odds ratio > 1) and depletion (< 1) are detected. P-values are
+BH-adjusted across all cancer x class tests within each signature.
+
+Duplicate gene symbols with opposite significant directions are excluded; other
+duplicates keep one representative and are listed for review.
+
+### Outputs
+
+- `results/tables/TCGA_senescence_overlap/<signature>/<project>/`: shared gene
+  lists, overlap statistics and the exact universe (`common_tested_genes.csv`).
+- `results/tables/TCGA_senescence_overlap/batch_run_status.csv`: one row per
+  cancer x signature; check it for failures.
+- `results/figures/TCGA_senescence_overlap/TCGA_<signature>_heatmap.png`: log2
+  odds ratios of significant overlaps (blue = enrichment, red = depletion);
+  the plotted values are in `results/tables/TCGA_senescence_overlap/`.

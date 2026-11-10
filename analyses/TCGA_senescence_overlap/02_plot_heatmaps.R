@@ -1,13 +1,10 @@
-script_arg <- grep("^--file=", commandArgs(), value = TRUE)
-script_file <- if (length(script_arg)) sub("^--file=", "", script_arg[1]) else sys.frame(1)$ofile
-project_dir <- dirname(normalizePath(script_file))
-source(file.path(project_dir, "config.R"))
+source(file.path("analyses", "TCGA_senescence_overlap", "00_config.R"))
 
 if (!requireNamespace("ggplot2", quietly = TRUE)) stop("Install ggplot2 first.")
 library(ggplot2)
 
 status_file <- file.path(results_dir, "batch_run_status.csv")
-if (!file.exists(status_file)) stop("Run TCGA_senescence_overlaps.R first.")
+if (!file.exists(status_file)) stop("Run 01_compute_overlaps.R first.")
 status <- read.csv(status_file, stringsAsFactors = FALSE)
 if (!all(c("signature", "cancer_project", "status") %in% names(status)) || !nrow(status)) {
   stop("Invalid batch_run_status.csv.")
@@ -46,15 +43,15 @@ data <- do.call( rbind, lapply(files, read_statistics) )
 
 unknown_cancers <- setdiff(unique(data$cancer_type), cancer_order)
 if (length(unknown_cancers)) {
-  stop("Add these cancers to cancer_order and cancer_labels in config.R: ",
+  stop("Add these cancers to cancer_order and cancer_labels in 00_config.R: ",
        paste(unknown_cancers, collapse = ", "))
 }
 if (!setequal(unique(data$signature), expected_signatures)) {
-  stop("Batch signatures differ from expected_signatures. Check config.R.")
+  stop("Batch signatures differ from expected_signatures. Check 00_config.R.")
 }
-if (anyNA(cancer_labels[unique(data$cancer_type)])) stop("Missing cancer labels in config.R.")
+if (anyNA(cancer_labels[unique(data$cancer_type)])) stop("Missing cancer labels in 00_config.R.")
 
-plots_dir <- file.path( results_dir, "heatmaps" )
+plots_dir <- figures_dir
 
 dir.create( plots_dir, recursive = TRUE, showWarnings = FALSE )
 
@@ -191,7 +188,7 @@ for (signature in expected_signatures) {
 
   write.csv(
     d,
-    file.path( plots_dir, paste0( "TCGA_", signature, "_heatmap_data.csv" ) ),
+    file.path( results_dir, paste0( "TCGA_", signature, "_heatmap_data.csv" ) ),
     row.names = FALSE
   )
 }
