@@ -1,0 +1,7 @@
+".y.","n","statistic","df","p","method","variable","p.adj","p.adj.signif","var_new"
+"value",6173,563.259929892607,3,9.28375711212253e-122,"Kruskal-Wallis","MAPK output",2.78512713363676e-121,"****","MAPK output (kw: ****)"
+"value",6173,3120.5200686997,3,0,"Kruskal-Wallis","RAS-autonomous UP",0,"****","RAS-autonomous UP (kw: ****)"
+"value",6173,114.625305436034,3,1.10854144807159e-24,"Kruskal-Wallis","Arrest-coupled UP",1.10854144807159e-24,"****","Arrest-coupled UP (kw: ****)"
+"value",6173,1552.9229548391,3,0,"Kruskal-Wallis","NF-kB/BRD4-dependent UP",0,"****","NF-kB/BRD4-dependent UP (kw: ****)"
+"value",6173,773.002120365716,3,3.09965571865813e-167,"Kruskal-Wallis","RAS-autonomous DOWN",1.23986228746325e-166,"****","RAS-autonomous DOWN (kw: ****)"
+"value",6173,370.580460950364,3,5.21223390997795e-80,"Kruskal-Wallis","Arrest-coupled DOWN",1.04244678199559e-79,"****","Arrest-coupled DOWN (kw: ****)"

@@ -109,7 +109,10 @@ resolve_symbol_duplicates <- function(
   list( data = do.call(rbind, selected), audit = do.call(rbind, audit) )
 }
 
-# Test whether two directional gene sets overlap more than expected by chance.
+# Test whether two directional gene sets overlap more (or, two-sided, also less)
+# than expected by chance. Fisher's exact test on the 2x2 table within the universe;
+# the sidedness is set by fisher_alternative in config.R. The odds ratio is the
+# sample odds ratio reported by GeneOverlap.
 run_overlap_test <- function(
     cancer_genes,
     signature_genes,
@@ -125,6 +128,17 @@ run_overlap_test <- function(
 
   observed <- length( intersect(cancer_genes, signature_genes) )
 
+  contingency <- matrix(
+    c(
+      observed,
+      length(cancer_genes) - observed,
+      length(signature_genes) - observed,
+      length(universe) - length(union(cancer_genes, signature_genes))
+    ),
+    nrow = 2
+  )
+  fisher_p <- fisher.test( contingency, alternative = fisher_alternative )$p.value
+
   expected <-
     length(cancer_genes) *
     length(signature_genes) /
@@ -139,7 +153,8 @@ run_overlap_test <- function(
     expected_overlap = expected,
     fold_enrichment = if (expected > 0) observed / expected else NA_real_,
     odds_ratio = getOddsRatio(test),
-    p_value = getPval(test),
+    p_value = fisher_p,
+    test_alternative = fisher_alternative,
     stringsAsFactors = FALSE
   )
 }

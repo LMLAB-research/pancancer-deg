@@ -1,0 +1,21 @@
+"set","relation","enriched","depleted","med_log2OR"
+"OIS senescence-specific | OIS-only down","opposite",0,16,-1.54
+"OIS senescence-specific | OIS-only down","same",15,0,0.82
+"OIS senescence-specific | OIS-only up","opposite",0,16,-1.06
+"OIS senescence-specific | OIS-only up","same",3,4,-0.1
+"OIS senescence-specific | shared with RS/SIPS down","opposite",0,17,-0.74
+"OIS senescence-specific | shared with RS/SIPS down","same",3,0,0.21
+"OIS senescence-specific | shared with RS/SIPS up","opposite",0,1,0
+"OIS senescence-specific | shared with RS/SIPS up","same",14,0,0.53
+"RAS-autonomous | OIS-only down","opposite",0,14,-1.53
+"RAS-autonomous | OIS-only down","same",12,0,0.89
+"RAS-autonomous | OIS-only up","opposite",0,9,-0.66
+"RAS-autonomous | OIS-only up","same",1,1,-0.02
+"RAS-autonomous | shared with RS/SIPS down","opposite",0,9,-0.67
+"RAS-autonomous | shared with RS/SIPS down","same",12,0,0.72
+"RAS-autonomous | shared with RS/SIPS up","opposite",5,0,0.31
+"RAS-autonomous | shared with RS/SIPS up","same",5,0,0.26
+"arrest-coupled (reference) down","opposite",16,0,2.08
+"arrest-coupled (reference) down","same",0,17,-2.31
+"arrest-coupled (reference) up","opposite",0,0,0.15
+"arrest-coupled (reference) up","same",0,0,-0.17
