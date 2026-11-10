@@ -133,7 +133,7 @@ add_scaled_age_covariate <- function(metadata) {
 }
 
 # Evaluate age and candidate categorical covariates for model inclusion.
-select_covariates <- function(metadata) {
+select_covariates <- function(metadata, candidates = candidate_covariates) {
   metadata <- add_scaled_age_covariate(metadata)
   
   age_report <- evaluate_numeric_covariate(
@@ -142,7 +142,7 @@ select_covariates <- function(metadata) {
   )
   covariate_report <- dplyr::bind_rows(
     age_report,
-    lapply(candidate_covariates, function(covariate) {
+    lapply(candidates, function(covariate) {
       evaluate_categorical_covariate(metadata, covariate)
     })
   )

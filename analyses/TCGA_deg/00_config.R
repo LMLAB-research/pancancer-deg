@@ -108,6 +108,12 @@ candidate_covariates <- c(
   "smoking_status"
 )
 
+# Sample subsets/models crossed with the naive and adjusted designs:
+# "all" = all samples (tumor effect); "female"/"male" = one sex only;
+# "sex_interaction" = both sexes with sex x condition, testing the difference
+# between the male and female tumor effects.
+sex_models <- c("all", "female", "male", "sex_interaction")
+
 #### Plot settings ####
 
 pca_blind <- FALSE
