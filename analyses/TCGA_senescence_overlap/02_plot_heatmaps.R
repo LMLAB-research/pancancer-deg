@@ -41,15 +41,23 @@ read_statistics <- function(file) {
 # Combine result tables
 data <- do.call( rbind, lapply(files, read_statistics) )
 
-unknown_cancers <- setdiff(unique(data$cancer_type), cancer_order)
+# Cancers missing from cancer_order or cancer_labels (00_config.R) are drawn
+# at the bottom, labelled by their code, with a warning.
+unknown_cancers <- sort(setdiff(unique(data$cancer_type), cancer_order))
 if (length(unknown_cancers)) {
-  stop("Add these cancers to cancer_order and cancer_labels in 00_config.R: ",
-       paste(unknown_cancers, collapse = ", "))
+  warning("Cancers not in cancer_order (00_config.R), added at the end: ",
+          paste(unknown_cancers, collapse = ", "))
+  cancer_order <- c(cancer_order, unknown_cancers)
+}
+unlabelled_cancers <- setdiff(unique(data$cancer_type), names(cancer_labels))
+if (length(unlabelled_cancers)) {
+  warning("Cancers without a label in cancer_labels (00_config.R), labelled by code: ",
+          paste(unlabelled_cancers, collapse = ", "))
+  cancer_labels[unlabelled_cancers] <- unlabelled_cancers
 }
 if (!setequal(unique(data$signature), expected_signatures)) {
   stop("Batch signatures differ from expected_signatures. Check 00_config.R.")
 }
-if (anyNA(cancer_labels[unique(data$cancer_type)])) stop("Missing cancer labels in 00_config.R.")
 
 plots_dir <- figures_dir
 
