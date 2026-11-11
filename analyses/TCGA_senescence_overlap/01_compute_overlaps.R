@@ -188,6 +188,29 @@ run_share_direction_tests <- function(cancer_sets, signature_sets, universe) {
   )
 }
 
+# Threshold-free direction readout: Spearman correlation between tumor and
+# signature log2 fold changes over all genes of the universe (rho > 0: same
+# overall direction, rho < 0: opposite). The p-value assumes independent genes
+# and is therefore optimistic; rho is the informative quantity.
+run_lfc_correlation <- function(cancer_data, signature_data, universe) {
+  cancer_lfc <- cancer_data$log2FoldChange[match(universe, cancer_data$gene_symbol)]
+  signature_lfc <- signature_data$log2FoldChange[match(universe, signature_data$gene_symbol)]
+  ok <- is.finite(cancer_lfc) & is.finite(signature_lfc)
+  if (sum(ok) < 3) {
+    return(data.frame(test = "lfc_correlation", n_genes = sum(ok),
+                      spearman_rho = NA_real_, p_value = NA_real_))
+  }
+  fit <- suppressWarnings(stats::cor.test(
+    cancer_lfc[ok], signature_lfc[ok], method = "spearman", exact = FALSE
+  ))
+  data.frame(
+    test = "lfc_correlation",
+    n_genes = sum(ok),
+    spearman_rho = unname(fit$estimate),
+    p_value = fit$p.value
+  )
+}
+
 read_background <- function(file) {
   x <- read.csv(file, stringsAsFactors = FALSE, check.names = FALSE)
   columns <- intersect(c("gene", "gene_symbol", "gene_name"), names(x))
@@ -201,7 +224,7 @@ read_background <- function(file) {
   genes
 }
 
-prepare_genes <- function(file, cancer = FALSE) {
+prepare_genes <- function(file, cancer = FALSE, symbol_map = character()) {
   x <- read.csv(file, stringsAsFactors = FALSE, check.names = FALSE)
   required <- c("log2FoldChange", "padj", if (cancer) {
     c("gene_id", "gene_name", "gene_type")
@@ -218,6 +241,7 @@ prepare_genes <- function(file, cancer = FALSE) {
   }
   x$gene_symbol <- toupper(trimws(as.character(x[[if (cancer) "gene_name" else "gene"]])))
   x$gene_symbol[x$gene_symbol == ""] <- NA_character_
+  x$gene_symbol <- apply_symbol_map(x$gene_symbol, symbol_map)
   x$padj <- validate_numeric(x$padj, "padj", file)
   x$log2FoldChange <- validate_numeric(x$log2FoldChange, "log2FoldChange", file)
   if (cancer) {
@@ -237,9 +261,59 @@ prepare_genes <- function(file, cancer = FALSE) {
   )
 }
 
-prepare_signature <- function(file, background_file) {
-  signature <- prepare_genes(file)
-  background <- read_background(background_file)
+# Signature symbols can be older than the TCGA (GENCODE) symbols, e.g. MRVI1
+# for IRAG1. A symbol is renamed only if it is absent from the TCGA symbols and
+# is not a current official symbol (so genes merely not expressed in TCGA are
+# never renamed), and its official aliases (org.Hs.eg.db) point to exactly one
+# current symbol that is present in TCGA, claimed by no other symbol and not
+# already in the signature. Returns a named vector: names = old symbols,
+# values = new symbols (upper case).
+build_symbol_map <- function(symbols, reference_symbols) {
+  symbols <- unique(trimws(as.character(symbols)))
+  symbols <- symbols[!is.na(symbols) & nzchar(symbols)]
+  current_symbols <- toupper(AnnotationDbi::keys(org.Hs.eg.db::org.Hs.eg.db, keytype = "SYMBOL"))
+  unmatched <- symbols[
+    !toupper(symbols) %in% reference_symbols & !toupper(symbols) %in% current_symbols
+  ]
+  if (!length(unmatched)) {
+    return(character())
+  }
+
+  alias <- suppressMessages(AnnotationDbi::select(
+    org.Hs.eg.db::org.Hs.eg.db,
+    keys = unmatched,
+    keytype = "ALIAS",
+    columns = "SYMBOL"
+  ))
+  alias <- unique(alias[!is.na(alias$SYMBOL), c("ALIAS", "SYMBOL")])
+  alias$SYMBOL <- toupper(alias$SYMBOL)
+  alias <- alias[
+    alias$SYMBOL %in% reference_symbols & !alias$SYMBOL %in% toupper(symbols),
+    ,
+    drop = FALSE
+  ]
+  alias <- alias[!alias$ALIAS %in% alias$ALIAS[duplicated(alias$ALIAS)], , drop = FALSE]
+  alias <- alias[!alias$SYMBOL %in% alias$SYMBOL[duplicated(alias$SYMBOL)], , drop = FALSE]
+
+  stats::setNames(alias$SYMBOL, toupper(alias$ALIAS))
+}
+
+apply_symbol_map <- function(symbols, symbol_map) {
+  renamed <- !is.na(symbols) & symbols %in% names(symbol_map)
+  symbols[renamed] <- unname(symbol_map[symbols[renamed]])
+  symbols
+}
+
+prepare_signature <- function(file, background_file, reference_symbols) {
+  raw_symbols <- c(
+    read.csv(file, stringsAsFactors = FALSE)$gene,
+    read.csv(background_file, stringsAsFactors = FALSE)[[1]]
+  )
+  symbol_map <- build_symbol_map(raw_symbols, reference_symbols)
+
+  signature <- prepare_genes(file, symbol_map = symbol_map)
+  signature$symbol_map <- symbol_map
+  background <- apply_symbol_map(read_background(background_file), symbol_map)
   outside <- setdiff(signature$audit$gene_symbol, background)
   if (length(outside)) {
     stop("Signature genes absent from background: ", paste(head(outside, 10), collapse = ", "),
@@ -261,7 +335,7 @@ analyze_one_cancer <- function(
     signature_name,
     output_root
 ) {
-  cancer_project <- sub( "_DGE_Raw_Results_Tumor_vs_Normal_Adjusted\\.csv$", "", basename(cancer_file) )
+  cancer_project <- sub(cancer_file_suffix, "", basename(cancer_file), fixed = TRUE)
 
   output_dir <- file.path( output_root, cancer_project )
 
@@ -309,6 +383,10 @@ analyze_one_cancer <- function(
   )
   statistics <- cbind(statistics, power_columns)
   share_direction <- cbind(share_direction, power_columns)
+
+  lfc_correlation <- run_lfc_correlation(cancer$data, signature$data, universe)
+  lfc_correlation$signature <- signature_name
+  lfc_correlation <- cbind(lfc_correlation, power_columns)
 
   genes <- data.frame(
     gene_symbol = unlist(overlaps, use.names = FALSE),
@@ -391,6 +469,7 @@ analyze_one_cancer <- function(
     overlap_counts = counts,
     overlap_statistics = statistics,
     share_direction_statistics = share_direction,
+    lfc_correlation_statistics = lfc_correlation,
     common_tested_genes = data.frame(gene_symbol = sort(unique(universe))),
     CANCER_duplicates_for_review = cancer$audit[cancer$audit$needs_review, , drop = FALSE]
   )
@@ -437,6 +516,13 @@ if (any(!file.exists(background_files))) {
 cancer_files <- sort(list.files(cancer_input_dir, cancer_file_pattern, full.names = TRUE))
 if (!length(cancer_files)) stop("No matching TCGA files in: ", cancer_input_dir)
 
+# TCGA protein-coding symbols over all cancers, to rename outdated signature
+# symbols (see build_symbol_map).
+tcga_reference_symbols <- unique(unlist(lapply(cancer_files, function(file) {
+  x <- read.csv(file, stringsAsFactors = FALSE)
+  toupper(x$gene_name[!is.na(x$gene_type) & x$gene_type == "protein_coding"])
+})))
+
 # Sample sizes of the TCGA design used, from TCGA_deg step 05.
 cancer_status <- if (file.exists(cancer_status_file)) {
   x <- read.csv(cancer_status_file, stringsAsFactors = FALSE)
@@ -455,15 +541,27 @@ dir.create(results_dir, recursive = TRUE, showWarnings = FALSE)
 run_status <- list()
 for (signature_name in expected_signatures) {
   message("Running ", signature_name)
-  signature <- prepare_signature(signature_files[[signature_name]], background_files[[signature_name]])
+  signature <- prepare_signature(
+    signature_files[[signature_name]],
+    background_files[[signature_name]],
+    tcga_reference_symbols
+  )
   output_root <- file.path(results_dir, signature_name)
   dir.create(output_root, recursive = TRUE, showWarnings = FALSE)
   write.csv(
     signature$audit[signature$audit$needs_review, , drop = FALSE],
     file.path(output_root, paste0(signature_name, "_duplicates_for_review.csv")), row.names = FALSE
   )
+  write.csv(
+    data.frame(
+      signature_symbol = names(signature$symbol_map),
+      tcga_symbol = unname(signature$symbol_map)
+    ),
+    file.path(output_root, paste0(signature_name, "_symbol_mapping.csv")), row.names = FALSE
+  )
+  message("  ", length(signature$symbol_map), " signature symbols renamed to current TCGA symbols")
   for (cancer_file in cancer_files) {
-    cancer_project <- sub("_DGE_Raw_Results_Tumor_vs_Normal_Adjusted\\.csv$", "", basename(cancer_file))
+    cancer_project <- sub(cancer_file_suffix, "", basename(cancer_file), fixed = TRUE)
     message("  ", cancer_project)
     run_status[[length(run_status) + 1]] <- tryCatch(
       analyze_one_cancer(cancer_file, signature, signature_name, output_root),
