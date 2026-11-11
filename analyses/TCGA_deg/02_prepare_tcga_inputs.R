@@ -520,6 +520,27 @@ prepare_project_inputs <- function(project_id) {
   metadata_availability$missing_fraction <-
     metadata_availability$n_missing / nrow(metadata_export)
 
+  # Library size = total counts per sample, to spot low-depth samples.
+  library_sizes <- data.frame(
+    barcode = metadata_export$barcode,
+    sample_type = metadata_export$sample_type,
+    condition = metadata_export$condition,
+    library_size = colSums(assay(rse, "counts")),
+    stringsAsFactors = FALSE
+  )
+  library_size_overview <- do.call(rbind, lapply(
+    split(library_sizes$library_size, library_sizes$sample_type),
+    function(x) {
+      q <- stats::quantile(x, c(0, 0.25, 0.5, 0.75, 1), names = FALSE)
+      data.frame(n = length(x), min = q[1], q1 = q[2], median = q[3], q3 = q[4], max = q[5])
+    }
+  ))
+  library_size_overview <- cbind(
+    sample_type = rownames(library_size_overview),
+    library_size_overview,
+    row.names = NULL
+  )
+
   wb <- createWorkbook()
   addWorksheet(wb, "sample_types")
   writeData(wb, "sample_types", sample_type_summary)
@@ -529,6 +550,10 @@ prepare_project_inputs <- function(project_id) {
   writeData(wb, "clinical_merge", clinical_merge_summary)
   addWorksheet(wb, "sample_metadata")
   writeData(wb, "sample_metadata", metadata_export, na.string = "NA")
+  addWorksheet(wb, "library_sizes")
+  writeData(wb, "library_sizes", library_sizes)
+  addWorksheet(wb, "library_size_overview")
+  writeData(wb, "library_size_overview", library_size_overview)
   saveWorkbook(wb, tcga_project_metadata_report_file(project_id), overwrite = TRUE)
 
   invisible(project_id)
