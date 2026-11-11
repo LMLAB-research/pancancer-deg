@@ -348,6 +348,16 @@ standardise_tcga_metadata <- function(metadata) {
     "tobacco_smoking_status",
     "smoking_status"
   ))
+  # Some BCR clinical tables code smoking history as TCGA numeric codes.
+  smoking_codes <- c(
+    "1" = "Lifelong Non-Smoker",
+    "2" = "Current Smoker",
+    "3" = "Current Reformed Smoker for > 15 yrs",
+    "4" = "Current Reformed Smoker for < or = 15 yrs",
+    "5" = "Current Reformed Smoker, Duration Not Specified"
+  )
+  coded <- !is.na(metadata$smoking_status) & metadata$smoking_status %in% names(smoking_codes)
+  metadata$smoking_status[coded] <- unname(smoking_codes[metadata$smoking_status[coded]])
   metadata$age_at_diagnosis_numeric <- standardise_age_at_diagnosis_years(metadata)
 
   metadata
