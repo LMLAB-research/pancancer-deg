@@ -282,7 +282,8 @@ A gene is up (down) if $\text{padj} < 0.05$ and $\log_2\text{FC} > \log_2 1.5$
 $S^\pm$. The universe $U$ is the TCGA protein-coding genes with a padj,
 intersected with the signature background; all sets are restricted to $U$.
 
-Three readouts are computed, each with Fisher's exact test on a 2x2 table:
+Four readouts are computed. The first three use Fisher's exact test on a 2x2
+table:
 
 1. **Class overlaps** (reference). For each class $T^a \cap S^b$,
    $a, b \in \{+, -\}$ (UP-UP, UP-DOWN, DOWN-UP, DOWN-DOWN; cancer first), the
@@ -294,7 +295,12 @@ Three readouts are computed, each with Fisher's exact test on a 2x2 table:
 3. **Direction.** Over genes DE in both: "up or down in cancer" x "up or down
    in signature". Odds ratio > 1: same direction; < 1: opposite direction.
 
-Readouts 2 and 3 are always two-sided, with BH across cancers within each
+4. **Fold-change correlation** (threshold-free). Spearman correlation $\rho$
+   between tumor and signature log2 fold changes over all genes of $U$.
+   $\rho > 0$: same overall direction; $\rho < 0$: opposite. It checks the
+   direction readout without any DEG cutoff.
+
+Readouts 2–4 are always two-sided, with BH across cancers within each
 signature.
 
 How they relate: the class-overlap enrichment mixes sharing and direction. For
@@ -305,8 +311,21 @@ $$\frac{P(S^+ \mid T^+)}{P(S^+ \mid \text{not } T^+)}
 \times \frac{P(S^+ \mid T^+, S\ \text{DE})}{P(S^+ \mid \text{not } T^+, S\ \text{DE})}.$$
 
 Because sharing is strong, all four classes can be enriched at once even when
-the shared genes move in opposite directions. Use the direction readout to
-compare directions.
+the shared genes move in opposite directions. Use the direction readout (and
+the fold-change correlation) to compare directions.
+
+**Reading the p-values.** All four tests treat genes as independent, but genes
+are co-regulated in modules, so the p-values are too optimistic; with about
+13,000 genes, even $\rho = 0.03$ is "significant". The effect sizes (odds
+ratios with their confidence intervals, $\rho$) are the informative
+quantities.
+
+**DEG definitions differ between the two sides.** Tumor DEGs come from TCGA_deg
+step 05 (by default the threshold test $H_0: |\beta| \le \log_2 1.5$).
+Signature DEGs are genes with padj < 0.05 and $|\log_2\text{FC}| > \log_2 1.5$
+in the meta-analysis tables (identical to their `significant` column); these
+tables give no standard errors, so the threshold test cannot be applied to
+them.
 
 Genes are matched by symbol. Signature symbols that were renamed since the
 signatures were built (e.g. `MRVI1` → `IRAG1`) are first updated: a symbol
@@ -322,7 +341,8 @@ duplicates keep one representative and are listed for review.
 
 - `results/tables/TCGA_senescence_overlap/<signature>/<project>/`: shared gene
   lists, class-overlap statistics (`overlap_statistics.csv`), sharing and
-  direction statistics (`share_direction_statistics.csv`) and the exact
+  direction statistics (`share_direction_statistics.csv`), fold-change
+  correlation (`lfc_correlation_statistics.csv`) and the exact
   universe (`common_tested_genes.csv`). The statistics tables also give the
   cancer's sample sizes (`n_normal`, `n_tumor`, from TCGA_deg step 05) and the
   numbers of cancer and signature DEGs in the universe, so that results can be
@@ -331,8 +351,8 @@ duplicates keep one representative and are listed for review.
   cancer x signature; check it for failures.
 - `results/figures/TCGA_senescence_overlap/TCGA_<signature>_heatmap.png`: log2
   odds ratios of significant class overlaps (blue = enrichment, red = depletion).
-- `results/figures/TCGA_senescence_overlap/TCGA_share_heatmap.png` and
-  `TCGA_direction_heatmap.png`: cancers x signatures (direction: blue = same,
-  red = opposite).
+- `results/figures/TCGA_senescence_overlap/TCGA_share_heatmap.png`,
+  `TCGA_direction_heatmap.png` and `TCGA_lfc_correlation_heatmap.png`: cancers
+  x signatures (direction and correlation: blue = same, red = opposite).
 - The plotted values of each heatmap are in
   `results/tables/TCGA_senescence_overlap/TCGA_*_heatmap_data.csv`.

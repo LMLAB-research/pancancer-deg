@@ -188,6 +188,29 @@ run_share_direction_tests <- function(cancer_sets, signature_sets, universe) {
   )
 }
 
+# Threshold-free direction readout: Spearman correlation between tumor and
+# signature log2 fold changes over all genes of the universe (rho > 0: same
+# overall direction, rho < 0: opposite). The p-value assumes independent genes
+# and is therefore optimistic; rho is the informative quantity.
+run_lfc_correlation <- function(cancer_data, signature_data, universe) {
+  cancer_lfc <- cancer_data$log2FoldChange[match(universe, cancer_data$gene_symbol)]
+  signature_lfc <- signature_data$log2FoldChange[match(universe, signature_data$gene_symbol)]
+  ok <- is.finite(cancer_lfc) & is.finite(signature_lfc)
+  if (sum(ok) < 3) {
+    return(data.frame(test = "lfc_correlation", n_genes = sum(ok),
+                      spearman_rho = NA_real_, p_value = NA_real_))
+  }
+  fit <- suppressWarnings(stats::cor.test(
+    cancer_lfc[ok], signature_lfc[ok], method = "spearman", exact = FALSE
+  ))
+  data.frame(
+    test = "lfc_correlation",
+    n_genes = sum(ok),
+    spearman_rho = unname(fit$estimate),
+    p_value = fit$p.value
+  )
+}
+
 read_background <- function(file) {
   x <- read.csv(file, stringsAsFactors = FALSE, check.names = FALSE)
   columns <- intersect(c("gene", "gene_symbol", "gene_name"), names(x))
@@ -361,6 +384,10 @@ analyze_one_cancer <- function(
   statistics <- cbind(statistics, power_columns)
   share_direction <- cbind(share_direction, power_columns)
 
+  lfc_correlation <- run_lfc_correlation(cancer$data, signature$data, universe)
+  lfc_correlation$signature <- signature_name
+  lfc_correlation <- cbind(lfc_correlation, power_columns)
+
   genes <- data.frame(
     gene_symbol = unlist(overlaps, use.names = FALSE),
     overlap_class = rep(class_order, lengths(overlaps))
@@ -442,6 +469,7 @@ analyze_one_cancer <- function(
     overlap_counts = counts,
     overlap_statistics = statistics,
     share_direction_statistics = share_direction,
+    lfc_correlation_statistics = lfc_correlation,
     common_tested_genes = data.frame(gene_symbol = sort(unique(universe))),
     CANCER_duplicates_for_review = cancer$audit[cancer$audit$needs_review, , drop = FALSE]
   )
