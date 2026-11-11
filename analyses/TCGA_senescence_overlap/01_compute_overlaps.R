@@ -225,6 +225,11 @@ prepare_genes <- function(file, cancer = FALSE) {
     x <- x[!is.na(x$padj) & !is.na(x$log2FoldChange), , drop = FALSE]
   }
   x$regulation <- classify_regulation(x$padj, x$log2FoldChange)
+  if (cancer && "deg" %in% names(x)) {
+    # Use the DEG calls of TCGA_deg step 05, so that tumor DEGs follow the
+    # test set there (threshold or zero test).
+    x$regulation <- unname(c(up = "UP", down = "DOWN", not_significant = "NS")[x$deg])
+  }
   resolved <- resolve_symbol_duplicates(x, if (cancer) "ensembl_id" else "source_row")
   list(
     data = resolved$data[!resolved$data$exclude_from_overlap, , drop = FALSE],
@@ -293,6 +298,17 @@ analyze_one_cancer <- function(
 
   share_direction <- run_share_direction_tests(cancer_sets, signature_sets, universe)
   share_direction$signature <- signature_name
+
+  # Sample sizes and DEG counts, to interpret results against power: cancers
+  # with more samples have more DEGs.
+  power_columns <- data.frame(
+    n_normal = cancer_sample_size(cancer_project, "n_normal"),
+    n_tumor = cancer_sample_size(cancer_project, "n_tumor"),
+    n_cancer_deg = length(union(cancer_sets$UP, cancer_sets$DOWN)),
+    n_signature_deg = length(union(signature_sets$UP, signature_sets$DOWN))
+  )
+  statistics <- cbind(statistics, power_columns)
+  share_direction <- cbind(share_direction, power_columns)
 
   genes <- data.frame(
     gene_symbol = unlist(overlaps, use.names = FALSE),
@@ -420,6 +436,19 @@ if (any(!file.exists(background_files))) {
 }
 cancer_files <- sort(list.files(cancer_input_dir, cancer_file_pattern, full.names = TRUE))
 if (!length(cancer_files)) stop("No matching TCGA files in: ", cancer_input_dir)
+
+# Sample sizes of the TCGA design used, from TCGA_deg step 05.
+cancer_status <- if (file.exists(cancer_status_file)) {
+  x <- read.csv(cancer_status_file, stringsAsFactors = FALSE)
+  x[x$design_type == cancer_design_type & x$status == "completed", , drop = FALSE]
+} else {
+  warning("No TCGA_deg status file; sample sizes will be NA: ", cancer_status_file)
+  data.frame(project_id = character(), n_normal = integer(), n_tumor = integer())
+}
+cancer_sample_size <- function(cancer_project, column) {
+  value <- cancer_status[[column]][match(cancer_project, cancer_status$project_id)]
+  if (length(value) == 0) NA_integer_ else value
+}
 dir.create(results_dir, recursive = TRUE, showWarnings = FALSE)
 
 # Process each signature once, then record the outcome for every cancer.
