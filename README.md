@@ -17,6 +17,14 @@ and runs a package availability check. To run only the check:
 RENV_CONFIG_AUTOLOADER_ENABLED=FALSE Rscript --vanilla setup/check_setup.R
 ```
 
+Setup never changes `renv.lock`. When a package is added to or removed from
+the code, list it in `setup/install_dependencies.R` and `setup/check_setup.R`,
+then update the lockfile and commit it:
+
+```bash
+RENV_CONFIG_AUTOLOADER_ENABLED=FALSE Rscript --vanilla setup/install_dependencies.R --snapshot
+```
+
 ## Project Structure
 
 ```text

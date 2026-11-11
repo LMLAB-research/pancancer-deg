@@ -16,16 +16,13 @@ required_packages <- c(
   "AnnotationDbi",
   "BiocParallel",
   "DESeq2",
-  "EnhancedVolcano",
   "SummarizedExperiment",
   "TCGAbiolinks",
   "ashr",
   "dplyr",
   "ggplot2",
   "openxlsx",
-  "org.Hs.eg.db",
-  "pheatmap",
-  "readr"
+  "org.Hs.eg.db"
 )
 
 available <- vapply(required_packages, requireNamespace, logical(1), quietly = TRUE)
