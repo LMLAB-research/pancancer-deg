@@ -93,7 +93,7 @@ Rscript analyses/TCGA_deg/04_run_deseq2_deg.R
 
 ### Designs
 
-Each cancer gets a naive and an adjusted version of four models:
+Each cancer gets a naive, an adjusted and a paired version of four models:
 
 | Model | Samples | Formula (naive) | Tested coefficient |
 | --- | --- | --- | --- |
@@ -109,6 +109,14 @@ design: a covariate is kept if at most 25% of values are missing and its
 smallest group has at least 3 samples. Sex is a candidate only in the
 all-samples model.
 
+The paired version uses only patients with both a tumor and a normal sample
+(about 97% of normals) and replaces covariates by one term per patient:
+`~ patient_id + condition`. The tumor effect is then estimated within patients,
+which controls for every patient-level factor (age, sex, race, smoking, and
+unrecorded ones) without clinical data. For the interaction, sex is constant
+within patients, so the formula is `~ patient_id + condition + tumor_male`, with
+`tumor_male` = 1 for tumor samples of men; its coefficient is $\delta$.
+
 A design is eligible if it has at least 5 normal and 5 tumor samples after
 filtering (in each sex for the interaction model). Reasons for ineligible
 designs are in `03_TCGA_deseq2_design_plan.csv`.
@@ -122,8 +130,8 @@ effects differ.
 
 In `results/tables/TCGA_deg/`, per cancer and design:
 
-- `<project>_DGE_Raw_Results_Tumor_vs_Normal_<Naive|Adjusted>[_Female|_Male].csv`
-- `<project>_DGE_Raw_Results_Sex_Interaction_<Naive|Adjusted>.csv`
+- `<project>_DGE_Raw_Results_Tumor_vs_Normal_<Naive|Adjusted|Paired>[_Female|_Male].csv`
+- `<project>_DGE_Raw_Results_Sex_Interaction_<Naive|Adjusted|Paired>.csv`
 - the same names with `DGE_Results` for shrunken log2 fold changes.
 
 QC figures (PCA, MA, volcano) are made for the all-samples model only, in

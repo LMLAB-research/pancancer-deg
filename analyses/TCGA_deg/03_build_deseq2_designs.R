@@ -3,9 +3,15 @@
 # This script chooses usable covariates separately for each cohort, creates
 # DESeq2 objects, and writes a design plan for manual review before analysis.
 #
-# Each cohort gets a naive and an adjusted design for every sex model in
-# `sex_models` (00_config.R): all samples, females only, males only, and the
+# Each cohort gets a naive, an adjusted and a paired design for every sex model
+# in `sex_models` (00_config.R): all samples, females only, males only, and the
 # sex x condition interaction model.
+#
+# - naive: ~ condition, all samples.
+# - adjusted: ~ covariates + condition, complete cases on selected covariates.
+# - paired: ~ patient_id + condition, patients with both a tumor and a normal
+#   sample; the tumor effect is estimated within patients, which controls for
+#   all patient-level factors without clinical covariates.
 
 source(file.path("analyses", "TCGA_deg", "00_config.R"))
 
@@ -28,11 +34,16 @@ make_design_type <- function(adjustment, sex_model) {
 
 # DESeq2 coefficient tested in script 04. With female and normal as reference
 # levels, the interaction is (male tumor effect) - (female tumor effect).
-design_coefficient <- function(sex_model) {
-  if (sex_model == "sex_interaction") {
-    "sexmale.conditiontumor"
-  } else {
+# In paired designs, sex is constant within patients, so the interaction is
+# coded as one indicator, tumor_male = (male and tumor), whose coefficient is
+# the same difference.
+design_coefficient <- function(sex_model, adjustment = "naive") {
+  if (sex_model != "sex_interaction") {
     "condition_tumor_vs_normal"
+  } else if (adjustment == "paired") {
+    "tumor_male_yes_vs_no"
+  } else {
+    "sexmale.conditiontumor"
   }
 }
 
@@ -71,9 +82,16 @@ make_design_plan_row <- function(
   )
 }
 
-# One ineligible row for both the naive and adjusted designs of a sex model.
-make_ineligible_rows <- function(project_id, sex_model, reason, n_normal, n_tumor) {
-  dplyr::bind_rows(lapply(c("naive", "adjusted"), function(adjustment) {
+# One ineligible row per design of a sex model (naive and adjusted by default).
+make_ineligible_rows <- function(
+  project_id,
+  sex_model,
+  reason,
+  n_normal,
+  n_tumor,
+  adjustments = c("naive", "adjusted")
+) {
+  dplyr::bind_rows(lapply(adjustments, function(adjustment) {
     make_design_plan_row(
       project_id, make_design_type(adjustment, sex_model), sex_model,
       FALSE, reason, n_normal, n_tumor
@@ -138,7 +156,8 @@ build_and_save_dds <- function(
   design_type,
   sex_model,
   design_formula,
-  covariates
+  covariates,
+  coefficient = design_coefficient(sex_model)
 ) {
   dds <- DESeqDataSet(rse, design = design_formula)
   smallest_group_size <- min(design_group_counts(colData(dds), sex_model))
@@ -155,7 +174,7 @@ build_and_save_dds <- function(
       design_type = design_type,
       sex_model = sex_model,
       design_formula = design_formula,
-      coefficient = design_coefficient(sex_model),
+      coefficient = coefficient,
       covariates = covariates,
       n_normal = sum(colData(dds)$condition == "normal"),
       n_tumor = sum(colData(dds)$condition == "tumor"),
@@ -337,6 +356,83 @@ build_sex_model_designs <- function(project_id, rse, metadata, sex_model) {
   )
 }
 
+# Build the paired design of one sex model: keep patients with both a tumor and
+# a normal sample, and fit ~ patient_id + condition (plus tumor_male for the
+# interaction). Returns one design plan row.
+build_paired_design <- function(project_id, rse, metadata, sex_model) {
+  paired_type <- make_design_type("paired", sex_model)
+  interaction <- is_interaction(sex_model)
+
+  ineligible <- function(reason, n_normal = NA_integer_, n_tumor = NA_integer_) {
+    make_ineligible_rows(
+      project_id, sex_model, reason, n_normal, n_tumor,
+      adjustments = "paired"
+    )
+  }
+
+  if (!"patient_barcode" %in% colnames(metadata)) {
+    return(ineligible("missing patient_barcode column"))
+  }
+
+  selected <- select_sex_model_samples(rse, metadata, sex_model)
+  rse <- selected$rse
+  metadata <- selected$metadata
+
+  patient <- as.character(metadata$patient_barcode)
+  paired_patients <- intersect(
+    patient[metadata$condition == "normal"],
+    patient[metadata$condition == "tumor"]
+  )
+  keep <- !is.na(patient) & patient %in% paired_patients
+  rse <- rse[, keep]
+  metadata <- metadata[keep, , drop = FALSE]
+
+  n_normal <- sum(metadata$condition == "normal")
+  n_tumor <- sum(metadata$condition == "tumor")
+
+  if (!has_enough_samples(metadata, sex_model)) {
+    return(ineligible("insufficient paired tumor/normal samples", n_normal, n_tumor))
+  }
+
+  # Syntactic patient levels avoid DESeq2 notes about special characters.
+  rse$patient_id <- factor(make.names(patient[keep]))
+  rse$condition <- metadata$condition
+  if (interaction) {
+    rse$tumor_male <- factor(
+      ifelse(metadata$sex == "male" & metadata$condition == "tumor", "yes", "no"),
+      levels = c("no", "yes")
+    )
+  }
+  # Built from text in the global environment, so that saved formulas do not
+  # carry this function's data with them.
+  design_formula <- as.formula(
+    if (interaction) "~ patient_id + condition + tumor_male" else "~ patient_id + condition",
+    env = globalenv()
+  )
+
+  if (!formula_is_full_rank(as.data.frame(colData(rse)), design_formula)) {
+    return(ineligible("design matrix is not full rank", n_normal, n_tumor))
+  }
+
+  dds <- build_and_save_dds(
+    rse, project_id, paired_type, sex_model, design_formula, character(),
+    coefficient = design_coefficient(sex_model, "paired")
+  )
+
+  make_design_plan_row(
+    project_id = project_id,
+    design_type = paired_type,
+    sex_model = sex_model,
+    eligible = TRUE,
+    reason = NA_character_,
+    n_normal = sum(colData(dds)$condition == "normal"),
+    n_tumor = sum(colData(dds)$condition == "tumor"),
+    n_genes = nrow(dds),
+    covariates = "patient_id",
+    design_formula = design_formula
+  )
+}
+
 build_project_design <- function(project_id) {
   message("Building DESeq2 designs for ", project_id)
 
@@ -362,12 +458,20 @@ build_project_design <- function(project_id) {
     if (sex_model != "all" && !"sex" %in% colnames(metadata)) {
       return(list(
         design_plan = make_ineligible_rows(
-          project_id, sex_model, "missing sex column", NA_integer_, NA_integer_
+          project_id, sex_model, "missing sex column", NA_integer_, NA_integer_,
+          adjustments = c("naive", "adjusted", "paired")
         ),
         covariate_report = data.frame()
       ))
     }
-    build_sex_model_designs(project_id, rse, metadata, sex_model)
+    unpaired <- build_sex_model_designs(project_id, rse, metadata, sex_model)
+    list(
+      design_plan = dplyr::bind_rows(
+        unpaired$design_plan,
+        build_paired_design(project_id, rse, metadata, sex_model)
+      ),
+      covariate_report = unpaired$covariate_report
+    )
   })
 
   list(
