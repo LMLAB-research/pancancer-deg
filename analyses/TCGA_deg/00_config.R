@@ -29,7 +29,10 @@ detected_cores <- parallel::detectCores(logical = FALSE)
 if (is.na(detected_cores)) {
   detected_cores <- 1
 }
-biocparallel_workers <- max(1, min(12, detected_cores - 1))
+# Each worker holds its own copy of the data (about 2.4 GB for TCGA-BRCA), so
+# the cap is set by memory, not cores: 4 workers stay within ~10 GB at peak.
+max_biocparallel_workers <- 4
+biocparallel_workers <- max(1, min(max_biocparallel_workers, detected_cores - 1))
 
 make_biocparallel_param <- function() {
   if (!use_biocparallel || biocparallel_workers <= 1) {

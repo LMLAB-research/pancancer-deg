@@ -47,6 +47,22 @@ The `results/` directory is organized by output type first, then by analysis mod
 
 The `data/` directory is intended for local input data, downloaded resources, and intermediate analysis objects. Large or generated data files should generally stay out of Git.
 
+## Running the pipeline
+
+`analyses/run_pipeline.sh` runs selected steps in order, stops at the first
+failure, and writes one log per step to `results/logs/`:
+
+```bash
+bash analyses/run_pipeline.sh all           # everything
+bash analyses/run_pipeline.sh from:deg04    # deg04 and all later steps
+bash analyses/run_pipeline.sh overlap       # overlap01 and overlap02
+nohup bash analyses/run_pipeline.sh all > /dev/null 2>&1 &   # keep running after logout
+```
+
+Steps: `deg01`–`deg04` (TCGA_deg) and `overlap01`–`overlap02`
+(TCGA_senescence_overlap); groups `deg`, `overlap`, `all`. Run
+`bash analyses/run_pipeline.sh` without arguments for help.
+
 ## TCGA_deg Analysis
 
 Tumor-versus-normal differential expression (DESeq2) for each TCGA cancer type.
