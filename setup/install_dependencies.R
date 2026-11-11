@@ -22,7 +22,6 @@ bioc_packages <- c(
   "DESeq2",
   "EnhancedVolcano",
   "org.Hs.eg.db",
-  "recount3",
   "SummarizedExperiment",
   "TCGAbiolinks"
 )

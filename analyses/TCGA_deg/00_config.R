@@ -11,7 +11,6 @@ library(openxlsx)
 library(org.Hs.eg.db)
 library(pheatmap)
 library(readr)
-library(recount3)
 library(SummarizedExperiment)
 library(TCGAbiolinks)
 
