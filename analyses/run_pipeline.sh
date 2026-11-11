@@ -5,10 +5,10 @@
 #   bash analyses/run_pipeline.sh STEP [STEP ...]
 #
 # Steps:
-#   deg01 deg02 deg03 deg04    analyses/TCGA_deg/01-04
+#   deg01 ... deg05            analyses/TCGA_deg/01-05
 #   overlap01 overlap02        analyses/TCGA_senescence_overlap/01-02
 # Groups:
-#   deg = deg01-deg04, overlap = overlap01-overlap02, all = deg + overlap
+#   deg = deg01-deg05, overlap = overlap01-overlap02, all = deg + overlap
 #   from:STEP = STEP and every step after it, e.g. from:deg04
 #
 # Examples:
@@ -23,12 +23,13 @@
 
 set -euo pipefail
 
-steps=(deg01 deg02 deg03 deg04 overlap01 overlap02)
+steps=(deg01 deg02 deg03 deg04 deg05 overlap01 overlap02)
 declare -A scripts=(
   [deg01]="analyses/TCGA_deg/01_discover_tcga_rnaseq_projects.R"
   [deg02]="analyses/TCGA_deg/02_prepare_tcga_inputs.R"
   [deg03]="analyses/TCGA_deg/03_build_deseq2_designs.R"
   [deg04]="analyses/TCGA_deg/04_run_deseq2_deg.R"
+  [deg05]="analyses/TCGA_deg/05_compare_designs.R"
   [overlap01]="analyses/TCGA_senescence_overlap/01_compute_overlaps.R"
   [overlap02]="analyses/TCGA_senescence_overlap/02_plot_heatmaps.R"
 )
@@ -45,7 +46,7 @@ declare -A selected=()
 for arg in "$@"; do
   case "$arg" in
     all) for s in "${steps[@]}"; do selected[$s]=1; done ;;
-    deg) for s in deg01 deg02 deg03 deg04; do selected[$s]=1; done ;;
+    deg) for s in deg01 deg02 deg03 deg04 deg05; do selected[$s]=1; done ;;
     overlap) for s in overlap01 overlap02; do selected[$s]=1; done ;;
     from:*)
       start="${arg#from:}"

@@ -67,7 +67,7 @@ bash analyses/run_pipeline.sh overlap       # overlap01 and overlap02
 nohup bash analyses/run_pipeline.sh all > /dev/null 2>&1 &   # keep running after logout
 ```
 
-Steps: `deg01`–`deg04` (TCGA_deg) and `overlap01`–`overlap02`
+Steps: `deg01`–`deg05` (TCGA_deg) and `overlap01`–`overlap02`
 (TCGA_senescence_overlap); groups `deg`, `overlap`, `all`. Run
 `bash analyses/run_pipeline.sh` without arguments for help.
 
@@ -82,6 +82,7 @@ Rscript analyses/TCGA_deg/01_discover_tcga_rnaseq_projects.R
 Rscript analyses/TCGA_deg/02_prepare_tcga_inputs.R
 Rscript analyses/TCGA_deg/03_build_deseq2_designs.R
 Rscript analyses/TCGA_deg/04_run_deseq2_deg.R
+Rscript analyses/TCGA_deg/05_compare_designs.R
 ```
 
 | Step | What it does |
@@ -90,6 +91,7 @@ Rscript analyses/TCGA_deg/04_run_deseq2_deg.R
 | 02 | Downloads STAR counts and clinical data. Tumor = primary tumor, normal = solid tissue normal; other sample types are excluded. |
 | 03 | Builds every DESeq2 design (below) and writes the design plan for review. |
 | 04 | Fits every eligible design and writes raw and ashr-shrunken result tables. |
+| 05 | Compares naive, adjusted and paired results per cancer and sex model (fold-change correlation, DEG agreement). |
 
 ### Designs
 

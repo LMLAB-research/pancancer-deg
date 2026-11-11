@@ -227,6 +227,11 @@ tcga_deseq_run_status_file <- file.path(
   "04_TCGA_deseq2_run_status.csv"
 )
 
+tcga_design_comparison_file <- file.path(
+  results_table_dir,
+  "05_TCGA_design_comparison.csv"
+)
+
 #### Per-Project Output Helpers ####
 
 tcga_project_rse_file <- function(project_id) {
