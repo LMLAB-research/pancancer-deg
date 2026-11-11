@@ -424,6 +424,9 @@ collapse_replicate_files <- function(rse) {
   if (anyNA(file_id) || anyDuplicated(file_id)) {
     stop("File barcodes must be present and unique")
   }
+  # The clinical merge drops column names; name samples by barcode so that the
+  # summed count matrix and the object agree.
+  colnames(rse) <- file_id
   mergeable <- metadata$condition %in% c("normal", "tumor") &
     !is.na(metadata$patient_barcode)
   unit <- ifelse(
