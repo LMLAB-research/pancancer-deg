@@ -93,7 +93,7 @@ Rscript analyses/TCGA_deg/06_compare_designs.R
 | 03 | Builds every DESeq2 design (below) and writes the design plan for review. |
 | 04 | Fits every eligible design (the slow step) and saves the fitted DESeq2 objects. |
 | 05 | Tests each fitted design (see *Differential expression test*), shrinks log2 fold changes (ashr), and writes raw and shrunken result tables. |
-| 06 | Compares naive, adjusted and paired results per cancer and sex model (fold-change correlation, DEG agreement). |
+| 06 | Compares naive, adjusted and paired results per cancer and sex model (fold-change correlation, DEG agreement), and summarises the sex models per cancer and version. |
 
 Each step saves its outputs, so later changes need only a partial rerun:
 
@@ -212,6 +212,10 @@ In `results/tables/TCGA_deg/`, per cancer and design:
   row per design (status, test used, DEG counts).
 - `06_TCGA_design_comparison.csv`: agreement between the naive, adjusted and
   paired versions.
+- `06_TCGA_sex_model_summary.csv`: per cancer and version, sample sizes of the
+  female and male models, DEG counts of all four models, and the agreement of
+  female and male tumor effects (Spearman correlation of log2 fold changes;
+  DEGs in both sexes with the same or opposite direction).
 
 Fitted DESeq2 objects are in `data/TCGA_deg/processed/*_fit_dds.rds`.
 

@@ -247,6 +247,11 @@ tcga_design_comparison_file <- file.path(
   "06_TCGA_design_comparison.csv"
 )
 
+tcga_sex_model_summary_file <- file.path(
+  results_table_dir,
+  "06_TCGA_sex_model_summary.csv"
+)
+
 #### Per-Project Output Helpers ####
 
 tcga_project_rse_file <- function(project_id) {
