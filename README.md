@@ -88,10 +88,23 @@ Rscript analyses/TCGA_deg/05_compare_designs.R
 | Step | What it does |
 | --- | --- |
 | 01 | Lists TCGA projects with at least 5 normal and 5 tumor RNA-seq samples. |
-| 02 | Downloads STAR counts and clinical data. Tumor = primary tumor, normal = solid tissue normal; other sample types are excluded. |
+| 02 | Downloads STAR counts and clinical data. Tumor = primary tumor, normal = solid tissue normal; other sample types are excluded. Sums replicate files of the same patient and condition (below). |
 | 03 | Builds every DESeq2 design (below) and writes the design plan for review. |
 | 04 | Fits every eligible design and writes raw and ashr-shrunken result tables. |
 | 05 | Compares naive, adjusted and paired results per cancer and sex model (fold-change correlation, DEG agreement). |
+
+### Replicate files
+
+Some patients have several RNA-seq files for the same condition: the same
+sample sequenced twice (e.g. on two plates), or several vials or portions of
+the same tissue. In 9 of the 18 eligible cancers this concerns 4 to 88 files
+(88 in GBM). Treating them as separate samples would be pseudo-replication: one
+tumor would count several times. Step 02 therefore sums their counts into one
+sample per patient and condition, as DESeq2's `collapseReplicates` does for
+technical replicates. Each patient still counts once, and the summed sample
+has a higher sequencing depth, which slightly reduces counting noise for
+low-expressed genes. The merged sample keeps the metadata of its first barcode
+(vial A before B); `n_files_merged` and `merged_barcodes` record the merge.
 
 ### Designs
 

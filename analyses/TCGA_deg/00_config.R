@@ -165,7 +165,8 @@ metadata_missing_value_labels <- c(
   "[Not Available]",
   "[Not Applicable]",
   "[Not Evaluated]",
-  "[Not Reported]"
+  "[Not Reported]",
+  "[Discrepancy]"
 )
 
 #### Paths ####

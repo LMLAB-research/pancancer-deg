@@ -346,8 +346,7 @@ standardise_tcga_metadata <- function(metadata) {
     "supplement_tobacco_smoking_history_indicator",
     "tobacco_smoking_history",
     "tobacco_smoking_status",
-    "smoking_status",
-    "cigarettes_per_day"
+    "smoking_status"
   ))
   metadata$age_at_diagnosis_numeric <- standardise_age_at_diagnosis_years(metadata)
 
@@ -410,6 +409,51 @@ slim_row_data <- function(rse) {
 
   rowData(rse) <- rowData(rse)[, keep_row_cols, drop = FALSE]
   rse
+}
+
+# Several RNA-seq files can come from the same patient and condition: the same
+# sample sequenced twice, or several vials/portions of the same tissue. Treating
+# them as independent samples would be pseudo-replication, so their counts are
+# summed into one sample per patient and condition (as DESeq2's
+# collapseReplicates does). The merged sample keeps the metadata of its first
+# barcode (in sorted order, so vial A before B); n_files_merged and
+# merged_barcodes record the merge. Uncharacterized samples are left unchanged.
+collapse_replicate_files <- function(rse) {
+  metadata <- as.data.frame(colData(rse))
+  file_id <- as.character(metadata$barcode)
+  if (anyNA(file_id) || anyDuplicated(file_id)) {
+    stop("File barcodes must be present and unique")
+  }
+  mergeable <- metadata$condition %in% c("normal", "tumor") &
+    !is.na(metadata$patient_barcode)
+  unit <- ifelse(
+    mergeable,
+    paste(metadata$patient_barcode, metadata$condition, sep = "|"),
+    file_id
+  )
+
+  file_order <- order(unit, file_id)
+  representative <- file_order[!duplicated(unit[file_order])]
+  unit_ids <- unit[representative]
+
+  summed_counts <- t(rowsum(t(assay(rse, "counts")), unit))[, unit_ids, drop = FALSE]
+  colnames(summed_counts) <- file_id[representative]
+
+  collapsed <- rse[, representative]
+  assay(collapsed, "counts") <- summed_counts
+  collapsed$n_files_merged <- as.integer(table(unit)[unit_ids])
+  collapsed$merged_barcodes <- vapply(
+    unit_ids,
+    function(id) paste(sort(file_id[unit == id]), collapse = ";"),
+    character(1),
+    USE.NAMES = FALSE
+  )
+
+  n_merged <- ncol(rse) - ncol(collapsed)
+  if (n_merged > 0) {
+    message("Summed ", n_merged, " replicate file(s) into their patient/condition sample")
+  }
+  collapsed
 }
 
 set_deseq2_count_assay <- function(rse) {
@@ -482,6 +526,7 @@ prepare_project_inputs <- function(project_id) {
   clinical_merge_summary <- summarise_clinical_merge(metadata)
 
   colData(rse) <- S4Vectors::DataFrame(metadata)
+  rse <- collapse_replicate_files(rse)
 
   keep_genes <- rowSums(assay(rse, "counts")) > 0
   rse <- rse[keep_genes, ]
