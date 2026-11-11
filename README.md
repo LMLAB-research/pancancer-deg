@@ -242,9 +242,9 @@ QC figures (PCA, MA, volcano) are made for the all-samples model only, in
   false discovery rates in large population datasets such as TCGA tumor vs
   normal (Li et al., *Genome Biology* 2022). Planned check: permute the
   tumor/normal labels (within patients for the paired design) in one large
-  cancer and count DEGs, which should be close to 0.
+  cancer and count DEGs, which should be close to 0 (issue #29).
 - **Tumor purity.** Use purity estimates (e.g. ABSOLUTE, ESTIMATE) as a
-  covariate or in a sensitivity analysis.
+  covariate or in a sensitivity analysis (issue #30).
 
 ## TCGA_senescence_overlap Analysis
 
@@ -310,7 +310,10 @@ duplicates keep one representative and are listed for review.
 - `results/tables/TCGA_senescence_overlap/<signature>/<project>/`: shared gene
   lists, class-overlap statistics (`overlap_statistics.csv`), sharing and
   direction statistics (`share_direction_statistics.csv`) and the exact
-  universe (`common_tested_genes.csv`).
+  universe (`common_tested_genes.csv`). The statistics tables also give the
+  cancer's sample sizes (`n_normal`, `n_tumor`, from TCGA_deg step 05) and the
+  numbers of cancer and signature DEGs in the universe, so that results can be
+  interpreted against power (cancers with more samples have more DEGs).
 - `results/tables/TCGA_senescence_overlap/batch_run_status.csv`: one row per
   cancer x signature; check it for failures.
 - `results/figures/TCGA_senescence_overlap/TCGA_<signature>_heatmap.png`: log2

@@ -5,7 +5,7 @@ analysis_name <- "TCGA_senescence_overlap"
 
 # Senescence/quiescence signatures and their backgrounds.
 senescence_input_dir <- file.path("data", "senescence_meta_analysis_deg")
-# Full TCGA DESeq2 tables from analyses/TCGA_deg (step 04).
+# Full TCGA DESeq2 result tables from analyses/TCGA_deg (step 05).
 cancer_input_dir <- file.path("results", "tables", "TCGA_deg")
 
 results_dir <- file.path("results", "tables", analysis_name)
@@ -13,6 +13,10 @@ figures_dir <- file.path("results", "figures", analysis_name)
 
 expected_signatures <- c("OIS", "RS", "SIPS", "CICQ", "SSCQ")
 cancer_file_pattern <- "^TCGA-[A-Za-z0-9-]+_DGE_Raw_Results_Tumor_vs_Normal_Adjusted\\.csv$"
+# TCGA_deg design whose result files are used above, and the status file that
+# gives its sample sizes (n_normal, n_tumor) per cancer.
+cancer_design_type <- "adjusted"
+cancer_status_file <- file.path(cancer_input_dir, "05_TCGA_deseq2_test_status.csv")
 
 # Thresholds 
 padj_threshold <- 0.05
