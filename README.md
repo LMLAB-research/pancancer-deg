@@ -218,6 +218,34 @@ Fitted DESeq2 objects are in `data/TCGA_deg/processed/*_fit_dds.rds`.
 QC figures (PCA, MA, volcano) are made for the all-samples model only, in
 `results/figures/TCGA_deg/`.
 
+### Limitations
+
+- **Adjacent normal tissue.** TCGA normals are taken next to the tumor and can
+  already carry tumor-related changes (field effects); they are not healthy
+  tissue. Tumor effects may therefore be underestimated.
+- **Tumor purity and cell composition.** Tumor and normal samples differ in
+  their mix of cell types (tumor cells, stroma, immune cells). Part of each
+  tumor effect reflects this mix rather than changes within cells. No design
+  corrects for it.
+- **Batch effects.** Samples were processed on different plates and in
+  different centers. The paired design removes differences between patients
+  but not between the batches of a patient's tumor and normal samples.
+- **Different power across cancers.** Sample sizes range from 8 to 113 pairs,
+  so the number of DEGs partly reflects sample size. Compare cancers by effect
+  sizes (e.g. fold-change correlations) rather than by DEG counts alone.
+- **GBM.** Its 5 normals have no clinical data and no matched tumor, so GBM
+  has only a naive design, based on 5 normals of unknown background.
+
+### To consider
+
+- **False discoveries with large samples.** DESeq2 and edgeR can show inflated
+  false discovery rates in large population datasets such as TCGA tumor vs
+  normal (Li et al., *Genome Biology* 2022). Planned check: permute the
+  tumor/normal labels (within patients for the paired design) in one large
+  cancer and count DEGs, which should be close to 0.
+- **Tumor purity.** Use purity estimates (e.g. ABSOLUTE, ESTIMATE) as a
+  covariate or in a sensitivity analysis.
+
 ## TCGA_senescence_overlap Analysis
 
 Tests whether tumor DEGs (from `TCGA_deg`, all-samples adjusted design, using
