@@ -201,7 +201,7 @@ read_background <- function(file) {
   genes
 }
 
-prepare_genes <- function(file, cancer = FALSE) {
+prepare_genes <- function(file, cancer = FALSE, symbol_map = character()) {
   x <- read.csv(file, stringsAsFactors = FALSE, check.names = FALSE)
   required <- c("log2FoldChange", "padj", if (cancer) {
     c("gene_id", "gene_name", "gene_type")
@@ -218,6 +218,7 @@ prepare_genes <- function(file, cancer = FALSE) {
   }
   x$gene_symbol <- toupper(trimws(as.character(x[[if (cancer) "gene_name" else "gene"]])))
   x$gene_symbol[x$gene_symbol == ""] <- NA_character_
+  x$gene_symbol <- apply_symbol_map(x$gene_symbol, symbol_map)
   x$padj <- validate_numeric(x$padj, "padj", file)
   x$log2FoldChange <- validate_numeric(x$log2FoldChange, "log2FoldChange", file)
   if (cancer) {
@@ -237,9 +238,59 @@ prepare_genes <- function(file, cancer = FALSE) {
   )
 }
 
-prepare_signature <- function(file, background_file) {
-  signature <- prepare_genes(file)
-  background <- read_background(background_file)
+# Signature symbols can be older than the TCGA (GENCODE) symbols, e.g. MRVI1
+# for IRAG1. A symbol is renamed only if it is absent from the TCGA symbols and
+# is not a current official symbol (so genes merely not expressed in TCGA are
+# never renamed), and its official aliases (org.Hs.eg.db) point to exactly one
+# current symbol that is present in TCGA, claimed by no other symbol and not
+# already in the signature. Returns a named vector: names = old symbols,
+# values = new symbols (upper case).
+build_symbol_map <- function(symbols, reference_symbols) {
+  symbols <- unique(trimws(as.character(symbols)))
+  symbols <- symbols[!is.na(symbols) & nzchar(symbols)]
+  current_symbols <- toupper(AnnotationDbi::keys(org.Hs.eg.db::org.Hs.eg.db, keytype = "SYMBOL"))
+  unmatched <- symbols[
+    !toupper(symbols) %in% reference_symbols & !toupper(symbols) %in% current_symbols
+  ]
+  if (!length(unmatched)) {
+    return(character())
+  }
+
+  alias <- suppressMessages(AnnotationDbi::select(
+    org.Hs.eg.db::org.Hs.eg.db,
+    keys = unmatched,
+    keytype = "ALIAS",
+    columns = "SYMBOL"
+  ))
+  alias <- unique(alias[!is.na(alias$SYMBOL), c("ALIAS", "SYMBOL")])
+  alias$SYMBOL <- toupper(alias$SYMBOL)
+  alias <- alias[
+    alias$SYMBOL %in% reference_symbols & !alias$SYMBOL %in% toupper(symbols),
+    ,
+    drop = FALSE
+  ]
+  alias <- alias[!alias$ALIAS %in% alias$ALIAS[duplicated(alias$ALIAS)], , drop = FALSE]
+  alias <- alias[!alias$SYMBOL %in% alias$SYMBOL[duplicated(alias$SYMBOL)], , drop = FALSE]
+
+  stats::setNames(alias$SYMBOL, toupper(alias$ALIAS))
+}
+
+apply_symbol_map <- function(symbols, symbol_map) {
+  renamed <- !is.na(symbols) & symbols %in% names(symbol_map)
+  symbols[renamed] <- unname(symbol_map[symbols[renamed]])
+  symbols
+}
+
+prepare_signature <- function(file, background_file, reference_symbols) {
+  raw_symbols <- c(
+    read.csv(file, stringsAsFactors = FALSE)$gene,
+    read.csv(background_file, stringsAsFactors = FALSE)[[1]]
+  )
+  symbol_map <- build_symbol_map(raw_symbols, reference_symbols)
+
+  signature <- prepare_genes(file, symbol_map = symbol_map)
+  signature$symbol_map <- symbol_map
+  background <- apply_symbol_map(read_background(background_file), symbol_map)
   outside <- setdiff(signature$audit$gene_symbol, background)
   if (length(outside)) {
     stop("Signature genes absent from background: ", paste(head(outside, 10), collapse = ", "),
@@ -437,6 +488,13 @@ if (any(!file.exists(background_files))) {
 cancer_files <- sort(list.files(cancer_input_dir, cancer_file_pattern, full.names = TRUE))
 if (!length(cancer_files)) stop("No matching TCGA files in: ", cancer_input_dir)
 
+# TCGA protein-coding symbols over all cancers, to rename outdated signature
+# symbols (see build_symbol_map).
+tcga_reference_symbols <- unique(unlist(lapply(cancer_files, function(file) {
+  x <- read.csv(file, stringsAsFactors = FALSE)
+  toupper(x$gene_name[!is.na(x$gene_type) & x$gene_type == "protein_coding"])
+})))
+
 # Sample sizes of the TCGA design used, from TCGA_deg step 05.
 cancer_status <- if (file.exists(cancer_status_file)) {
   x <- read.csv(cancer_status_file, stringsAsFactors = FALSE)
@@ -455,13 +513,25 @@ dir.create(results_dir, recursive = TRUE, showWarnings = FALSE)
 run_status <- list()
 for (signature_name in expected_signatures) {
   message("Running ", signature_name)
-  signature <- prepare_signature(signature_files[[signature_name]], background_files[[signature_name]])
+  signature <- prepare_signature(
+    signature_files[[signature_name]],
+    background_files[[signature_name]],
+    tcga_reference_symbols
+  )
   output_root <- file.path(results_dir, signature_name)
   dir.create(output_root, recursive = TRUE, showWarnings = FALSE)
   write.csv(
     signature$audit[signature$audit$needs_review, , drop = FALSE],
     file.path(output_root, paste0(signature_name, "_duplicates_for_review.csv")), row.names = FALSE
   )
+  write.csv(
+    data.frame(
+      signature_symbol = names(signature$symbol_map),
+      tcga_symbol = unname(signature$symbol_map)
+    ),
+    file.path(output_root, paste0(signature_name, "_symbol_mapping.csv")), row.names = FALSE
+  )
+  message("  ", length(signature$symbol_map), " signature symbols renamed to current TCGA symbols")
   for (cancer_file in cancer_files) {
     cancer_project <- sub(cancer_file_suffix, "", basename(cancer_file), fixed = TRUE)
     message("  ", cancer_project)

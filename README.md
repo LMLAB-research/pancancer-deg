@@ -308,6 +308,13 @@ Because sharing is strong, all four classes can be enriched at once even when
 the shared genes move in opposite directions. Use the direction readout to
 compare directions.
 
+Genes are matched by symbol. Signature symbols that were renamed since the
+signatures were built (e.g. `MRVI1` → `IRAG1`) are first updated: a symbol
+absent from TCGA and no longer an official symbol is replaced by its current
+symbol when the official aliases (`org.Hs.eg.db`) give exactly one candidate
+present in TCGA. This recovers about 30 genes per signature; the renamings are
+listed in `<signature>/<signature>_symbol_mapping.csv`.
+
 Duplicate gene symbols with opposite significant directions are excluded; other
 duplicates keep one representative and are listed for review.
 
