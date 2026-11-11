@@ -449,19 +449,40 @@ run_safely <- function(fun, project_id, design_type, ...) {
 
 # Step 04: fit -------------------------------------------------------------------
 
-# Fit the DESeq2 model of one design (size factors, dispersions, coefficients)
-# and save the fitted object; no test is run here.
-fit_project_deseq2 <- function(project_id, design_type, create_plots) {
-  message("Fitting ", design_type, " DESeq2 for ", project_id)
+# A fitted object can be reused if it is newer than both step-03 files of its
+# design (so rerunning step 03 always forces a refit).
+fit_is_current <- function(fit_file, dds_file, design_file) {
+  file.exists(fit_file) &&
+    file.mtime(fit_file) > file.mtime(dds_file) &&
+    file.mtime(fit_file) > file.mtime(design_file)
+}
 
+# Fit the DESeq2 model of one design (size factors, dispersions, coefficients)
+# and save the fitted object; no test is run here. With reuse_existing_fits,
+# designs already fitted since step 03 are skipped, so an interrupted step 04
+# resumes where it stopped.
+fit_project_deseq2 <- function(project_id, design_type, create_plots) {
   dds_file <- tcga_project_dds_file(project_id, design_type)
   design_file <- tcga_project_design_file(project_id, design_type)
+  fit_file <- tcga_project_fit_file(project_id, design_type)
   if (!file.exists(dds_file) || !file.exists(design_file)) {
     return(status_row(project_id, design_type, "skipped", "design or DDS file not found"))
   }
 
-  dds <- readRDS(dds_file)
   design_info <- readRDS(design_file)
+  if (reuse_existing_fits && fit_is_current(fit_file, dds_file, design_file)) {
+    message("Reusing fitted ", design_type, " DESeq2 for ", project_id)
+    return(status_row(
+      project_id, design_type, "reused",
+      "fitted object newer than its step-03 design",
+      n_normal = design_info$n_normal,
+      n_tumor = design_info$n_tumor,
+      design_formula = format_design_formula(design_info$design_formula)
+    ))
+  }
+
+  message("Fitting ", design_type, " DESeq2 for ", project_id)
+  dds <- readRDS(dds_file)
   bpparam <- make_biocparallel_param()
   parallel_enabled <- use_biocparallel && BiocParallel::bpnworkers(bpparam) > 1
 
@@ -477,7 +498,13 @@ fit_project_deseq2 <- function(project_id, design_type, create_plots) {
     coefficient = design_info$coefficient,
     pca_variables = pca_variables
   )
-  saveRDS(dds, tcga_project_fit_file(project_id, design_type))
+  # Write to a temporary file, then rename, so that an interrupted save never
+  # leaves a truncated file that would look like a finished fit.
+  tmp_file <- paste0(fit_file, ".tmp")
+  saveRDS(dds, tmp_file)
+  if (!file.rename(tmp_file, fit_file)) {
+    stop("Could not move ", tmp_file, " to ", fit_file)
+  }
 
   status_row(
     project_id, design_type, "completed",

@@ -103,6 +103,11 @@ Each step saves its outputs, so later changes need only a partial rerun:
 | designs or covariate rules | `deg03` |
 | sample selection or clinical merging | `deg02` (downloads are reused) |
 
+Step 04 can be interrupted and resumed: rerunning `from:deg04` reuses every
+design fitted since step 03 and fits only the others (set
+`reuse_existing_fits <- FALSE` in `00_config.R` to refit everything). Rerunning
+step 03 always forces a refit.
+
 ### Replicate files
 
 Some patients have several RNA-seq files for the same condition: the same

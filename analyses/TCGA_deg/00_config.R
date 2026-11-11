@@ -30,6 +30,10 @@ if (is.na(detected_cores)) {
 max_biocparallel_workers <- 4
 biocparallel_workers <- max(1, min(max_biocparallel_workers, detected_cores - 1))
 
+# Step 04 skips designs already fitted since step 03 (resume after an
+# interruption). Set to FALSE to refit everything.
+reuse_existing_fits <- TRUE
+
 make_biocparallel_param <- function() {
   if (!use_biocparallel || biocparallel_workers <= 1) {
     return(BiocParallel::SerialParam())
