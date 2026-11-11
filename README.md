@@ -95,29 +95,56 @@ Rscript analyses/TCGA_deg/05_compare_designs.R
 
 ### Designs
 
-Each cancer gets a naive, an adjusted and a paired version of four models:
+Each cancer is analysed with four models:
 
-| Model | Samples | Formula (naive) | Tested coefficient |
+| Model | Samples | Tested coefficient |
+| --- | --- | --- |
+| all | all | tumor effect $\beta$ |
+| female | women only | tumor effect in women $\beta^F$ |
+| male | men only | tumor effect in men $\beta^M$ |
+| sex interaction | both sexes | $\delta = \beta^M - \beta^F$ |
+
+All effects are log2 fold changes (tumor vs normal).
+
+#### Three tests of the tumor effect
+
+For robustness, each model is fitted in three versions that differ in how
+differences between patients are handled:
+
+| Version | Samples | Formula (all-samples model) | Controls for |
 | --- | --- | --- | --- |
-| all | all | `~ condition` | tumor effect $\beta$ |
-| female | women only | `~ condition` | tumor effect in women $\beta^F$ |
-| male | men only | `~ condition` | tumor effect in men $\beta^M$ |
-| sex interaction | both sexes | `~ sex * condition` | $\delta = \beta^M - \beta^F$ |
+| naive | all tumors and normals | `~ condition` | nothing |
+| adjusted | complete cases on the selected covariates | `~ age + sex + race + ... + condition` | recorded clinical covariates |
+| paired | patients with both a tumor and a normal sample | `~ patient_id + condition` | every patient-level factor |
 
-All effects are log2 fold changes (tumor vs normal). The adjusted version adds
-covariates in front of these terms, e.g. `~ age + race + condition`. Candidate
-covariates (age, sex, race, smoking status) are selected separately for each
-design: a covariate is kept if at most 25% of values are missing and its
-smallest group has at least 3 samples. Sex is a candidate only in the
-all-samples model.
+- **Naive** compares tumors and normals from different people. It uses all
+  samples but mixes the tumor effect with any patient difference between the
+  two groups (normals come from only about 10% of patients).
+- **Adjusted** adds clinical covariates (age, sex, race, smoking status),
+  selected per design: a covariate is kept if at most 25% of values are missing
+  and its smallest group has at least 3 samples (sex only in the all-samples
+  model). It corrects only for recorded factors and drops samples with missing
+  values, which in some cancers removes 16–34% of the normals.
+- **Paired** compares tumor and normal within each patient, so every factor
+  that is constant within a patient cancels out, recorded or not (age, sex,
+  ancestry, smoking, environment, ...), and no clinical data are needed. About
+  97% of normals have a matched tumor. For the interaction, sex is constant
+  within patients, so the formula is `~ patient_id + condition + tumor_male`,
+  where `tumor_male` = 1 for tumor samples of men; its coefficient is $\delta$.
 
-The paired version uses only patients with both a tumor and a normal sample
-(about 97% of normals) and replaces covariates by one term per patient:
-`~ patient_id + condition`. The tumor effect is then estimated within patients,
-which controls for every patient-level factor (age, sex, race, smoking, and
-unrecorded ones) without clinical data. For the interaction, sex is constant
-within patients, so the formula is `~ patient_id + condition + tumor_male`, with
-`tumor_male` = 1 for tumor samples of men; its coefficient is $\delta$.
+Conceptually, the paired version estimates the quantity of interest, the
+change from normal to tumor tissue within a person, and matches the design of
+the senescence signatures (senescent vs proliferating cells of the same
+culture). **We expect to keep the paired version as the main analysis**, with
+naive as a sensitivity check covering all tumors. The adjusted version is kept
+for now. None of the three corrects for tumor purity or for adjacent normal
+tissue not being fully healthy.
+
+Step 05 compares the three versions per cancer and sex model. **Status:** the
+full chain (steps 03–05) has been tested on one cancer (TCGA-KICH), where the
+versions largely agree (all-samples model: Spearman correlation of fold
+changes 0.95–0.99, Jaccard index of DEG sets 0.80–0.89). Results for all
+cancers are pending a full rerun.
 
 A design is eligible if it has at least 5 normal and 5 tumor samples after
 filtering (in each sex for the interaction model). Reasons for ineligible
@@ -135,6 +162,8 @@ In `results/tables/TCGA_deg/`, per cancer and design:
 - `<project>_DGE_Raw_Results_Tumor_vs_Normal_<Naive|Adjusted|Paired>[_Female|_Male].csv`
 - `<project>_DGE_Raw_Results_Sex_Interaction_<Naive|Adjusted|Paired>.csv`
 - the same names with `DGE_Results` for shrunken log2 fold changes.
+- `05_TCGA_design_comparison.csv`: agreement between the naive, adjusted and
+  paired versions (step 05).
 
 QC figures (PCA, MA, volcano) are made for the all-samples model only, in
 `results/figures/TCGA_deg/`.
