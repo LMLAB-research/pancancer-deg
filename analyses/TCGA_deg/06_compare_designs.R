@@ -1,12 +1,11 @@
-#### Compare Naive, Adjusted And Paired Designs ####
+#### Compare Naive, Adjusted And Paired Designs (step 06) ####
 #
 # For each cancer and sex model, compares the raw DESeq2 results of every pair
 # of designs among naive, adjusted and paired, over their common genes:
 # - Spearman correlation of log2 fold changes;
-# - DEG counts (padj < deseq_alpha and |log2FC| > deseq_lfc_threshold) and
-#   their agreement: DEGs in both with the same direction, with opposite
-#   directions, and the Jaccard index |D_A and D_B| / |D_A or D_B| (same
-#   direction only in the numerator).
+# - DEG counts (the deg column of step 05) and their agreement: DEGs in both
+#   with the same direction, with opposite directions, and the Jaccard index
+#   |D_A and D_B| / |D_A or D_B| (same direction only in the numerator).
 
 source(file.path("analyses", "TCGA_deg", "00_config.R"))
 
@@ -19,12 +18,13 @@ make_design_type <- function(adjustment, sex_model) {
   if (sex_model == "all") adjustment else paste(adjustment, sex_model, sep = "_")
 }
 
-# DEG direction per gene: 1 up, -1 down, 0 not a DEG.
+# DEG direction per gene: 1 up, -1 down, 0 not a DEG, from the `deg` column
+# written by step 05 (so that DEG calls match the test set in 00_config.R).
 deg_direction <- function(results_df) {
-  significant <- !is.na(results_df$padj) &
-    results_df$padj < deseq_alpha &
-    abs(results_df$log2FoldChange) > deseq_lfc_threshold
-  ifelse(significant, sign(results_df$log2FoldChange), 0)
+  if (!"deg" %in% colnames(results_df)) {
+    stop("Result table has no deg column; rerun step 05")
+  }
+  c(up = 1, down = -1, not_significant = 0)[results_df$deg]
 }
 
 compare_two_designs <- function(project_id, sex_model, design_a, design_b) {

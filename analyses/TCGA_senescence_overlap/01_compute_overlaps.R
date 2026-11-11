@@ -225,6 +225,11 @@ prepare_genes <- function(file, cancer = FALSE) {
     x <- x[!is.na(x$padj) & !is.na(x$log2FoldChange), , drop = FALSE]
   }
   x$regulation <- classify_regulation(x$padj, x$log2FoldChange)
+  if (cancer && "deg" %in% names(x)) {
+    # Use the DEG calls of TCGA_deg step 05, so that tumor DEGs follow the
+    # test set there (threshold or zero test).
+    x$regulation <- unname(c(up = "UP", down = "DOWN", not_significant = "NS")[x$deg])
+  }
   resolved <- resolve_symbol_duplicates(x, if (cancer) "ensembl_id" else "source_row")
   list(
     data = resolved$data[!resolved$data$exclude_from_overlap, , drop = FALSE],

@@ -97,6 +97,15 @@ max_covariate_missing_fraction <- 0.25
 min_covariate_group_size <- 3
 deseq_alpha <- 0.05
 deseq_lfc_threshold <- log2(1.5)
+
+# Differential expression test (step 05; changing it needs no refit, rerun from
+# deg05):
+# - "threshold": H0: |beta| <= deseq_lfc_threshold (DESeq2 lfcThreshold with
+#   altHypothesis = "greaterAbs"). The FDR then controls genes whose change
+#   exceeds the threshold.
+# - "zero": H0: beta = 0, then |log2FC| > deseq_lfc_threshold as a filter.
+# In both cases a DEG has padj < deseq_alpha and |raw log2FC| > deseq_lfc_threshold.
+deseq_test <- "threshold"
 use_lfc_shrinkage <- TRUE
 lfc_shrinkage_type <- "ashr"
 
@@ -223,14 +232,19 @@ tcga_covariate_report_file <- file.path(
   "03_TCGA_covariate_report.csv"
 )
 
-tcga_deseq_run_status_file <- file.path(
+tcga_deseq_fit_status_file <- file.path(
   results_table_dir,
-  "04_TCGA_deseq2_run_status.csv"
+  "04_TCGA_deseq2_fit_status.csv"
+)
+
+tcga_deseq_test_status_file <- file.path(
+  results_table_dir,
+  "05_TCGA_deseq2_test_status.csv"
 )
 
 tcga_design_comparison_file <- file.path(
   results_table_dir,
-  "05_TCGA_design_comparison.csv"
+  "06_TCGA_design_comparison.csv"
 )
 
 #### Per-Project Output Helpers ####
@@ -266,6 +280,15 @@ tcga_project_design_file <- function(project_id, design_type) {
   )
 }
 
+# Fitted DESeq2 object (step 04); step 05 tests from it without refitting.
+tcga_project_fit_file <- function(project_id, design_type) {
+  file.path(
+    data_processed_tcga_dir,
+    paste0(project_id, "_", design_type, "_fit_dds.rds")
+  )
+}
+
+# Unfitted DESeq2 object (step 03).
 tcga_project_dds_file <- function(project_id, design_type) {
   file.path(
     data_processed_tcga_dir,

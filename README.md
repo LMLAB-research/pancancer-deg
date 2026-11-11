@@ -62,12 +62,12 @@ failure, and writes one log per step to `results/logs/`:
 
 ```bash
 bash analyses/run_pipeline.sh all           # everything
-bash analyses/run_pipeline.sh from:deg04    # deg04 and all later steps
+bash analyses/run_pipeline.sh from:deg05    # new test settings: deg05 and all later steps, no refit
 bash analyses/run_pipeline.sh overlap       # overlap01 and overlap02
 nohup bash analyses/run_pipeline.sh all > /dev/null 2>&1 &   # keep running after logout
 ```
 
-Steps: `deg01`–`deg05` (TCGA_deg) and `overlap01`–`overlap02`
+Steps: `deg01`–`deg06` (TCGA_deg) and `overlap01`–`overlap02`
 (TCGA_senescence_overlap); groups `deg`, `overlap`, `all`. Run
 `bash analyses/run_pipeline.sh` without arguments for help.
 
@@ -81,8 +81,9 @@ Run the scripts in order from the repository root:
 Rscript analyses/TCGA_deg/01_discover_tcga_rnaseq_projects.R
 Rscript analyses/TCGA_deg/02_prepare_tcga_inputs.R
 Rscript analyses/TCGA_deg/03_build_deseq2_designs.R
-Rscript analyses/TCGA_deg/04_run_deseq2_deg.R
-Rscript analyses/TCGA_deg/05_compare_designs.R
+Rscript analyses/TCGA_deg/04_fit_deseq2.R
+Rscript analyses/TCGA_deg/05_test_deseq2.R
+Rscript analyses/TCGA_deg/06_compare_designs.R
 ```
 
 | Step | What it does |
@@ -90,8 +91,17 @@ Rscript analyses/TCGA_deg/05_compare_designs.R
 | 01 | Lists TCGA projects with at least 5 normal and 5 tumor RNA-seq samples. |
 | 02 | Downloads STAR counts and clinical data. Tumor = primary tumor, normal = solid tissue normal; other sample types are excluded. Sums replicate files of the same patient and condition (below). |
 | 03 | Builds every DESeq2 design (below) and writes the design plan for review. |
-| 04 | Fits every eligible design and writes raw and ashr-shrunken result tables. |
-| 05 | Compares naive, adjusted and paired results per cancer and sex model (fold-change correlation, DEG agreement). |
+| 04 | Fits every eligible design (the slow step) and saves the fitted DESeq2 objects. |
+| 05 | Tests each fitted design (see *Differential expression test*), shrinks log2 fold changes (ashr), and writes raw and shrunken result tables. |
+| 06 | Compares naive, adjusted and paired results per cancer and sex model (fold-change correlation, DEG agreement). |
+
+Each step saves its outputs, so later changes need only a partial rerun:
+
+| To change | Rerun from |
+| --- | --- |
+| test, FDR level or fold-change threshold | `deg05` (minutes; no refit) |
+| designs or covariate rules | `deg03` |
+| sample selection or clinical merging | `deg02` (downloads are reused) |
 
 ### Replicate files
 
@@ -153,11 +163,12 @@ naive as a sensitivity check covering all tumors. The adjusted version is kept
 for now. None of the three corrects for tumor purity or for adjacent normal
 tissue not being fully healthy.
 
-Step 05 compares the three versions per cancer and sex model. **Status:** the
-full chain (steps 03–05) has been tested on one cancer (TCGA-KICH), where the
-versions largely agree (all-samples model: Spearman correlation of fold
-changes 0.95–0.99, Jaccard index of DEG sets 0.80–0.89). Results for all
-cancers are pending a full rerun.
+Step 06 compares the three versions per cancer and sex model. **Status:** the
+full chain (steps 03–06) has been tested on one cancer (TCGA-KICH), where the
+versions largely agree (all-samples model, threshold test: Spearman
+correlation of fold changes 0.95–0.99, Jaccard index of DEG sets 0.72–0.85,
+at most 2 DEGs with opposite directions). Results for all cancers are pending
+a full rerun.
 
 A design is eligible if it has at least 5 normal and 5 tumor samples after
 filtering (in each sex for the interaction model). Reasons for ineligible
@@ -168,6 +179,26 @@ model ($\delta \neq 0$), not a comparison of the female and male gene lists: a
 gene significant in one sex and not in the other does not show that the two
 effects differ.
 
+### Differential expression test
+
+By default (`deseq_test <- "threshold"` in `00_config.R`), step 05 tests
+$H_0: |\beta| \le \log_2 1.5$ against $|\beta| > \log_2 1.5$ (DESeq2
+`lfcThreshold` with `altHypothesis = "greaterAbs"`). A gene is a DEG if its
+BH-adjusted p-value is below 0.05; its direction is the sign of $\hat\beta$.
+The false discovery rate therefore applies to changes larger than 1.5-fold.
+
+The alternative, `deseq_test <- "zero"`, tests $H_0: \beta = 0$ and keeps
+genes with $|\hat\beta| > \log_2 1.5$ as a separate filter (the previous
+approach). With hundreds of samples nearly every expressed gene rejects
+$\beta = 0$, and the p-value does not account for the fold-change filter; in
+TCGA-KICH (paired design) the threshold test gives 6,607 DEGs instead of
+10,643.
+
+In both cases DEG calls use the raw (unshrunken) $\hat\beta$ and are written
+in the `deg` column (`up`, `down`, `not_significant`) of every result table;
+steps 06 and the overlap analysis use this column. Shrunken log2 fold changes
+are for ranking and plotting.
+
 ### Outputs
 
 In `results/tables/TCGA_deg/`, per cancer and design:
@@ -175,15 +206,22 @@ In `results/tables/TCGA_deg/`, per cancer and design:
 - `<project>_DGE_Raw_Results_Tumor_vs_Normal_<Naive|Adjusted|Paired>[_Female|_Male].csv`
 - `<project>_DGE_Raw_Results_Sex_Interaction_<Naive|Adjusted|Paired>.csv`
 - the same names with `DGE_Results` for shrunken log2 fold changes.
-- `05_TCGA_design_comparison.csv`: agreement between the naive, adjusted and
-  paired versions (step 05).
+- `03_TCGA_deseq2_design_plan.csv`: every design, eligible or not, with
+  sample counts and formula.
+- `04_TCGA_deseq2_fit_status.csv` and `05_TCGA_deseq2_test_status.csv`: one
+  row per design (status, test used, DEG counts).
+- `06_TCGA_design_comparison.csv`: agreement between the naive, adjusted and
+  paired versions.
+
+Fitted DESeq2 objects are in `data/TCGA_deg/processed/*_fit_dds.rds`.
 
 QC figures (PCA, MA, volcano) are made for the all-samples model only, in
 `results/figures/TCGA_deg/`.
 
 ## TCGA_senescence_overlap Analysis
 
-Tests whether tumor DEGs (from `TCGA_deg`, all-samples adjusted design) overlap
+Tests whether tumor DEGs (from `TCGA_deg`, all-samples adjusted design, using
+its `deg` column) overlap
 senescence (OIS, RS, SIPS) and quiescence (CICQ, SSCQ) signatures. Settings are
 in `analyses/TCGA_senescence_overlap/00_config.R`. Run from the repository root:
 

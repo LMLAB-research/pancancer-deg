@@ -230,6 +230,16 @@ classify_deg_direction <- function(results_df, lfc = results_df$log2FoldChange) 
   factor(direction, levels = c("down", "not_significant", "up"))
 }
 
+# DEG call as a factor for plots: the `deg` column written by step 05 (based
+# on the raw log2FC), else computed from the table's own log2FC.
+deg_factor <- function(results_df) {
+  if ("deg" %in% colnames(results_df)) {
+    factor(results_df$deg, levels = c("down", "not_significant", "up"))
+  } else {
+    classify_deg_direction(results_df)
+  }
+}
+
 deg_direction_colors <- c(
   down = deg_down_color,
   not_significant = deg_neutral_color,
@@ -334,7 +344,7 @@ plot_project_ma <- function(results_df, project_id) {
     return(FALSE)
   }
   
-  plot_df$direction <- classify_deg_direction(plot_df)
+  plot_df$direction <- deg_factor(plot_df)
   
   ma_plot <- ggplot(
     plot_df,
@@ -378,7 +388,7 @@ plot_project_volcano <- function(results_df, project_id) {
     return(FALSE)
   }
   
-  plot_df$direction <- classify_deg_direction(plot_df)
+  plot_df$direction <- deg_factor(plot_df)
   plot_df$neg_log10_padj <- -log10(pmax(plot_df$padj, .Machine$double.xmin))
   
   volcano_plot <- ggplot(
@@ -416,132 +426,114 @@ plot_project_volcano <- function(results_df, project_id) {
   TRUE
 }
 
-summarise_results <- function(project_id, design_info, results_df, raw_results_df) {
-  data.frame(
-    project_id = project_id,
-    design_type = design_info$design_type,
-    status = "completed",
-    reason = NA_character_,
-    n_normal = design_info$n_normal,
-    n_tumor = design_info$n_tumor,
-    n_results = nrow(results_df),
-    n_raw_results = nrow(raw_results_df),
-    deseq_alpha = deseq_alpha,
-    deseq_lfc_threshold = deseq_lfc_threshold,
-    use_lfc_shrinkage = use_lfc_shrinkage,
-    lfc_shrinkage_type = if (use_lfc_shrinkage) lfc_shrinkage_type else NA_character_,
-    n_padj_below_alpha = sum(results_df$padj < deseq_alpha, na.rm = TRUE),
-    n_abs_lfc_above_threshold = sum(
-      abs(results_df$log2FoldChange) > deseq_lfc_threshold,
-      na.rm = TRUE
-    ),
-    n_padj_below_alpha_and_abs_lfc_above_threshold = sum(
-      results_df$padj < deseq_alpha &
-        abs(results_df$log2FoldChange) > deseq_lfc_threshold,
-      na.rm = TRUE
-    ),
-    biocparallel_backend = class(design_info$BPPARAM)[[1]],
-    biocparallel_workers = BiocParallel::bpnworkers(design_info$BPPARAM),
-    covariates = paste(design_info$covariates, collapse = ";"),
-    design_formula = format_design_formula(design_info$design_formula),
-    stringsAsFactors = FALSE
-  )
-}
+# Status rows -----------------------------------------------------------------
 
-skip_status <- function(project_id, design_type, reason) {
+# One status row; columns not given are filled with NA when rows are combined.
+status_row <- function(project_id, design_type, status, reason = NA_character_, ...) {
   data.frame(
     project_id = project_id,
     design_type = design_type,
-    status = "skipped",
+    status = status,
     reason = reason,
-    n_normal = NA_integer_,
-    n_tumor = NA_integer_,
-    n_results = NA_integer_,
-    n_raw_results = NA_integer_,
-    deseq_alpha = deseq_alpha,
-    deseq_lfc_threshold = deseq_lfc_threshold,
-    use_lfc_shrinkage = use_lfc_shrinkage,
-    lfc_shrinkage_type = if (use_lfc_shrinkage) lfc_shrinkage_type else NA_character_,
-    n_padj_below_alpha = NA_integer_,
-    n_abs_lfc_above_threshold = NA_integer_,
-    n_padj_below_alpha_and_abs_lfc_above_threshold = NA_integer_,
-    biocparallel_backend = NA_character_,
-    biocparallel_workers = NA_integer_,
-    covariates = NA_character_,
-    design_formula = NA_character_,
+    ...,
     stringsAsFactors = FALSE
   )
 }
 
-failure_status <- function(project_id, design_type, error) {
-  data.frame(
-    project_id = project_id,
-    design_type = design_type,
-    status = "failed",
-    reason = conditionMessage(error),
-    n_normal = NA_integer_,
-    n_tumor = NA_integer_,
-    n_results = NA_integer_,
-    n_raw_results = NA_integer_,
-    deseq_alpha = deseq_alpha,
-    deseq_lfc_threshold = deseq_lfc_threshold,
-    use_lfc_shrinkage = use_lfc_shrinkage,
-    lfc_shrinkage_type = if (use_lfc_shrinkage) lfc_shrinkage_type else NA_character_,
-    n_padj_below_alpha = NA_integer_,
-    n_abs_lfc_above_threshold = NA_integer_,
-    n_padj_below_alpha_and_abs_lfc_above_threshold = NA_integer_,
-    biocparallel_backend = NA_character_,
-    biocparallel_workers = NA_integer_,
-    covariates = NA_character_,
-    design_formula = NA_character_,
-    stringsAsFactors = FALSE
+run_safely <- function(fun, project_id, design_type, ...) {
+  tryCatch(
+    fun(project_id, design_type, ...),
+    error = function(e) status_row(project_id, design_type, "failed", conditionMessage(e))
   )
 }
 
-run_project_deseq2 <- function(project_id, design_type, create_plots) {
-  message("Running ", design_type, " DESeq2 for ", project_id)
-  
+# Step 04: fit -------------------------------------------------------------------
+
+# Fit the DESeq2 model of one design (size factors, dispersions, coefficients)
+# and save the fitted object; no test is run here.
+fit_project_deseq2 <- function(project_id, design_type, create_plots) {
+  message("Fitting ", design_type, " DESeq2 for ", project_id)
+
   dds_file <- tcga_project_dds_file(project_id, design_type)
   design_file <- tcga_project_design_file(project_id, design_type)
-  
-  if (!file.exists(dds_file)) {
-    return(skip_status(project_id, design_type, "DDS file not found"))
+  if (!file.exists(dds_file) || !file.exists(design_file)) {
+    return(status_row(project_id, design_type, "skipped", "design or DDS file not found"))
   }
-  
-  if (!file.exists(design_file)) {
-    return(skip_status(project_id, design_type, "design file not found"))
-  }
-  
+
   dds <- readRDS(dds_file)
   design_info <- readRDS(design_file)
-  design_info$BPPARAM <- make_biocparallel_param()
-  parallel_enabled <- use_biocparallel &&
-    BiocParallel::bpnworkers(design_info$BPPARAM) > 1
-  
+  bpparam <- make_biocparallel_param()
+  parallel_enabled <- use_biocparallel && BiocParallel::bpnworkers(bpparam) > 1
+
   pca_variables <- if (create_plots) {
     plot_project_pcas(dds, project_id, design_info)
   } else {
     character()
   }
-  
-  dds <- DESeq(
-    dds,
-    parallel = parallel_enabled,
-    BPPARAM = design_info$BPPARAM
+
+  dds <- DESeq(dds, parallel = parallel_enabled, BPPARAM = bpparam)
+  metadata(dds)$tcga_deg_fit <- list(
+    design_type = design_type,
+    coefficient = design_info$coefficient,
+    pca_variables = pca_variables
   )
-  
-  # Test the coefficient chosen in script 03: the tumor-vs-normal effect, or
-  # for the interaction model, (male tumor effect) - (female tumor effect).
-  # Normal and female are the reference levels.
+  saveRDS(dds, tcga_project_fit_file(project_id, design_type))
+
+  status_row(
+    project_id, design_type, "completed",
+    n_normal = design_info$n_normal,
+    n_tumor = design_info$n_tumor,
+    n_genes = nrow(dds),
+    biocparallel_workers = BiocParallel::bpnworkers(bpparam),
+    design_formula = format_design_formula(design_info$design_formula)
+  )
+}
+
+# Step 05: test --------------------------------------------------------------
+
+# DESeq2 results for the coefficient chosen in step 03 (the tumor effect, or
+# for the interaction the male minus female tumor effect), with the test set
+# by deseq_test in 00_config.R.
+test_coefficient <- function(dds, coefficient) {
+  if (!deseq_test %in% c("threshold", "zero")) {
+    stop("deseq_test must be \"threshold\" or \"zero\"")
+  }
+  if (deseq_test == "threshold") {
+    results(
+      dds, name = coefficient, alpha = deseq_alpha,
+      lfcThreshold = deseq_lfc_threshold, altHypothesis = "greaterAbs"
+    )
+  } else {
+    results(dds, name = coefficient, alpha = deseq_alpha)
+  }
+}
+
+# Test one fitted design, shrink log2FC, write raw and shrunken tables (with a
+# `deg` column: up, down or not_significant, from the raw log2FC) and plots.
+test_project_deseq2 <- function(project_id, design_type, create_plots) {
+  message("Testing ", design_type, " DESeq2 for ", project_id)
+
+  fit_file <- tcga_project_fit_file(project_id, design_type)
+  design_file <- tcga_project_design_file(project_id, design_type)
+  if (!file.exists(fit_file) || !file.exists(design_file)) {
+    return(status_row(project_id, design_type, "skipped", "fitted object not found; run step 04"))
+  }
+
+  dds <- readRDS(fit_file)
+  design_info <- readRDS(design_file)
   coefficient <- design_info$coefficient
   if (is.null(coefficient)) {
-    stop("Design file has no coefficient; rerun script 03")
+    stop("Design file has no coefficient; rerun step 03")
   }
   if (!coefficient %in% resultsNames(dds)) {
     stop("Coefficient ", coefficient, " not in model: ",
          paste(resultsNames(dds), collapse = ", "))
   }
-  raw_results <- results(dds, name = coefficient, alpha = deseq_alpha)
+
+  bpparam <- make_biocparallel_param()
+  parallel_enabled <- use_biocparallel && BiocParallel::bpnworkers(bpparam) > 1
+
+  raw_results <- test_coefficient(dds, coefficient)
   shrunken_results <- if (use_lfc_shrinkage) {
     lfcShrink(
       dds,
@@ -549,25 +541,29 @@ run_project_deseq2 <- function(project_id, design_type, create_plots) {
       res = raw_results,
       type = lfc_shrinkage_type,
       parallel = parallel_enabled,
-      BPPARAM = design_info$BPPARAM
+      BPPARAM = bpparam,
+      quiet = TRUE
     )
   } else {
     raw_results
   }
-  
+
   row_data <- as.data.frame(rowData(dds))
   raw_results_df <- annotate_results(as.data.frame(raw_results), row_data)
   shrunken_results_df <- annotate_results(as.data.frame(shrunken_results), row_data)
-  
+
+  raw_results_df$deg <- as.character(classify_deg_direction(raw_results_df))
+  shrunken_results_df$deg <- raw_results_df$deg[
+    match(shrunken_results_df$gene_id, raw_results_df$gene_id)
+  ]
+
   raw_results_df <- raw_results_df |>
     dplyr::filter(!is.na(padj)) |>
     dplyr::arrange(padj)
   shrunken_results_df <- shrunken_results_df |>
     dplyr::filter(!is.na(padj)) |>
     dplyr::arrange(padj)
-  
-  # Save results and quality-control outputs -----------------------------------
-  
+
   write.csv(
     raw_results_df,
     tcga_deseq_raw_results_file(project_id, design_type),
@@ -578,31 +574,26 @@ run_project_deseq2 <- function(project_id, design_type, create_plots) {
     tcga_deseq_results_file(project_id, design_type),
     row.names = FALSE
   )
-  
-  ma_created <- create_plots && plot_project_ma(shrunken_results_df, project_id)
-  volcano_created <- create_plots && plot_project_volcano(shrunken_results_df, project_id)
-  
-  metadata(dds)$tcga_deg <- list(
-    pca_variables = pca_variables,
-    ma_created = ma_created,
-    volcano_created = volcano_created,
-    use_lfc_shrinkage = use_lfc_shrinkage,
-    lfc_shrinkage_type = if (use_lfc_shrinkage) lfc_shrinkage_type else NA_character_,
-    biocparallel_backend = class(design_info$BPPARAM)[[1]],
-    biocparallel_workers = BiocParallel::bpnworkers(design_info$BPPARAM),
-    design_type = design_type,
-    coefficient = coefficient,
-    raw_results_file = tcga_deseq_raw_results_file(project_id, design_type),
-    shrunken_results_file = tcga_deseq_results_file(project_id, design_type)
-  )
-  saveRDS(dds, dds_file)
-  
-  summarise_results(project_id, design_info, shrunken_results_df, raw_results_df)
-}
 
-run_project_deseq2_safe <- function(project_id, design_type, create_plots) {
-  tryCatch(
-    run_project_deseq2(project_id, design_type, create_plots),
-    error = function(e) failure_status(project_id, design_type, e)
+  if (create_plots) {
+    plot_project_ma(shrunken_results_df, project_id)
+    plot_project_volcano(shrunken_results_df, project_id)
+  }
+
+  status_row(
+    project_id, design_type, "completed",
+    n_normal = design_info$n_normal,
+    n_tumor = design_info$n_tumor,
+    coefficient = coefficient,
+    deseq_test = deseq_test,
+    deseq_alpha = deseq_alpha,
+    deseq_lfc_threshold = deseq_lfc_threshold,
+    lfc_shrinkage_type = if (use_lfc_shrinkage) lfc_shrinkage_type else NA_character_,
+    n_tested = nrow(raw_results_df),
+    n_deg = sum(raw_results_df$deg != "not_significant"),
+    n_deg_up = sum(raw_results_df$deg == "up"),
+    n_deg_down = sum(raw_results_df$deg == "down"),
+    covariates = paste(design_info$covariates, collapse = ";"),
+    design_formula = format_design_formula(design_info$design_formula)
   )
 }
