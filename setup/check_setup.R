@@ -25,8 +25,7 @@ required_packages <- c(
   "openxlsx",
   "org.Hs.eg.db",
   "pheatmap",
-  "readr",
-  "recount3"
+  "readr"
 )
 
 available <- vapply(required_packages, requireNamespace, logical(1), quietly = TRUE)
