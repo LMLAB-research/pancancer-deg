@@ -252,10 +252,11 @@ QC figures (PCA, MA, volcano) are made for the all-samples model only, in
 
 ## TCGA_senescence_overlap Analysis
 
-Tests whether tumor DEGs (from `TCGA_deg`, all-samples adjusted design, using
-its `deg` column) overlap
-senescence (OIS, RS, SIPS) and quiescence (CICQ, SSCQ) signatures. Settings are
-in `analyses/TCGA_senescence_overlap/00_config.R`. Run from the repository root:
+Tests whether tumor DEGs overlap senescence (OIS, RS, SIPS) and quiescence
+(CICQ, SSCQ) signatures. Tumor DEGs are the `deg` column of one all-samples
+`TCGA_deg` design, set by `cancer_design_type` in
+`analyses/TCGA_senescence_overlap/00_config.R`: `"paired"` by default (the
+main analysis), or `"naive"` / `"adjusted"`. Run from the repository root:
 
 ```bash
 Rscript analyses/TCGA_senescence_overlap/01_compute_overlaps.R
@@ -271,7 +272,8 @@ Script 02 only redraws the heatmaps from the outputs of script 01.
   `<group>_<signature>_background.csv` (all genes tested in that signature,
   column `gene`, `gene_symbol` or `gene_name`) per signature, e.g.
   `senescence_OIS_genes.csv`, `quiescence_SSCQ_background.csv`.
-- `results/tables/TCGA_deg/<project>_DGE_Raw_Results_Tumor_vs_Normal_Adjusted.csv`.
+- `results/tables/TCGA_deg/<project>_DGE_Raw_Results_Tumor_vs_Normal_<Paired|Naive|Adjusted>.csv`
+  (the design set by `cancer_design_type`) and `05_TCGA_deseq2_test_status.csv`.
 
 ### Method
 

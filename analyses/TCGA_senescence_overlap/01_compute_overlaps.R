@@ -261,7 +261,7 @@ analyze_one_cancer <- function(
     signature_name,
     output_root
 ) {
-  cancer_project <- sub( "_DGE_Raw_Results_Tumor_vs_Normal_Adjusted\\.csv$", "", basename(cancer_file) )
+  cancer_project <- sub(cancer_file_suffix, "", basename(cancer_file), fixed = TRUE)
 
   output_dir <- file.path( output_root, cancer_project )
 
@@ -463,7 +463,7 @@ for (signature_name in expected_signatures) {
     file.path(output_root, paste0(signature_name, "_duplicates_for_review.csv")), row.names = FALSE
   )
   for (cancer_file in cancer_files) {
-    cancer_project <- sub("_DGE_Raw_Results_Tumor_vs_Normal_Adjusted\\.csv$", "", basename(cancer_file))
+    cancer_project <- sub(cancer_file_suffix, "", basename(cancer_file), fixed = TRUE)
     message("  ", cancer_project)
     run_status[[length(run_status) + 1]] <- tryCatch(
       analyze_one_cancer(cancer_file, signature, signature_name, output_root),

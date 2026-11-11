@@ -12,10 +12,14 @@ results_dir <- file.path("results", "tables", analysis_name)
 figures_dir <- file.path("results", "figures", analysis_name)
 
 expected_signatures <- c("OIS", "RS", "SIPS", "CICQ", "SSCQ")
-cancer_file_pattern <- "^TCGA-[A-Za-z0-9-]+_DGE_Raw_Results_Tumor_vs_Normal_Adjusted\\.csv$"
-# TCGA_deg design whose result files are used above, and the status file that
-# gives its sample sizes (n_normal, n_tumor) per cancer.
-cancer_design_type <- "adjusted"
+# TCGA_deg all-samples design used for tumor DEGs: "paired" (main analysis),
+# "naive" or "adjusted". Its result files and sample sizes (from the step 05
+# status file) are read for every cancer.
+cancer_design_type <- "paired"
+cancer_file_suffix <- paste0(
+  "_DGE_Raw_Results_Tumor_vs_Normal_", tools::toTitleCase(cancer_design_type), ".csv"
+)
+cancer_file_pattern <- paste0("^TCGA-[A-Za-z0-9-]+", gsub(".", "\\.", cancer_file_suffix, fixed = TRUE), "$")
 cancer_status_file <- file.path(cancer_input_dir, "05_TCGA_deseq2_test_status.csv")
 
 # Thresholds 
