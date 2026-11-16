@@ -67,7 +67,7 @@ bash analyses/run_pipeline.sh overlap       # overlap01 and overlap02
 nohup bash analyses/run_pipeline.sh all > /dev/null 2>&1 &   # keep running after logout
 ```
 
-Steps: `deg01`–`deg06` (TCGA_deg) and `overlap01`–`overlap02`
+Steps: `deg01`–`deg07` (TCGA_deg) and `overlap01`–`overlap02`
 (TCGA_senescence_overlap); groups `deg`, `overlap`, `all`. Run
 `bash analyses/run_pipeline.sh` without arguments for help.
 
@@ -84,6 +84,7 @@ Rscript analyses/TCGA_deg/03_build_deseq2_designs.R
 Rscript analyses/TCGA_deg/04_fit_deseq2.R
 Rscript analyses/TCGA_deg/05_test_deseq2.R
 Rscript analyses/TCGA_deg/06_compare_designs.R
+Rscript analyses/TCGA_deg/07_compare_published_degs.R
 ```
 
 | Step | What it does |
@@ -94,6 +95,7 @@ Rscript analyses/TCGA_deg/06_compare_designs.R
 | 04 | Fits every eligible design (the slow step) and saves the fitted DESeq2 objects. |
 | 05 | Tests each fitted design (see *Differential expression test*), shrinks log2 fold changes (ashr), and writes raw and shrunken result tables. |
 | 06 | Compares naive, adjusted and paired results per cancer and sex model (fold-change correlation, DEG agreement), and summarises the sex models per cancer and version. |
+| 07 | Compares our results with the published cancer-DEGs of Chatsirisupachai et al. 2019 (see *Comparison with published DEGs*). |
 
 Each step saves its outputs, so later changes need only a partial rerun:
 
@@ -204,6 +206,30 @@ in the `deg` column (`up`, `down`, `not_significant`) of every result table;
 steps 06 and the overlap analysis use this column. Shrunken log2 fold changes
 are for ranking and plotting.
 
+### Comparison with published DEGs
+
+Step 07 compares our results with the cancer-DEGs of Chatsirisupachai,
+Palmer, Ferreira & de Magalhães (2019), *Aging Cell* 18:e13041 (PMC6826163),
+Data S2: 10 TCGA projects (BRCA, COAD, ESCA, GBM, LIHC, LUAD, PRAD, STAD, THCA,
+UCEC), RSEM counts from FireBrowse (GRCh37), limma-voom, primary tumor vs
+solid normal without covariates, DEG = BH-adjusted p < 0.01 and
+$|\log_2\text{FC}| > 1$. Data S2 is downloaded automatically from Europe PMC
+into `data/published_degs/` (checksum-verified). Genes are matched by Ensembl
+ID; Data S2 lists only their DEGs, so every measure is over their DEGs:
+
+- **direction concordance:** share of their DEGs with the same sign of
+  log2FC in our results (threshold-free);
+- **Spearman correlation** of their and our log2FC;
+- **recovery:** share of their up (down) DEGs that are up (down) DEGs in our
+  results, with our default calls and with their rule applied to our fits;
+- **precision and Jaccard index** (their rule on both sides, protein-coding
+  genes).
+
+The comparison uses our naive design (theirs) and the paired design. The two
+pipelines also differ in genome build and annotation (GRCh37 RSEM vs GRCh38
+STAR), method (limma-voom vs DESeq2), gene filters and sample sets, so perfect
+agreement is not expected.
+
 ### Outputs
 
 In `results/tables/TCGA_deg/`, per cancer and design:
@@ -217,6 +243,9 @@ In `results/tables/TCGA_deg/`, per cancer and design:
   row per design (status, test used, DEG counts).
 - `06_TCGA_design_comparison.csv`: agreement between the naive, adjusted and
   paired versions.
+- `07_TCGA_published_deg_comparison.csv` and
+  `results/figures/TCGA_deg/07_TCGA_published_deg_comparison.png`: agreement
+  with the published cancer-DEGs (step 07).
 - `06_TCGA_sex_model_summary.csv`: per cancer and version, sample sizes of the
   female and male models, DEG counts of all four models, and the agreement of
   female and male tumor effects (Spearman correlation of log2 fold changes;

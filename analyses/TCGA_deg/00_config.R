@@ -256,6 +256,33 @@ tcga_sex_model_summary_file <- file.path(
   "06_TCGA_sex_model_summary.csv"
 )
 
+#### Published DEGs (step 07) ####
+
+# Chatsirisupachai et al. 2019, Aging Cell (PMC6826163): cancer-DEGs of 10 TCGA
+# projects (limma-voom, primary tumor vs solid normal, no covariates), Data S2.
+# Downloaded from the Europe PMC supplementary files if missing.
+published_deg_dir <- file.path("data", "published_degs")
+published_deg_url <- paste0(
+  "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC6826163/supplementaryFiles"
+)
+published_deg_file <- file.path(published_deg_dir, "Chatsirisupachai2019_Data_S2.xlsx")
+published_deg_md5 <- "0c7e4fdf97ad73819a998e1823fdb016"
+# Their DEG rule: BH-adjusted p < 0.01 and |log2FC| > 1, testing beta = 0.
+published_deg_alpha <- 0.01
+published_deg_lfc_threshold <- 1
+# Our designs compared with theirs (naive matches their design).
+published_deg_designs <- c("naive", "paired")
+
+tcga_published_deg_comparison_file <- file.path(
+  results_table_dir,
+  "07_TCGA_published_deg_comparison.csv"
+)
+
+tcga_published_deg_figure_file <- file.path(
+  results_figure_dir,
+  "07_TCGA_published_deg_comparison.png"
+)
+
 #### Per-Project Output Helpers ####
 
 tcga_project_rse_file <- function(project_id) {
