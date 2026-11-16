@@ -67,7 +67,7 @@ bash analyses/run_pipeline.sh overlap       # overlap01 and overlap02
 nohup bash analyses/run_pipeline.sh all > /dev/null 2>&1 &   # keep running after logout
 ```
 
-Steps: `deg01`–`deg07` (TCGA_deg) and `overlap01`–`overlap02`
+Steps: `deg01`–`deg08` (TCGA_deg) and `overlap01`–`overlap02`
 (TCGA_senescence_overlap); groups `deg`, `overlap`, `all`. Run
 `bash analyses/run_pipeline.sh` without arguments for help.
 
@@ -85,6 +85,7 @@ Rscript analyses/TCGA_deg/04_fit_deseq2.R
 Rscript analyses/TCGA_deg/05_test_deseq2.R
 Rscript analyses/TCGA_deg/06_compare_designs.R
 Rscript analyses/TCGA_deg/07_compare_published_degs.R
+Rscript analyses/TCGA_deg/08_pca_diagnostics.R
 ```
 
 | Step | What it does |
@@ -96,6 +97,7 @@ Rscript analyses/TCGA_deg/07_compare_published_degs.R
 | 05 | Tests each fitted design (see *Differential expression test*), shrinks log2 fold changes (ashr), and writes raw and shrunken result tables. |
 | 06 | Compares naive, adjusted and paired results per cancer and sex model (fold-change correlation, DEG agreement), and summarises the sex models per cancer and version. |
 | 07 | Compares our results with the published cancer-DEGs of Chatsirisupachai et al. 2019 (see *Comparison with published DEGs*). |
+| 08 | PCA diagnostics: which sample variables drive the main axes of variation (see *What drives the main axes of variation*). |
 
 Each step saves its outputs, so later changes need only a partial rerun:
 
