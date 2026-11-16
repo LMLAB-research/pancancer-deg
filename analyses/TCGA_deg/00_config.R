@@ -283,6 +283,25 @@ tcga_published_deg_figure_file <- file.path(
   "07_TCGA_published_deg_comparison.png"
 )
 
+#### PCA diagnostics (step 08) ####
+
+# PCA on variance-stabilized counts of the naive fit (all samples), using the
+# most variable genes, as in the step 04 PCA plots; first pca_n_pcs PCs.
+pca_n_top_genes <- 500
+pca_n_pcs <- 10
+
+tcga_pca_variance_file <- file.path(results_table_dir, "08_TCGA_pca_variance.csv")
+tcga_pca_association_file <- file.path(results_table_dir, "08_TCGA_pca_associations.csv")
+tcga_pca_summary_file <- file.path(results_table_dir, "08_TCGA_pca_summary.csv")
+
+tcga_pca_condition_figure_file <- function(project_id) {
+  file.path(results_figure_dir, paste0("08_", project_id, "_PCA_condition.png"))
+}
+
+tcga_pca_paper_figure_file <- function(project_id) {
+  file.path(results_figure_dir, paste0("08_", project_id, "_PCA_paper_annotation.png"))
+}
+
 #### Per-Project Output Helpers ####
 
 tcga_project_rse_file <- function(project_id) {

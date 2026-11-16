@@ -67,7 +67,7 @@ bash analyses/run_pipeline.sh overlap       # overlap01 and overlap02
 nohup bash analyses/run_pipeline.sh all > /dev/null 2>&1 &   # keep running after logout
 ```
 
-Steps: `deg01`–`deg07` (TCGA_deg) and `overlap01`–`overlap02`
+Steps: `deg01`–`deg08` (TCGA_deg) and `overlap01`–`overlap02`
 (TCGA_senescence_overlap); groups `deg`, `overlap`, `all`. Run
 `bash analyses/run_pipeline.sh` without arguments for help.
 
@@ -85,6 +85,7 @@ Rscript analyses/TCGA_deg/04_fit_deseq2.R
 Rscript analyses/TCGA_deg/05_test_deseq2.R
 Rscript analyses/TCGA_deg/06_compare_designs.R
 Rscript analyses/TCGA_deg/07_compare_published_degs.R
+Rscript analyses/TCGA_deg/08_pca_diagnostics.R
 ```
 
 | Step | What it does |
@@ -96,6 +97,7 @@ Rscript analyses/TCGA_deg/07_compare_published_degs.R
 | 05 | Tests each fitted design (see *Differential expression test*), shrinks log2 fold changes (ashr), and writes raw and shrunken result tables. |
 | 06 | Compares naive, adjusted and paired results per cancer and sex model (fold-change correlation, DEG agreement), and summarises the sex models per cancer and version. |
 | 07 | Compares our results with the published cancer-DEGs of Chatsirisupachai et al. 2019 (see *Comparison with published DEGs*). |
+| 08 | PCA diagnostics: which sample variables drive the main axes of variation (see *What drives the main axes of variation*). |
 
 Each step saves its outputs, so later changes need only a partial rerun:
 
@@ -230,6 +232,38 @@ pipelines also differ in genome build and annotation (GRCh37 RSEM vs GRCh38
 STAR), method (limma-voom vs DESeq2), gene filters and sample sets, so perfect
 agreement is not expected.
 
+### What drives the main axes of variation
+
+Step 08 runs a PCA per cancer (variance-stabilized counts of the naive fit,
+500 most variable genes, PCs 1–10) and relates each PC to sample variables by
+the adjusted $R^2$ of PC ~ variable: condition, sex, race, age, library size,
+plate and tissue source site (from the TCGA barcode), and the annotations of
+the TCGA marker papers (`paper_*` columns: mostly molecular subtypes and
+histologies; among tumors only). It repeats the PCA on paired samples only
+(one normal and one tumor per patient). Results (full run, 18 cancers):
+
+- **Tumor vs normal is PC1** in 9 cancers: KICH (adjusted $R^2$ 0.90), CHOL
+  (0.75), KIRC (0.74), KIRP (0.74), LUSC (0.53), LUAD (0.47), COAD (0.46), and
+  more weakly LIHC and READ (0.32).
+- **Elsewhere PC1 is tumor heterogeneity**, and tumor vs normal appears only
+  on PC2–PC4 ($R^2$ 0.12–0.30). Among tumors, PC1 matches published subtypes
+  or histologies: ESCA histology/mRNA cluster (0.86), BLCA mRNA cluster
+  (0.78), THCA mRNA cluster (0.71), BRCA mRNA clusters (0.69), UCEC mRNA
+  cluster (0.51), PRAD iCluster (0.48); weaker in HNSC (0.31) and STAD (0.26).
+- **Why:** PCA ranks directions by total variance. A tumor/normal difference
+  $\delta$ adds variance $p(1-p)\,\delta^2$, where $p$ is the fraction of
+  normals; with $p \approx 0.05$–$0.10$ this is small compared with the
+  differences between tumor subtypes. Differential expression tests are not
+  affected. In the paired-only PCA ($p = 0.5$), tumor vs normal becomes PC1
+  in most cancers ($R^2$ 0.76–0.93, including BRCA 0.81 and UCEC 0.76), but
+  stays weak in THCA (0.47), PRAD (0.24), BLCA (0.20), HNSC (0.19), STAD and
+  ESCA (≈ 0), where tumor heterogeneity remains larger than the tumor/normal
+  difference.
+- **GBM:** PC1 is the sequencing plate (0.77), a batch effect.
+- **Clinical and technical variables** explain little of PC1–PC2 elsewhere:
+  sex ≤ 0.08, age ≤ 0.11, race ≤ 0.27 (ESCA, through histology), library size
+  ≤ 0.36.
+
 ### Outputs
 
 In `results/tables/TCGA_deg/`, per cancer and design:
@@ -246,6 +280,10 @@ In `results/tables/TCGA_deg/`, per cancer and design:
 - `07_TCGA_published_deg_comparison.csv` and
   `results/figures/TCGA_deg/07_TCGA_published_deg_comparison.png`: agreement
   with the published cancer-DEGs (step 07).
+- `08_TCGA_pca_summary.csv` (one row per cancer), `08_TCGA_pca_associations.csv`
+  (every PC x variable) and `08_TCGA_pca_variance.csv`; figures
+  `08_<project>_PCA_condition.png` and `08_<project>_PCA_paper_annotation.png`
+  in `results/figures/TCGA_deg/` (step 08).
 - `06_TCGA_sex_model_summary.csv`: per cancer and version, sample sizes of the
   female and male models, DEG counts of all four models, and the agreement of
   female and male tumor effects (Spearman correlation of log2 fold changes;
