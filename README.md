@@ -31,15 +31,18 @@ RENV_CONFIG_AUTOLOADER_ENABLED=FALSE Rscript --vanilla setup/install_dependencie
 pancancer-deg/
 |-- analyses/
 |   |-- TCGA_deg/
-|   `-- TCGA_senescence_overlap/
+|   |-- TCGA_senescence_overlap/
+|   `-- TCGA_senescence_enrichment/
 |-- data/
 |-- results/
 |   |-- figures/
 |   |   |-- TCGA_deg/
-|   |   `-- TCGA_senescence_overlap/
+|   |   |-- TCGA_senescence_overlap/
+|   |   `-- TCGA_senescence_enrichment/
 |   `-- tables/
 |       |-- TCGA_deg/
-|       `-- TCGA_senescence_overlap/
+|       |-- TCGA_senescence_overlap/
+|       `-- TCGA_senescence_enrichment/
 |-- setup/
 |   |-- check_setup.R
 |   |-- install_dependencies.R
@@ -49,7 +52,7 @@ pancancer-deg/
 `-- pancancer_deg.Rproj
 ```
 
-The `analyses/` directory contains analysis scripts grouped by analysis module. Current modules are `TCGA_deg/` and `TCGA_senescence_overlap/`; future modules can be added as sibling directories under `analyses/`.
+The `analyses/` directory contains analysis scripts grouped by analysis module. Current modules are `TCGA_deg/`, `TCGA_senescence_overlap/` and `TCGA_senescence_enrichment/`; future modules can be added as sibling directories under `analyses/`.
 
 The `results/` directory is organized by output type first, then by analysis module. For example, the TCGA differential expression analysis writes figures to `results/figures/TCGA_deg/` and tables to `results/tables/TCGA_deg/`.
 
@@ -67,8 +70,9 @@ bash analyses/run_pipeline.sh overlap       # overlap01 and overlap02
 nohup bash analyses/run_pipeline.sh all > /dev/null 2>&1 &   # keep running after logout
 ```
 
-Steps: `deg01`–`deg08` (TCGA_deg) and `overlap01`–`overlap02`
-(TCGA_senescence_overlap); groups `deg`, `overlap`, `all`. Run
+Steps: `deg01`–`deg08` (TCGA_deg), `overlap01`–`overlap02`
+(TCGA_senescence_overlap) and `enrich01`–`enrich05` (TCGA_senescence_enrichment);
+groups `deg`, `overlap`, `enrich`, `all`. Run
 `bash analyses/run_pipeline.sh` without arguments for help.
 
 ## TCGA_deg Analysis
@@ -442,3 +446,112 @@ duplicates keep one representative and are listed for review.
   x signatures (direction and correlation: blue = same, red = opposite).
 - The plotted values of each heatmap are in
   `results/tables/TCGA_senescence_overlap/TCGA_*_heatmap_data.csv`.
+- `results/tables/TCGA_senescence_overlap/<signature>/<signature>_signature_genes.csv`
+  and `_signature_background.csv`, and `cancer_gene_tables/<project>_genes.csv`:
+  prepared signature and tumor gene tables (after symbol mapping and duplicate
+  handling), used by the enrichment module.
+
+## TCGA_senescence_enrichment Analysis
+
+Which pathways change in tumors and in senescence or quiescence, and do they
+change in the same or opposite direction? Settings are in
+`analyses/TCGA_senescence_enrichment/00_config.R`; the TCGA design (paired by
+default), signatures and input folder are read from the overlap module's
+config. Run from the repository root:
+
+```bash
+Rscript analyses/TCGA_senescence_enrichment/01_gene_sets.R
+Rscript analyses/TCGA_senescence_enrichment/02_ora.R
+Rscript analyses/TCGA_senescence_enrichment/03_gsea.R
+Rscript analyses/TCGA_senescence_enrichment/04_compare.R
+Rscript analyses/TCGA_senescence_enrichment/05_workbooks.R
+```
+
+| Step | What it does |
+| --- | --- |
+| 01 | Downloads the gene sets from MSigDB (`msigdbr`) and saves them with their version. |
+| 02 | Over-representation analysis (ORA) of gene lists. |
+| 03 | Preranked gene-set enrichment analysis (GSEA, `fgsea`) of tumor and signature rankings. |
+| 04 | Compares tumor and signature GSEA results per gene set. |
+| 05 | Excel workbooks of the main results (optional). |
+
+### Gene sets
+
+From MSigDB (`msigdbr` 26.1.1): HALLMARK (H, 50 sets), GO_BP (C5 GO:BP, 7,538),
+REACTOME (C2 CP:REACTOME, 1,839), KEGG (C2 CP:KEGG_MEDICUS, 658) and CGP (C2
+CGP, 3,555: published perturbation signatures). Gene sets are tested if they
+have 10–500 genes in the analysis universe.
+
+### Methods
+
+The module uses only the outputs of the earlier modules (tumor DEG calls,
+shrunken log2 fold changes, overlap classes and prepared gene tables), so all
+analyses use the same genes. Three complementary approaches:
+
+- **B. Each side separately, then compared (main analysis).** GSEA on the
+  ranking of all tumor genes (shrunken log2FC) and of all signature genes
+  (log2FC), without DEG cutoffs. NES > 0: the gene set is concentrated among
+  up-regulated genes; NES < 0: among down-regulated genes. Step 04 compares
+  $\text{NES}_\text{cancer}$ and $\text{NES}_\text{signature}$ per gene set
+  (same or opposite direction when significant on both sides) and correlates
+  them across gene sets (pathway-level concordance).
+- **C. Joint test within gene sets.** For gene sets significant on both sides:
+  the Jaccard index of the two leading edges (do the same genes drive both
+  enrichments?) and the Spearman correlation $\rho_\text{set}$ of tumor and
+  signature log2FC over the genes of the set, next to the genome-wide
+  $\rho_\text{genome}$.
+- **A. Intersection (descriptive).** ORA (one-sided hypergeometric test) of
+  the four overlap classes (UP-UP, UP-DOWN, DOWN-UP, DOWN-DOWN; cancer first;
+  universe = genes tested in both), next to ORA of tumor and signature DEGs
+  alone. A gene set enriched on each side separately is also enriched in their
+  intersection, so class results describe the shared genes but are not
+  evidence of a joint effect.
+
+BH correction per gene list or ranking and collection; significant if
+BH < 0.05.
+
+GSEA is **unweighted** (`gsea_weight <- 0`, fgsea `gseaParam = 0`): only gene
+ranks count. In some tumors the largest changes are almost all losses (95–100%
+of the top 100 |log2FC| in KICH and KIRP), which makes the null distribution of
+weighted GSEA one-sided, so positively enriched gene sets get no valid p-value.
+Unweighted GSEA avoids this and makes tumor and signature NES comparable
+(HALLMARK: Spearman 0.92 with weighted NES). Gene sets that the default method
+still cannot score are rerun by permutation (10,000; none in the current run).
+
+### First results (paired design, threshold test)
+
+- **Pathways move in opposite directions in tumors and in quiescence and
+  senescence:** median correlation of tumor and signature NES across gene sets
+  −0.40 to −0.63 for CICQ, SSCQ and SIPS, −0.15 to −0.43 for RS, depending on
+  the collection; strongest in LUAD, LUSC and UCEC (down to −0.87).
+- **OIS is the exception:** NES correlation about 0 (−0.08 to +0.12),
+  slightly positive in kidney cancers, THCA and ESCA, in line with the
+  gene-level direction readout.
+- **Proliferation is the core of the opposition:** HALLMARK E2F targets and
+  G2M checkpoint are opposite in all 85 cancer x signature pairs, mitotic
+  spindle in 80, MYC targets in 68.
+- **Gene-level support:** among gene sets significant on both sides, the
+  leading edges overlap moderately (median Jaccard 0.35); 63% of same-direction
+  gene sets have $\rho_\text{set} > \rho_\text{genome}$, but only 50% of
+  opposite-direction ones have $\rho_\text{set} < \rho_\text{genome}$: many
+  pathways are opposite as a whole without their genes being more opposite
+  than the genome average.
+
+### Outputs
+
+In `results/tables/TCGA_senescence_enrichment/`:
+
+- `01_gene_set_versions.csv`; gene sets in `data/TCGA_senescence_enrichment/gene_sets/`.
+- `02_ORA_<collection>.csv` (rows with p < 0.05, with the matched genes) and
+  `02_ORA_status.csv` (input and universe sizes, gene sets tested per list).
+- `03_GSEA_<collection>.csv` (NES, p, padj per ranking and gene set; leading
+  edges for padj < 0.05) and `03_GSEA_status.csv`.
+- `04_compare_<collection>.csv` (gene sets significant on at least one side,
+  with direction, leading-edge Jaccard, $\rho_\text{set}$, $\rho_\text{genome}$)
+  and `04_compare_summary.csv` (one row per cancer x signature x collection).
+- `workbooks/<project>_enrichment.xlsx` and `workbooks/signatures_enrichment.xlsx`.
+
+Figures in `results/figures/TCGA_senescence_enrichment/`:
+`04_HALLMARK_NES_heatmap.png` (NES of 17 tumors and 5 signatures) and
+`04_NES_correlation_heatmap.png` (NES correlation per cancer x signature and
+collection).
