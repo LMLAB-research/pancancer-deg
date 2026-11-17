@@ -309,11 +309,25 @@ QC figures (PCA, MA, volcano) are made for the all-samples model only, in
 - **Different power across cancers.** Sample sizes range from 8 to 113 pairs,
   so the number of DEGs partly reflects sample size. Compare cancers by effect
   sizes (e.g. fold-change correlations) rather than by DEG counts alone.
+- **Tumor effects average over subtypes.** In heterogeneous cancers, PC1 is
+  tumor subtype or histology (step 08), and $\beta$ is the average tumor effect
+  over the subtype mix of each cohort; a gene can change in one subtype and
+  not in another.
+- **ESCA mixes two cancers.** Squamous carcinoma and adenocarcinoma arise from
+  different epithelia; PC1 is histology (adjusted $R^2$ 0.86) and even the
+  paired PCA shows no tumor/normal separation. Its DEGs average over both
+  (STAD shows a similar, weaker pattern).
 - **GBM.** Its 5 normals have no clinical data and no matched tumor, so GBM
-  has only a naive design, based on 5 normals of unknown background.
+  has only a naive design, based on 5 normals of unknown background, and its PC1
+  is the sequencing plate (a batch effect).
 
 ### To consider
 
+- **Outlier samples.** In BLCA, 5 of 19 normals form a separate cluster in the
+  paired PCA (step 08). Check BLCA, then flag samples far from their group in
+  every cancer.
+- **ESCA by histology.** Analyse squamous carcinoma and adenocarcinoma
+  separately.
 - **False discoveries with large samples.** DESeq2 and edgeR can show inflated
   false discovery rates in large population datasets such as TCGA tumor vs
   normal (Li et al., *Genome Biology* 2022). Planned check: permute the
