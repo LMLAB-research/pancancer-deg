@@ -42,6 +42,10 @@ fdr_threshold <- 0.05
 # GSEA (fgsea, preranked): tumor genes ranked by shrunken log2 fold change of
 # the TCGA design above, signature genes by their log2 fold change.
 gsea_seed <- 1
+# Parallel workers for fgsea (it uses all cores by default).
+gsea_workers <- 4
+# Leading-edge genes are written for gene sets with padj below this value.
+gsea_leading_edge_padj <- fdr_threshold
 
 dir.create(results_dir, recursive = TRUE, showWarnings = FALSE)
 dir.create(figures_dir, recursive = TRUE, showWarnings = FALSE)
