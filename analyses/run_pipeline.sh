@@ -7,9 +7,9 @@
 # Steps:
 #   deg01 ... deg08            analyses/TCGA_deg/01-08
 #   overlap01 overlap02        analyses/TCGA_senescence_overlap/01-02
-#   enrich01                   analyses/TCGA_senescence_enrichment/01
+#   enrich01 enrich02          analyses/TCGA_senescence_enrichment/01-02
 # Groups:
-#   deg = deg01-deg08, overlap = overlap01-overlap02, enrich = enrich01,
+#   deg = deg01-deg08, overlap = overlap01-overlap02, enrich = enrich01-enrich02,
 #   all = deg + overlap + enrich
 #   from:STEP = STEP and every step after it, e.g. from:deg04
 #
@@ -25,7 +25,7 @@
 
 set -euo pipefail
 
-steps=(deg01 deg02 deg03 deg04 deg05 deg06 deg07 deg08 overlap01 overlap02 enrich01)
+steps=(deg01 deg02 deg03 deg04 deg05 deg06 deg07 deg08 overlap01 overlap02 enrich01 enrich02)
 declare -A scripts=(
   [deg01]="analyses/TCGA_deg/01_discover_tcga_rnaseq_projects.R"
   [deg02]="analyses/TCGA_deg/02_prepare_tcga_inputs.R"
@@ -38,6 +38,7 @@ declare -A scripts=(
   [overlap01]="analyses/TCGA_senescence_overlap/01_compute_overlaps.R"
   [overlap02]="analyses/TCGA_senescence_overlap/02_plot_heatmaps.R"
   [enrich01]="analyses/TCGA_senescence_enrichment/01_gene_sets.R"
+  [enrich02]="analyses/TCGA_senescence_enrichment/02_ora.R"
 )
 
 usage() {
@@ -54,7 +55,7 @@ for arg in "$@"; do
     all) for s in "${steps[@]}"; do selected[$s]=1; done ;;
     deg) for s in deg01 deg02 deg03 deg04 deg05 deg06 deg07 deg08; do selected[$s]=1; done ;;
     overlap) for s in overlap01 overlap02; do selected[$s]=1; done ;;
-    enrich) for s in enrich01; do selected[$s]=1; done ;;
+    enrich) for s in enrich01 enrich02; do selected[$s]=1; done ;;
     from:*)
       start="${arg#from:}"
       [[ -n "${scripts[$start]:-}" ]] || { echo "Unknown step: $start" >&2; usage; }
