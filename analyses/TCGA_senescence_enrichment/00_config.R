@@ -42,6 +42,15 @@ fdr_threshold <- 0.05
 # GSEA (fgsea, preranked): tumor genes ranked by shrunken log2 fold change of
 # the TCGA design above, signature genes by their log2 fold change.
 gsea_seed <- 1
+# Gene weights in the enrichment score (fgsea gseaParam). 0 = unweighted:
+# only gene ranks count, so rankings dominated by large changes of one sign
+# (e.g. kidney tumors, where the largest changes are losses) do not distort
+# the null distribution, and NES are comparable between tumors and signatures.
+# 1 = classic weighted GSEA.
+gsea_weight <- 0
+# Permutations for gene sets that fgseaMultilevel cannot score (unbalanced
+# rankings); p-values then have a floor of 1 / gsea_permutations.
+gsea_permutations <- 10000
 # Parallel workers for fgsea (it uses all cores by default).
 gsea_workers <- 4
 # Leading-edge genes are written for gene sets with padj below this value.

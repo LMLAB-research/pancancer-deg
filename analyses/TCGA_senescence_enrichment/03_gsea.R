@@ -6,45 +6,19 @@
 #   genes of its prepared cancer table (protein-coding, one row per symbol);
 # - signature: genes of each signature ranked by log2 fold change, over its
 #   prepared gene table (after symbol mapping).
-# NES > 0: gene set concentrated among up-regulated genes; NES < 0: among
-# down-regulated genes. BH (fgsea padj) per ranking and collection. Cancer and
+# Unweighted by default (gsea_weight = 0, see 00_config.R). NES > 0: gene set
+# concentrated among up-regulated genes; NES < 0: among down-regulated genes. BH (fgsea padj) per ranking and collection. Cancer and
 # signature NES are compared per gene set in step 04.
 
 source(file.path("analyses", "TCGA_senescence_enrichment", "00_config.R"))
+
+source(file.path("analyses", "TCGA_senescence_enrichment", "utils.R"))
 
 if (!requireNamespace("fgsea", quietly = TRUE)) {
   stop("Install fgsea (see README, R setup).")
 }
 
 #### Rankings ####
-
-# Named vector of log2 fold changes, one per gene symbol, without missing values.
-make_ranking <- function(symbols, values) {
-  ok <- !is.na(symbols) & nzchar(symbols) & is.finite(values)
-  ranking <- stats::setNames(values[ok], toupper(symbols[ok]))
-  ranking[!duplicated(names(ranking))]
-}
-
-cancer_ranking <- function(cancer_project) {
-  genes <- read.csv(
-    file.path(overlap_table_dir, "cancer_gene_tables", paste0(cancer_project, "_genes.csv")),
-    stringsAsFactors = FALSE
-  )
-  shrunken_file <- file.path(
-    tcga_table_dir,
-    paste0(cancer_project, "_DGE_Results_Tumor_vs_Normal_", tools::toTitleCase(cancer_design_type), ".csv")
-  )
-  shrunken <- read.csv(shrunken_file, stringsAsFactors = FALSE)
-  make_ranking(genes$gene_symbol, shrunken$log2FoldChange[match(genes$gene_id, shrunken$gene_id)])
-}
-
-signature_ranking <- function(signature) {
-  genes <- read.csv(
-    file.path(overlap_table_dir, signature, paste0(signature, "_signature_genes.csv")),
-    stringsAsFactors = FALSE
-  )
-  make_ranking(genes$gene_symbol, genes$log2FoldChange)
-}
 
 rankings <- list()
 cancer_projects <- sub(
@@ -73,6 +47,11 @@ bpparam <- if (gsea_workers > 1 && .Platform$OS.type == "unix") {
   BiocParallel::SerialParam()
 }
 
+# fgseaMultilevel leaves NES and p-value empty for some gene sets when the
+# ranking has many more positive than negative values (or the reverse), e.g.
+# in kidney tumors. Those gene sets are rerun with the permutation method
+# (fgseaSimple), and BH is recomputed over all gene sets. `method` records
+# which method gave each row.
 run_gsea <- function(ranking, gene_sets) {
   set.seed(gsea_seed)
   result <- suppressWarnings(fgsea::fgseaMultilevel(
@@ -80,9 +59,31 @@ run_gsea <- function(ranking, gene_sets) {
     stats = ranking,
     minSize = min_gene_set_size,
     maxSize = max_gene_set_size,
+    gseaParam = gsea_weight,
     BPPARAM = bpparam
   ))
   result <- as.data.frame(result)
+  result$method <- "multilevel"
+  missing <- is.na(result$pval)
+  if (any(missing)) {
+    set.seed(gsea_seed)
+    rerun <- as.data.frame(suppressWarnings(fgsea::fgseaSimple(
+      pathways = gene_sets[result$pathway[missing]],
+      stats = ranking,
+      nperm = gsea_permutations,
+      minSize = min_gene_set_size,
+      maxSize = max_gene_set_size,
+      gseaParam = gsea_weight,
+      BPPARAM = bpparam
+    )))
+    index <- match(rerun$pathway, result$pathway)
+    for (column in c("pval", "ES", "NES")) {
+      result[[column]][index] <- rerun[[column]]
+    }
+    result$leadingEdge[index] <- rerun$leadingEdge
+    result$method[index] <- "permutation"
+    result$padj <- stats::p.adjust(result$pval, method = "BH")
+  }
   result$leading_edge <- ifelse(
     !is.na(result$padj) & result$padj < gsea_leading_edge_padj,
     vapply(result$leadingEdge, paste, character(1), collapse = ";"),
@@ -125,6 +126,7 @@ for (collection in names(gene_set_collections)) {
       n_ranked_genes = length(rankings[[i]]$ranking),
       n_gene_sets_tested = if (failed) NA_integer_ else nrow(results[[i]]),
       n_significant = if (failed) NA_integer_ else sum(results[[i]]$padj < fdr_threshold, na.rm = TRUE),
+      n_permutation = if (failed) NA_integer_ else sum(results[[i]]$method == "permutation"),
       status = if (failed) paste("failed:", conditionMessage(results[[i]])) else "completed",
       stringsAsFactors = FALSE
     ))
