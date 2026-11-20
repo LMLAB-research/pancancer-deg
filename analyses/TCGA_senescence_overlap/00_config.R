@@ -3,13 +3,16 @@
 
 analysis_name <- "TCGA_senescence_overlap"
 
-# Senescence/quiescence signatures and their backgrounds.
-senescence_input_dir <- file.path("data", "senescence_meta_analysis_deg")
-# Full TCGA DESeq2 result tables from analyses/TCGA_deg (step 05).
-cancer_input_dir <- file.path("results", "tables", "TCGA_deg")
+# Data and results roots (see analyses/paths.R).
+source(file.path("analyses", "paths.R"), local = TRUE)
 
-results_dir <- file.path("results", "tables", analysis_name)
-figures_dir <- file.path("results", "figures", analysis_name)
+# Senescence/quiescence signatures and their backgrounds.
+senescence_input_dir <- file.path(data_root, "senescence_meta_analysis_deg")
+# Full TCGA DESeq2 result tables from analyses/TCGA_deg (step 05).
+cancer_input_dir <- file.path(results_root, "tables", "TCGA_deg")
+
+results_dir <- file.path(results_root, "tables", analysis_name)
+figures_dir <- file.path(results_root, "figures", analysis_name)
 
 expected_signatures <- c("OIS", "RS", "SIPS", "CICQ", "SSCQ")
 # TCGA_deg all-samples design used for tumor DEGs: "paired" (main analysis),

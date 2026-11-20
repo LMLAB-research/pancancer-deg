@@ -78,7 +78,7 @@ done
 
 # Scripts expect the repository root as working directory.
 cd "$(dirname "$0")/.."
-log_dir="results/logs"
+log_dir="${PANCANCER_RESULTS_DIR:-results}/logs"
 mkdir -p "$log_dir"
 run_time="$(date +%Y-%m-%d_%H%M%S)"
 run_log="$log_dir/${run_time}_run.log"

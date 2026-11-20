@@ -61,6 +61,19 @@ The `docs/` directory holds dated notes on findings and follow-up ideas (index i
 
 The `data/` directory is intended for local input data, downloaded resources, and intermediate analysis objects. Large or generated data files should generally stay out of Git.
 
+By default, data and results are written to `data/` and `results/` inside the
+repository. To keep them elsewhere on a machine (e.g. a workstation with a
+separate data disk), set two environment variables, in `~/.bashrc` for
+`run_pipeline.sh` and in `~/.Renviron` for interactive R sessions:
+
+```bash
+export PANCANCER_DATA_DIR=/path/to/pancancer-deg/data
+export PANCANCER_RESULTS_DIR=/path/to/pancancer-deg/results
+```
+
+All modules read these roots through `analyses/paths.R`; machines that do not
+set them keep the default folders.
+
 ## Running the pipeline
 
 `analyses/run_pipeline.sh` runs selected steps in order, stops at the first
