@@ -11,6 +11,7 @@ cran_packages <- c(
   "ashr",
   "dplyr",
   "ggplot2",
+  "msigdbr",
   "openxlsx"
 )
 
@@ -18,6 +19,7 @@ bioc_packages <- c(
   "AnnotationDbi",
   "BiocParallel",
   "DESeq2",
+  "fgsea",
   "org.Hs.eg.db",
   "SummarizedExperiment",
   "TCGAbiolinks"

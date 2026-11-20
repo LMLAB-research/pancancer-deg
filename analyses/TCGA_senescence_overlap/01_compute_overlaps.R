@@ -560,6 +560,17 @@ for (signature_name in expected_signatures) {
     file.path(output_root, paste0(signature_name, "_symbol_mapping.csv")), row.names = FALSE
   )
   message("  ", length(signature$symbol_map), " signature symbols renamed to current TCGA symbols")
+  # Prepared signature genes (after symbol mapping and duplicate handling) and
+  # background, for downstream modules (enrichment).
+  write.csv(
+    signature$data[, c("gene_symbol", "gene", "log2FoldChange", "padj", "regulation",
+                       "duplicate_n", "duplicate_status")],
+    file.path(output_root, paste0(signature_name, "_signature_genes.csv")), row.names = FALSE
+  )
+  write.csv(
+    data.frame(gene_symbol = sort(signature$background)),
+    file.path(output_root, paste0(signature_name, "_signature_background.csv")), row.names = FALSE
+  )
   for (cancer_file in cancer_files) {
     cancer_project <- sub(cancer_file_suffix, "", basename(cancer_file), fixed = TRUE)
     message("  ", cancer_project)
@@ -575,5 +586,19 @@ for (signature_name in expected_signatures) {
 }
 run_status <- do.call(rbind, run_status)
 write.csv(run_status, file.path(results_dir, "batch_run_status.csv"), row.names = FALSE)
+
+# Prepared tumor genes per cancer (protein-coding, one row per symbol, DEG calls
+# from TCGA_deg), for downstream modules (enrichment).
+gene_table_dir <- file.path(results_dir, "cancer_gene_tables")
+dir.create(gene_table_dir, recursive = TRUE, showWarnings = FALSE)
+for (cancer_file in cancer_files) {
+  cancer_project <- sub(cancer_file_suffix, "", basename(cancer_file), fixed = TRUE)
+  cancer <- prepare_cancer(cancer_file)
+  write.csv(
+    cancer$data[, c("gene_symbol", "gene_id", "ensembl_id", "log2FoldChange", "padj",
+                    "regulation", "duplicate_n", "duplicate_status")],
+    file.path(gene_table_dir, paste0(cancer_project, "_genes.csv")), row.names = FALSE
+  )
+}
 print(run_status[, c("signature", "cancer_project", "status")], row.names = FALSE)
 if (any(run_status$status == "FAILED")) stop("Some comparisons failed. See batch_run_status.csv.")

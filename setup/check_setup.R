@@ -16,11 +16,13 @@ required_packages <- c(
   "AnnotationDbi",
   "BiocParallel",
   "DESeq2",
+  "fgsea",
   "SummarizedExperiment",
   "TCGAbiolinks",
   "ashr",
   "dplyr",
   "ggplot2",
+  "msigdbr",
   "openxlsx",
   "org.Hs.eg.db"
 )
