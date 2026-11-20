@@ -12,9 +12,12 @@ signatures <- overlap_config$expected_signatures
 overlap_table_dir <- overlap_config$results_dir
 tcga_table_dir <- overlap_config$cancer_input_dir
 
-results_dir <- file.path("results", "tables", analysis_name)
-figures_dir <- file.path("results", "figures", analysis_name)
-gene_set_dir <- file.path("data", analysis_name, "gene_sets")
+# Data and results roots (see analyses/paths.R).
+source(file.path("analyses", "paths.R"), local = TRUE)
+
+results_dir <- file.path(results_root, "tables", analysis_name)
+figures_dir <- file.path(results_root, "figures", analysis_name)
+gene_set_dir <- file.path(data_root, analysis_name, "gene_sets")
 
 #### Gene sets ####
 

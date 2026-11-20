@@ -186,13 +186,16 @@ metadata_missing_value_labels <- c(
 
 analysis_dir <- file.path("analyses", analysis_name)
 
-data_tcga_dir <- file.path("data", analysis_name)
+# Data and results roots (see analyses/paths.R).
+source(file.path("analyses", "paths.R"), local = TRUE)
+
+data_tcga_dir <- file.path(data_root, analysis_name)
 data_raw_tcga_dir <- file.path(data_tcga_dir, "raw")
 data_processed_tcga_dir <- file.path(data_tcga_dir, "processed")
 tcga_gdc_download_dir <- "GDCdata"
 
-results_table_dir <- file.path("results", "tables", analysis_name)
-results_figure_dir <- file.path("results", "figures", analysis_name)
+results_table_dir <- file.path(results_root, "tables", analysis_name)
+results_figure_dir <- file.path(results_root, "figures", analysis_name)
 
 #### Shared Output Files ####
 
@@ -261,7 +264,7 @@ tcga_sex_model_summary_file <- file.path(
 # Chatsirisupachai et al. 2019, Aging Cell (PMC6826163): cancer-DEGs of 10 TCGA
 # projects (limma-voom, primary tumor vs solid normal, no covariates), Data S2.
 # Downloaded from the Europe PMC supplementary files if missing.
-published_deg_dir <- file.path("data", "published_degs")
+published_deg_dir <- file.path(data_root, "published_degs")
 published_deg_url <- paste0(
   "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC6826163/supplementaryFiles"
 )
