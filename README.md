@@ -34,6 +34,7 @@ pancancer-deg/
 |   |-- TCGA_senescence_overlap/
 |   `-- TCGA_senescence_enrichment/
 |-- data/
+|-- docs/
 |-- results/
 |   |-- figures/
 |   |   |-- TCGA_deg/
@@ -55,6 +56,8 @@ pancancer-deg/
 The `analyses/` directory contains analysis scripts grouped by analysis module. Current modules are `TCGA_deg/`, `TCGA_senescence_overlap/` and `TCGA_senescence_enrichment/`; future modules can be added as sibling directories under `analyses/`.
 
 The `results/` directory is organized by output type first, then by analysis module. For example, the TCGA differential expression analysis writes figures to `results/figures/TCGA_deg/` and tables to `results/tables/TCGA_deg/`.
+
+The `docs/` directory holds dated notes on findings and follow-up ideas (index in `docs/README.md`), so that this README stays focused on how the analyses work.
 
 The `data/` directory is intended for local input data, downloaded resources, and intermediate analysis objects. Large or generated data files should generally stay out of Git.
 
