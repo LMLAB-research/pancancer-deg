@@ -78,6 +78,15 @@ done
 
 # Scripts expect the repository root as working directory.
 cd "$(dirname "$0")/.."
+
+# One linear-algebra thread per R process: the steps parallelise across
+# workers themselves, and a multi-threaded BLAS (e.g. OpenBLAS, which starts one
+# thread per core) would otherwise multiply the threads and oversubscribe the
+# cores. Set the variables beforehand to override.
+export OPENBLAS_NUM_THREADS="${OPENBLAS_NUM_THREADS:-1}"
+export OMP_NUM_THREADS="${OMP_NUM_THREADS:-1}"
+export MKL_NUM_THREADS="${MKL_NUM_THREADS:-1}"
+
 log_dir="${PANCANCER_RESULTS_DIR:-results}/logs"
 mkdir -p "$log_dir"
 run_time="$(date +%Y-%m-%d_%H%M%S)"

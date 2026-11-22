@@ -8,6 +8,9 @@
 #
 #   export PANCANCER_DATA_DIR=/path/to/pancancer-deg/data
 #   export PANCANCER_RESULTS_DIR=/path/to/pancancer-deg/results
+#
+# PANCANCER_WORKERS sets the number of parallel DESeq2 workers (default 4; about
+# 2.4 GB of memory each for the largest cohort).
 
 data_root <- Sys.getenv("PANCANCER_DATA_DIR", unset = "data")
 results_root <- Sys.getenv("PANCANCER_RESULTS_DIR", unset = "results")

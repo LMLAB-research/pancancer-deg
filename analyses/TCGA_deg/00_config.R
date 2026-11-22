@@ -27,7 +27,9 @@ if (is.na(detected_cores)) {
 }
 # Each worker holds its own copy of the data (about 2.4 GB for TCGA-BRCA), so
 # the cap is set by memory, not cores: 4 workers stay within ~10 GB at peak.
-max_biocparallel_workers <- 4
+# Machines with more memory can raise it with the environment variable
+# PANCANCER_WORKERS (see analyses/paths.R).
+max_biocparallel_workers <- as.integer(Sys.getenv("PANCANCER_WORKERS", unset = "4"))
 biocparallel_workers <- max(1, min(max_biocparallel_workers, detected_cores - 1))
 
 # Step 04 skips designs already fitted since step 03 (resume after an
