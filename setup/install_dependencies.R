@@ -12,7 +12,8 @@ cran_packages <- c(
   "dplyr",
   "ggplot2",
   "msigdbr",
-  "openxlsx"
+  "openxlsx",
+  "RhpcBLASctl"
 )
 
 bioc_packages <- c(

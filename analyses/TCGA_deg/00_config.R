@@ -27,7 +27,9 @@ if (is.na(detected_cores)) {
 }
 # Each worker holds its own copy of the data (about 2.4 GB for TCGA-BRCA), so
 # the cap is set by memory, not cores: 4 workers stay within ~10 GB at peak.
-max_biocparallel_workers <- 4
+# Machines with more memory can raise it with the environment variable
+# PANCANCER_WORKERS (see README).
+max_biocparallel_workers <- as.integer(Sys.getenv("PANCANCER_WORKERS", unset = "4"))
 biocparallel_workers <- max(1, min(max_biocparallel_workers, detected_cores - 1))
 
 # Step 04 skips designs already fitted since step 03 (resume after an
@@ -188,6 +190,9 @@ analysis_dir <- file.path("analyses", analysis_name)
 
 # Data and results roots (see analyses/paths.R).
 source(file.path("analyses", "paths.R"), local = TRUE)
+
+# One BLAS thread per R process (see analyses/runtime.R).
+source(file.path("analyses", "runtime.R"))
 
 data_tcga_dir <- file.path(data_root, analysis_name)
 data_raw_tcga_dir <- file.path(data_tcga_dir, "raw")

@@ -6,6 +6,9 @@ analysis_name <- "TCGA_senescence_overlap"
 # Data and results roots (see analyses/paths.R).
 source(file.path("analyses", "paths.R"), local = TRUE)
 
+# One BLAS thread per R process (see analyses/runtime.R).
+source(file.path("analyses", "runtime.R"))
+
 # Senescence/quiescence signatures and their backgrounds.
 senescence_input_dir <- file.path(data_root, "senescence_meta_analysis_deg")
 # Full TCGA DESeq2 result tables from analyses/TCGA_deg (step 05).
