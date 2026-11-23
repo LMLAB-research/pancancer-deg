@@ -24,6 +24,7 @@ required_packages <- c(
   "ggplot2",
   "msigdbr",
   "openxlsx",
+  "RhpcBLASctl",
   "org.Hs.eg.db"
 )
 

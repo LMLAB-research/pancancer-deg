@@ -74,6 +74,16 @@ export PANCANCER_RESULTS_DIR=/path/to/pancancer-deg/results
 All modules read these roots through `analyses/paths.R`; machines that do not
 set them keep the default folders.
 
+Step 04 fits DESeq2 with 4 parallel workers by default (about 2.4 GB of memory
+each for TCGA-BRCA). On a machine with more memory, raise it the same way, e.g.
+`export PANCANCER_WORKERS=12`.
+
+Every module limits linear algebra to one thread per R process
+(`analyses/runtime.R`). This matters on machines where R uses a multi-threaded
+BLAS such as OpenBLAS (check with `sessionInfo()`): there, DESeq2's per-gene
+fits are much slower with many threads, and step 04 did not finish the TCGA-BRCA
+paired design in more than a day on a 32-core workstation.
+
 ## Running the pipeline
 
 `analyses/run_pipeline.sh` runs selected steps in order, stops at the first
